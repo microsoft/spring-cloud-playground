@@ -1,3 +1,20 @@
+# Azure Spring Cloud Playground
+Azure Spring Cloud Playground helps you scaffold and generate Microservice projects.
+It provides you with native Spring Cloud modules as well as modules developed for
+connecting to and consuming Azure related services. The generated Microservice projects
+follow [The Twelve-Factor App](https://12factor.net/) methodology and are ready for further development with [Azure Dev Spaces](http://landinghub.visualstudio.com/devspaces) and [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/container-service/).
+
+# Getting Started
+* Install [Maven](https://maven.apache.org/install.html) and [Docker](https://docs.docker.com/install/)
+* Access to [azure-spring-cloud.azurewebsites.net](https://azure-spring-cloud.azurewebsites.net/)
+* Sign in with your Azure subscription if you want your Spring Cloud Azure modules to be configured. If you don't have a Azure subscription get a [free one](https://azure.microsoft.com/en-us/free/).
+* Select the modules you'd like to start with and generate the project.
+* You can run locally with docker compose. Extract and go to project root directory, run the following:
+```
+cd docker
+run.cmd (run.sh)
+```
+* After all microservices start, access gateway endpoint at http://localhost:9999
 
 # Contributing
 
