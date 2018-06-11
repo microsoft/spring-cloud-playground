@@ -1,0 +1,100 @@
+.azure-logo {
+    color: #0078d7 !important;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.header-nav {
+    min-height: 4.25rem !important;
+    background-color: black !important;
+    padding: 0.25rem 0;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.metadata-row {
+    margin: 3rem 0 1rem;
+}
+
+.large-vertical-margin {
+    margin: 4rem 0;
+}
+
+.small-top-margin {
+    margin: 1rem 0 0;
+}
+
+.medium-top-margin {
+    margin: 2rem 0 0;
+}
+
+.module-checkbox {
+    padding-left: 20px;
+}
+
+.module-checkbox input {
+    margin-left: -20px;
+}
+
+.module-checkbox p {
+    margin: 2px 0 0 -2px;
+    color: grey;
+}
+
+body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
+    font-weight: 400;
+    font-family: 'Segoe UI',SegoeUI,'Segoe WP',Tahoma,Arial,sans-serif;
+}
+
+#login_link, #user_dropdown, #free_link, #about_link {
+    align-items: center;
+    margin-left: 2rem;
+}
+
+.small-container {
+    max-width: 1152px !important;
+    width: 1152px !important;
+}
+
+.nav-title {
+    color: #dedede !important;
+    font-size: 1.75rem;
+}
+
+.button,.file-cta,.file-name,.input,.pagination-ellipsis,.pagination-link,.pagination-next,.pagination-previous,.select select,.textarea {
+    border-radius: 0px;
+}
+
+#free_link a{
+    background-color: transparent;
+    color: #89c402;
+}
+
+#login_link a, #user_dropdown a, #free_link a, #about_link {
+    font-weight: 600;
+}
+
+#generate-project {
+    background-color: #3273dc;
+    color: #fff;
+}
+
+.truncate {
+    display: inline-block;
+    width: 12rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#logout_link {
+    border-radius: 0;
+}
+
+#user_dropdown div {
+    text-align: center;
+    vertical-align: middle;
+    line-height: 2.75rem;
+}

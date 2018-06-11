@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>{{groupId}}</groupId>
+	<artifactId>{{artifactId}}</artifactId>
+	<version>{{version}}</version>
+	<packaging>pom</packaging>
+
+	<name>{{name}}</name>
+	<description>{{description}}</description>
+
+	<parent>
+		<groupId>{{mavenParentGroupId}}</groupId>
+		<artifactId>{{mavenParentArtifactId}}</artifactId>
+		<version>{{mavenParentVersion}}</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		{{#buildPropertiesMaven}}
+		<{{key}}>{{#value}}{{.}}{{/value}}</{{key}}>
+		{{/buildPropertiesMaven}}
+		{{#buildPropertiesVersions}}
+		<{{key}}>{{#value}}{{.}}{{/value}}</{{key}}>
+		{{/buildPropertiesVersions}}
+		<dockerfile.maven.version>1.4.0</dockerfile.maven.version>
+		<dockerfile.skip>true</dockerfile.skip>
+	</properties>
+
+	<modules>
+		{{#modules}}
+		<module>{{.}}</module>
+		{{/modules}}
+	</modules>
+
+{{#hasBoms}}
+
+	<dependencyManagement>
+		<dependencies>
+		    {{#resolvedBoms}}
+			<dependency>
+				<groupId>{{groupId}}</groupId>
+				<artifactId>{{artifactId}}</artifactId>
+				<version>{{versionToken}}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			{{/resolvedBoms}}
+		</dependencies>
+	</dependencyManagement>
+{{/hasBoms}}
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile.maven.version}</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>demo/${project.name}</repository>
+					<!--<tag>${project.version}</tag>-->
+					<buildArgs>
+						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
+					<skip>${dockerfile.skip}</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+{{#hasRepositories}}
+
+	<repositories>
+		{{#repositoryValues}}
+		<repository>
+			<id>{{key}}</id>
+			<name>{{value.name}}</name>
+			<url>{{value.url}}</url>
+			<snapshots>
+				<enabled>{{value.snapshotsEnabled}}</enabled>
+			</snapshots>
+		</repository>
+		{{/repositoryValues}}
+	</repositories>
+{{/hasRepositories}}
+{{^isRelease}}
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+{{/isRelease}}
+
+
+</project>

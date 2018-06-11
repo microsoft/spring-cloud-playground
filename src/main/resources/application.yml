@@ -1,0 +1,316 @@
+playground:
+  env:
+    boms:
+      azure:
+        groupId: com.microsoft.azure
+        artifactId: azure-spring-boot-bom
+        versionProperty: azure.version
+        mappings:
+          - versionRange: "[1.5.4.RELEASE,2.0.0.RELEASE)"
+            version: 0.2.3
+          - versionRange: "2.0.0.RELEASE"
+            version: 2.0.1
+      spring-cloud:
+        groupId: org.springframework.cloud
+        artifactId: spring-cloud-dependencies
+        versionProperty: spring-cloud.version
+        order: 50
+        mappings:
+          - versionRange: "[1.2.3.RELEASE,1.3.0.RELEASE)"
+            version: Angel.SR6
+          - versionRange: "[1.3.0.RELEASE,1.4.0.RELEASE)"
+            version: Brixton.SR7
+          - versionRange: "[1.4.0.RELEASE,1.4.x.RELEASE]"
+            version: Camden.SR7
+          - versionRange: "[1.5.0.RELEASE,1.5.x.RELEASE]"
+            version: Edgware.SR3
+          - versionRange: "[1.5.x.BUILD-SNAPSHOT,2.0.0.M1)"
+            version: Edgware.BUILD-SNAPSHOT
+            repositories: spring-snapshots,spring-milestones
+          - versionRange: "[2.0.0.M3, 2.0.0.M5)"
+            version: Finchley.M2
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.M5, 2.0.0.M5]"
+            version: Finchley.M3
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.M6, 2.0.0.M6]"
+            version: Finchley.M4
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.M7, 2.0.0.M7]"
+            version: Finchley.M5
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.RC1, 2.0.0.RC1]"
+            version: Finchley.M6
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.RC2,2.0.0.RC2]"
+            version: Finchley.M7
+            repositories: spring-milestones
+          - versionRange: "[2.0.0.RELEASE,2.0.x.RELEASE]"
+            version: Finchley.M9
+            repositories: spring-milestones
+          - versionRange: "2.0.x.BUILD-SNAPSHOT"
+            version: Finchley.BUILD-SNAPSHOT
+            repositories: spring-snapshots,spring-milestones
+  dependencies:
+    - name: Web
+      content:
+        - name: Web
+          id: web
+          description: Full-stack web development with Tomcat and Spring MVC
+          weight: 100
+          facets:
+            - web
+            - json
+          links:
+            - rel: guide
+              href: https://spring.io/guides/gs/rest-service/
+              description: Building a RESTful Web Service
+            - rel: reference
+              href: http://docs.spring.io/spring-boot/docs/{bootVersion}/reference/htmlsingle/#boot-features-developing-web-applications
+            - rel: guide
+              href: https://spring.io/guides/gs/serving-web-content/
+              description: Serving Web Content with Spring MVC
+            - rel: guide
+              href: https://spring.io/guides/tutorials/bookmarks/
+              description: Building REST services with Spring
+    - name: Cloud Config
+      bom: spring-cloud
+      versionRange: 1.2.3.RELEASE
+      content:
+        - name: Config Client
+          id: cloud-config-client
+          description: spring-cloud-config Client
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-config
+          weight: 100
+        - name: Config Server
+          id: cloud-config-server
+          description: Central management for configuration via a git or svn backend
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-config-server
+          links:
+            - rel: guide
+              href: https://spring.io/guides/gs/centralized-configuration/
+              description: Centralized Configuration
+        - name: Vault Configuration
+          id: cloud-starter-vault-config
+          description: Configuration management with HashiCorp Vault
+          versionRange: 1.5.3.RELEASE
+          starter: false
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-vault-config
+    - name: Cloud Discovery
+      bom: spring-cloud
+      versionRange: 1.2.3.RELEASE
+      content:
+        - name: Eureka Discovery
+          id: cloud-eureka-client
+          description: Service discovery using spring-cloud-netflix and Eureka
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-netflix-eureka-client
+          weight: 100
+          mappings:
+            - versionRange: "[1.2.3.RELEASE,1.5.x.RELEASE]"
+              artifactId: spring-cloud-starter-eureka
+            - versionRange: "1.5.0.BUILD-SNAPSHOT"
+        - name: Eureka Server
+          id: cloud-eureka-server
+          description: spring-cloud-netflix Eureka Server
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-netflix-eureka-server
+          links:
+            - rel: guide
+              href: https://spring.io/guides/gs/service-registration-and-discovery/
+              description: Service Registration and Discovery
+          mappings:
+            - versionRange: "[1.2.3.RELEASE,1.5.x.RELEASE]"
+              artifactId: spring-cloud-starter-eureka-server
+            - versionRange: "1.5.0.BUILD-SNAPSHOT"
+    - name: Cloud Routing
+      bom: spring-cloud
+      versionRange: 1.2.3.RELEASE
+      content:
+        - name: Gateway
+          id: cloud-gateway
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-gateway
+          description: Intelligent and programmable routing with the reactive Spring Cloud Gateway
+          versionRange: 2.0.0.M5
+          links:
+            - rel: guide
+              href: https://github.com/spring-cloud-samples/spring-cloud-gateway-sample
+              description: Using Spring Cloud Gateway
+    - name: Cloud Circuit Breaker
+      bom: spring-cloud
+      versionRange: 1.2.3.RELEASE
+      content:
+        - name: Hystrix
+          id: cloud-hystrix
+          description: Circuit breaker with spring-cloud-netflix Hystrix
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-netflix-hystrix
+          links:
+            - rel: guide
+              href: https://spring.io/guides/gs/circuit-breaker/
+              description: Circuit Breaker
+          mappings:
+            - versionRange: "[1.2.3.RELEASE,1.5.x.RELEASE]"
+              artifactId: spring-cloud-starter-hystrix
+            - versionRange: "1.5.0.BUILD-SNAPSHOT"
+        - name: Hystrix Dashboard
+          id: cloud-hystrix-dashboard
+          description: Circuit breaker dashboard with spring-cloud-netflix Hystrix
+          groupId: org.springframework.cloud
+          artifactId: spring-cloud-starter-netflix-hystrix-dashboard
+          mappings:
+            - versionRange: "[1.2.3.RELEASE,1.5.x.RELEASE]"
+              artifactId: spring-cloud-starter-hystrix-dashboard
+            - versionRange: "1.5.0.BUILD-SNAPSHOT"
+    - name: Azure
+      bom: azure
+      versionRange: "1.5.4.RELEASE"
+      content:
+        - name: Azure Support
+          id: azure-support
+          groupId: com.microsoft.azure
+          artifactId: azure-spring-boot
+          description: Auto-configuration for Azure Services (service bus, storage, active directory, cosmos DB, key vault and more)
+          links:
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot
+              description: Reference doc
+        - name: Azure Active Directory
+          id: azure-active-directory
+          groupId: com.microsoft.azure
+          artifactId: azure-active-directory-spring-boot-starter
+          description: Spring Security integration with Azure Active Directory for authentication
+          links:
+            - rel: guide
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-active-directory-spring-boot-sample
+              description: Using Active Directory
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-active-directory-spring-boot-starter
+              description: Reference doc
+        - name: Azure Key Vault
+          id: azure-keyvault-secrets
+          groupId: com.microsoft.azure
+          artifactId: azure-keyvault-secrets-spring-boot-starter
+          description: Spring value annotation integration with Azure Key Vault Secrets
+          links:
+            - rel: guide
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-keyvault-secrets-spring-boot-sample
+              description: Using Key Vault
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-keyvault-secrets-spring-boot-starter
+              description: Reference doc
+        - name: Azure Storage
+          id: azure-storage
+          groupId: com.microsoft.azure
+          artifactId: azure-storage-spring-boot-starter
+          description: Azure Storage service integration
+          links:
+            - rel: guide
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-storage-spring-boot-sample
+              description: Using Azure Storage
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-storage-spring-boot-starter
+              description: Reference doc
+        - name: Azure Service Bus
+          id: azure-service-bus
+          groupId: com.microsoft.azure
+          artifactId: azure-servicebus-spring-boot-starter
+          description: Azure Service Bus integration
+          links:
+            - rel: guide
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-servicebus-spring-boot-sample
+              description: Using Azure Storage
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-servicebus-spring-boot-starter
+              description: Reference doc
+  services:
+    - name: Infrastructure Spring Cloud Modules
+      content:
+        - name: Spring Cloud Config Server
+          id: cloud-config-server
+          description: Central management for configuration via a git or svn backend
+        - name: Spring Cloud Gateway
+          id: cloud-gateway
+          description: Intelligent and programmable routing with the reactive Spring Cloud Gateway
+        - name: Spring Cloud Eureka Server
+          id: cloud-eureka-server
+          description: Spring Cloud Service Registry and Discovery
+        - name: Spring Cloud Hystrix Dashboard
+          id: cloud-hystrix-dashboard
+          description: Circuit breaker dashboard with spring-cloud-netflix Hystrix
+    - name: Azure Spring Cloud Modules
+      content:
+        - name: Security (Azure Active Directory)
+          id: azure-active-directory
+          description: Spring Cloud Security with Azure AD and Azure AD B2C backend
+        - name: Messaging (Azure Service Bus)
+          id: azure-service-bus
+          description: Spring Cloud Messaging API implementation for Azure Service Bus
+        - name: Messaging (Azure Queue Storage)
+          id: azure-queue-storage
+          description: Spring Cloud Messaging API implementation for Azure Queue Storage
+        - name: Stream (Azure Event Hub)
+          id: azure-event-hub
+          description: Spring Cloud Stream Binder for Azure Event Hub
+        - name: Stream (Azure SignalR Service)
+          id: azure-signalr-service
+          description: Spring Cloud Stream Binder for Azure SignalR Service
+        - name: Vault (Azure Key Vault)
+          id: azure-key-vault
+          description: Spring Cloud Vault with Azure Key Vault backend
+
+  types:
+    - name: Maven Project
+      id: maven-project
+      description: Generate a Maven based project archive
+      sts-id: starter.zip
+      tags:
+        build: maven
+        format: project
+      default: true
+      action: /starter.zip
+    - name: Maven POM
+      id: maven-build
+      description: Generate a Maven pom.xml
+      sts-id: pom.xml
+      tags:
+        build: maven
+        format: build
+      default: false
+      action: /pom.xml
+  packagings:
+    - name: Jar
+      id: jar
+      default: true
+    - name: War
+      id: war
+      default: false
+  javaVersions:
+    - id: 10
+      default: false
+    - id: 9
+      default: false
+    - id: 1.8
+      name: 8
+      default: true
+    - id: 1.7
+      name: 7
+      default: false
+  languages:
+    - name: Java
+      id: java
+      default: true
+  bootVersions:
+    - name : Latest SNAPSHOT
+      id: 1.2.4.BUILD-SNAPSHOT
+      default: false
+    - name: 1.2.3
+      id: 1.2.3.RELEASE
+      default: true
+    - name: 1.1.12
+      id: 1.1.12.RELEASE
+      default: false

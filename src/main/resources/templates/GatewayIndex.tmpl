@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="bulma.min.css"/>
+	<title>Gateway Homepage</title>
+</head>
+<body>
+		<nav class="navbar has-background-dark" role="navigation" aria-label="main navigation">
+        <div class="container">
+          <div class="navbar-menu">
+            <div class="navbar-start">
+                  <div class="navbar-item  is-active has-text-white-bis is-size-4" style="padding:0px;">
+                    <span>Spring Cloud Gateway</span>
+                  </div>
+             </div>
+          </div>
+        </div>
+    </nav>
+	<section class="section">
+		<div class="container content">
+			<div id="basic-services">
+				<p class="menu-label is-size-5">
+          Essential Spring Cloud Services
+        </p>
+				<ul style="list-style-type:circle">
+					{{#services}}
+						{{#isBasic}}
+							<li><a href="{{serviceUrl}}">{{serviceName}}</a></li>
+						{{/isBasic}}
+					{{/services}}
+				</ul>
+			</div>
+			<hr>
+			<div id="azure-services">
+				<p class="menu-label is-size-5">
+					Azure Spring Cloud Services
+				</p>
+				<ul style="list-style-type:circle">
+					{{#services}}
+						{{^isBasic}}
+							<li><a href="{{serviceUrl}}">{{serviceName}}</a></li>
+						{{/isBasic}}
+					{{/services}}
+				</ul>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

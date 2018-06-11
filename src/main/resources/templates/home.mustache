@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Azure Spring Cloud Playground</title>
+    <link href="//fonts.googleapis.com/css?family=Varela+Round|Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{{#linkTo}}/css/bulma.min.css{{/linkTo}}"/>
+    <link rel="stylesheet" href="{{#linkTo}}/css/customize.css{{/linkTo}}"/>
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{#trackingCode}}
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KZM7GF6');</script>
+    {{/trackingCode}}
+</head>
+<body>
+<form id="form" action="/starter.zip" method="get" role="form">
+    <nav class="navbar header-nav" role="navigation" aria-label="main navigation">
+        <div class="small-container container">
+            <div class="navbar-brand">
+                <a href="https://azure.microsoft.com/en-us/" class="navbar-item azure-logo">
+                    Microsoft Azure
+                </a>
+            </div>
+            <div class="navbar-menu is-active">
+                <div class="navbar-start">
+                    <h1 class="navbar-item nav-title" >
+                        Azure Spring Cloud Playground
+                    </h1>
+                </div>
+                <div class="navbar-end" id="free_link">
+                    <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" >Free account</a>
+                </div>
+                <div class="navbar-end" id="login_link">
+                    <a>Login</a>
+                </div>
+                <div class="navbar-end" id="user_dropdown">
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="truncate" id="logged_user">
+                        </a>
+                        <div class="navbar-dropdown" id="logout_link">
+                            <a class="navbar-item">
+                               Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-end" id="about_link">
+                    <a title="{{build.information}}">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="small-container container">
+        <div class="small-container container">
+            <p class="help is-danger app-error"></p>
+            <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
+
+            <div class="row metadata-row">
+                <h4 class="title is-5">Generate your Spring Cloud application</h4>
+                <div class="columns">
+                    <div class="column">
+                        <label for="groupId" class="label">{{groupId.title}}</label>
+                        <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
+                               name="groupId">
+                    </div>
+                    <div class="column">
+                        <label for="artifactId" class="label">{{artifactId.title}}</label>
+                        <input tabindex="5" id="artifactId" class="input" type="text"
+                               value="{{artifactId.content}}"
+                               name="artifactId">
+                    </div>
+                    <div class="column hidden">
+                        <label for="name" class="label">{{name.title}}</label>
+                        <input tabindex="6" id="name" class="input" type="text" value="{{name.content}}"
+                               name="name">
+                    </div>
+                    <div class="column hidden">
+                        <label for="description" class="label">{{description.title}}</label>
+                        <input tabindex="7" id="description" class="input" type="text"
+                               value="{{description.content}}" name="description">
+                    </div>
+                    <div class="column hidden">
+                        <label for="packageName" class="label">{{packageName.title}}</label>
+                        <input tabindex="8" id="packageName" class="input" type="text"
+                               value="{{packageName.content}}"
+                               name="packageName">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="services" class="columns">
+                    {{#services.content}}
+                    <div class="column is-half medium-top-margin">
+                        <h3 class="title is-6">Select {{name}}</h3>
+                        {{#content}}
+                        <div class="small-top-margin">
+                            <label class="checkbox module-checkbox">
+                                <input tabindex="13" type="checkbox" name="services" value="{{id}}">
+                                {{name}}
+                                <p class="help-block">{{#description}}{{.}}{{/description}}</p>
+                            </label>
+                        </div>
+                        {{/content}}
+                    </div>
+                   {{/services.content}}
+                </div>
+            </div>
+            <div class="large-vertical-margin">
+                <p class="has-text-centered">
+                    <button tabindex="12" id="generate-project" type="submit" class="button"
+                            role="button">
+                        Generate Project
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="{{#linkTo}}/js/jquery-3.1.1.min.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/typeahead.bundle.min.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/mousetrap.min.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/adal.min.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/all.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/start.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/auth.js{{/linkTo}}"></script>
+</body>
+</html>

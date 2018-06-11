@@ -1,0 +1,68 @@
+version: '2.1'
+services:
+{{#cloud-config-server}}
+  config-server:
+    image: "demo/cloud-config-server"
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://config-server:8888/gateway-server.yml"]
+      interval: 5s
+      retries: 20
+{{/cloud-config-server}}
+{{#cloud-eureka-server}}
+  eureka-server:
+    image: "demo/cloud-eureka-server"
+    ports:
+      - "8761:8761"
+    links:
+      - config-server
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://eureka-server:8761"]
+      interval: 5s
+      retries: 20
+{{/cloud-eureka-server}}
+{{#azure-service-bus}}
+  service-bus-server:
+    image: "demo/azure-service-bus"
+    ports:
+      - "8081:8081"
+    links:
+      - eureka-server
+      - config-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-bus-server:8081/azure-service-bus/actuator/health"]
+      interval: 5s
+      retries: 20
+{{/azure-service-bus}}
+{{#cloud-hystrix-dashboard}}
+  hystrix-server:
+    image: "demo/cloud-hystrix-dashboard"
+    ports:
+      - "7979:7979"
+    links:
+      - eureka-server
+      - config-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+{{/cloud-hystrix-dashboard}}
+{{#cloud-gateway}}
+  gateway-server:
+    image: "demo/cloud-gateway"
+    links:
+      - eureka-server
+      - config-server
+    ports:
+      - "9999:9999"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://gateway-server:8080/actuator/health"]
+      interval: 5s
+      retries: 20
+{{/cloud-gateway}}
