@@ -23,6 +23,19 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<azure.version>2.0.1</azure.version>
 		<java.version>1.8</java.version>
+		<maven.build.timestamp.format>yyyy_MM_dd-HH_mm</maven.build.timestamp.format>
+
+        <!-- Docker Images -->
+		<docker.image.prefix>${your-docker-image-prefix}</docker.image.prefix>
+		<docker.image.name>azure-spring-cloud</docker.image.name>
+		<docker.image>${docker.image.prefix}/${docker.image.name}</docker.image>
+		<docker.image.tag>${maven.build.timestamp}</docker.image.tag>
+		<docker.jar.file>spring-cloud-playground-${project.version}.jar</docker.jar.file>
+
+		<!-- Azure Resource -->
+		<azure.authentication.server>${your-azure-authentication-server}</azure.authentication.server>
+		<azure.resource.group>${your-azure-resource-group}</azure.resource.group>
+		<azure.cr.server>${your-azure-acr-server}</azure.cr.server>
 	</properties>
 
 	<dependencies>
@@ -105,8 +118,67 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+            <!-- Git Commit Id -->
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+					<dateFormat>yyyy-MM-dd^HH:mm:ssZ</dateFormat>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>
+						${project.build.outputDirectory}/git.properties
+					</generateGitPropertiesFilename>
+				</configuration>
+			</plugin>
+
+			<!-- Build Docker Image -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<id>image-tag-timestamp</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<repository>${docker.image}</repository>
+							<tag>${docker.image.tag}</tag>
+							<buildArgs>
+								<JAR_FILE>${docker.jar.file}</JAR_FILE>
+							</buildArgs>
+						</configuration>
+					</execution>
+					<execution>
+						<id>image-tag-latest</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<repository>${docker.image}</repository>
+							<tag>latest</tag>
+							<buildArgs>
+								<JAR_FILE>${docker.jar.file}</JAR_FILE>
+							</buildArgs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
-
-
 </project>
