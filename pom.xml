@@ -25,7 +25,7 @@
 		<java.version>1.8</java.version>
 		<maven.build.timestamp.format>yyyy_MM_dd-HH_mm</maven.build.timestamp.format>
 
-        <!-- Docker Images -->
+		<!-- Docker Images -->
 		<docker.image.prefix>${your-docker-image-prefix}</docker.image.prefix>
 		<docker.image.name>azure-spring-cloud</docker.image.name>
 		<docker.image>${docker.image.prefix}/${docker.image.name}</docker.image>
@@ -119,7 +119,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-            <!-- Git Commit Id -->
+			<!-- Git Commit Id -->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
@@ -148,7 +148,7 @@
 				<executions>
 					<execution>
 						<id>image-tag-timestamp</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>build</goal>
 							<goal>push</goal>
@@ -163,7 +163,7 @@
 					</execution>
 					<execution>
 						<id>image-tag-latest</id>
-						<phase>package</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>build</goal>
 							<goal>push</goal>
@@ -179,6 +179,31 @@
 				</executions>
 			</plugin>
 
+			<!-- Azure Web App Deploy: mvn azure-webapp:deploy -->
+			<plugin>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-webapp-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<authentication>
+						<serverId>${azure.authentication.server}</serverId>
+					</authentication>
+					<resourceGroup>${azure.resource.group}</resourceGroup>
+					<appName>${docker.image.name}</appName>
+					<region>japaneast</region>
+					<containerSettings>
+						<imageName>${docker.image}:latest</imageName>
+						<serverId>${azure.cr.server}</serverId>
+						<registryUrl>https://${docker.image.prefix}</registryUrl>
+					</containerSettings>
+					<appSettings>
+						<property>
+							<name>PORT</name>
+							<value>8080</value>
+						</property>
+					</appSettings>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
