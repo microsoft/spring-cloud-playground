@@ -19,5 +19,5 @@ jobs:
       script: mvn clean package
     - stage: docker push
       script: mvn clean install && docker images
-      if: branch = master AND type != pull_request
+      if: branch = devel AND type != pull_request
 
