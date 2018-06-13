@@ -23,8 +23,7 @@ public class SpringBootMetadataReader {
      */
     public SpringBootMetadataReader(ObjectMapper objectMapper, RestTemplate restTemplate,
                                     String url) throws IOException {
-        this.content = objectMapper
-                .readTree(restTemplate.getForObject(url, String.class));
+        this.content = objectMapper.readTree(restTemplate.getForObject(url, String.class));
     }
 
     /**
@@ -34,16 +33,18 @@ public class SpringBootMetadataReader {
     public List<DefaultMetadataElement> getBootVersions() {
         ArrayNode array = (ArrayNode) this.content.get("projectReleases");
         List<DefaultMetadataElement> list = new ArrayList<>();
+
         for (JsonNode it : array) {
             DefaultMetadataElement version = new DefaultMetadataElement();
             version.setId(it.get("version").textValue());
+
             String name = it.get("versionDisplayName").textValue();
-            version.setName(
-                    it.get("snapshot").booleanValue() ? name + " (SNAPSHOT)" : name);
+            version.setName(it.get("snapshot").booleanValue() ? name + " (SNAPSHOT)" : name);
             version.setDefault(it.get("current").booleanValue());
+
             list.add(version);
         }
+
         return list;
     }
-
 }

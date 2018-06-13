@@ -10,11 +10,15 @@ import com.microsoft.azure.springcloudplayground.util.InvalidVersionException;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionParser;
 import com.microsoft.azure.springcloudplayground.util.VersionRange;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class Dependency extends MetadataElement implements Describable {
 
     /**
@@ -49,36 +53,63 @@ public class Dependency extends MetadataElement implements Describable {
             .unmodifiableList(Arrays.asList(SCOPE_COMPILE, SCOPE_RUNTIME,
                     SCOPE_COMPILE_ONLY, SCOPE_PROVIDED, SCOPE_TEST));
 
+    @Getter
+    @Setter
     private List<String> aliases = new ArrayList<>();
 
+    @Getter
+    @Setter
     private List<String> facets = new ArrayList<>();
 
+    @Getter
+    @Setter
     private String groupId;
 
+    @Getter
+    @Setter
     private String artifactId;
 
+    @Getter
+    @Setter
     private String version;
 
+    @Getter
+    @Setter
     private String type;
 
+    @Getter
+    @Setter
     private List<Mapping> mappings = new ArrayList<>();
 
+    @Getter
     private String scope = SCOPE_COMPILE;
 
+    @Setter
     private String description;
 
+    @Getter
     private String versionRange;
 
+    @Getter
+    @Setter
     @JsonIgnore
     private String versionRequirement;
 
+    @Getter
+    @Setter
     @JsonIgnore
     private VersionRange range;
 
+    @Getter
+    @Setter
     private String bom;
 
+    @Getter
+    @Setter
     private String repository;
 
+    @Getter
+    @Setter
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int weight;
 
@@ -90,10 +121,9 @@ public class Dependency extends MetadataElement implements Describable {
 
     private List<String> keywords = new ArrayList<>();
 
+    @Getter
+    @Setter
     private List<Link> links = new ArrayList<>();
-
-    public Dependency() {
-    }
 
     public Dependency(Dependency dependency) {
         super(dependency);
@@ -122,12 +152,12 @@ public class Dependency extends MetadataElement implements Describable {
             throw new InvalidGeneratorMetadataException(
                     "Invalid scope " + scope + " must be one of " + SCOPE_ALL);
         }
+
         this.scope = scope;
     }
 
     public void setVersionRange(String versionRange) {
-        this.versionRange = StringUtils.hasText(versionRange) ? versionRange.trim()
-                : null;
+        this.versionRange = StringUtils.hasText(versionRange) ? versionRange.trim() : null;
     }
 
     /**
@@ -147,11 +177,12 @@ public class Dependency extends MetadataElement implements Describable {
      */
     public Dependency asSpringBootStarter(String name) {
         this.groupId = "org.springframework.boot";
-        this.artifactId = StringUtils.hasText(name) ? "spring-boot-starter-" + name
-                : "spring-boot-starter";
+        this.artifactId = StringUtils.hasText(name) ? "spring-boot-starter-" + name : "spring-boot-starter";
+
         if (StringUtils.hasText(name)) {
             setId(name);
         }
+
         return this;
     }
 
@@ -232,9 +263,11 @@ public class Dependency extends MetadataElement implements Describable {
                         : this.version;
                 dependency.versionRequirement = mapping.range.toString();
                 dependency.mappings = null;
+
                 return dependency;
             }
         }
+
         return this;
     }
 
@@ -247,6 +280,7 @@ public class Dependency extends MetadataElement implements Describable {
         if (this.range != null) {
             return this.range.match(version);
         }
+
         return true;
     }
 
@@ -259,128 +293,15 @@ public class Dependency extends MetadataElement implements Describable {
             throw new IllegalArgumentException("Could not generate id for " + this
                     + ": at least groupId and artifactId must be set.");
         }
+
         setId(this.groupId + ":" + this.artifactId);
+
         return getId();
-    }
-
-    public List<String> getAliases() {
-        return this.aliases;
-    }
-
-    public void setAliases(List<String> aliases) {
-        this.aliases = aliases;
-    }
-
-    public List<String> getFacets() {
-        return this.facets;
-    }
-
-    public void setFacets(List<String> facets) {
-        this.facets = facets;
-    }
-
-    public String getGroupId() {
-        return this.groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public String getArtifactId() {
-        return this.artifactId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
-    }
-
-    /**
-     * Return the default version, can be {@code null} to indicate that the version is
-     * managed by the project and does not need to be specified.
-     * @return The default version or {@code null}
-     */
-    public String getVersion() {
-        return this.version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    /**
-     * Return the type, can be {@code null} to indicate that the default type should be
-     * used (i.e. {@code jar}).
-     * @return the type or {@code null}
-     */
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    /**
-     * Return the dependency mapping if an attribute of the dependency differs according
-     * to the Spring Boot version. If no mapping matches, default attributes are used.
-     * @return the dependency mappings
-     */
-    public List<Mapping> getMappings() {
-        return this.mappings;
-    }
-
-    public void setMappings(List<Mapping> mappings) {
-        this.mappings = mappings;
     }
 
     @Override
     public String getDescription() {
         return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getVersionRequirement() {
-        return this.versionRequirement;
-    }
-
-    public void setVersionRequirement(String versionRequirement) {
-        this.versionRequirement = versionRequirement;
-    }
-
-    public VersionRange getRange() {
-        return this.range;
-    }
-
-    public void setRange(VersionRange range) {
-        this.range = range;
-    }
-
-    public String getBom() {
-        return this.bom;
-    }
-
-    public void setBom(String bom) {
-        this.bom = bom;
-    }
-
-    public String getRepository() {
-        return this.repository;
-    }
-
-    public void setRepository(String repository) {
-        this.repository = repository;
-    }
-
-    public int getWeight() {
-        return this.weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
     }
 
     public boolean isStarter() {
@@ -389,30 +310,6 @@ public class Dependency extends MetadataElement implements Describable {
 
     public void setStarter(boolean starter) {
         this.starter = starter;
-    }
-
-    public List<String> getKeywords() {
-        return this.keywords;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
-    }
-
-    public List<Link> getLinks() {
-        return this.links;
-    }
-
-    public void setLinks(List<Link> links) {
-        this.links = links;
-    }
-
-    public String getScope() {
-        return this.scope;
-    }
-
-    public String getVersionRange() {
-        return this.versionRange;
     }
 
     @Override
@@ -467,61 +364,34 @@ public class Dependency extends MetadataElement implements Describable {
         /**
          * The version range of this mapping.
          */
+        @Getter
+        @Setter
         private String versionRange;
 
         /**
          * The version to use for this mapping or {@code null} to use the default.
          */
+        @Getter
+        @Setter
         private String groupId;
 
         /**
          * The groupId to use for this mapping or {@code null} to use the default.
          */
+        @Getter
+        @Setter
         private String artifactId;
 
         /**
          * The artifactId to use for this mapping or {@code null} to use the default.
          */
+        @Getter
+        @Setter
         private String version;
 
         @JsonIgnore
+        @Getter
         private VersionRange range;
-
-        public String getGroupId() {
-            return this.groupId;
-        }
-
-        public void setGroupId(String groupId) {
-            this.groupId = groupId;
-        }
-
-        public String getArtifactId() {
-            return this.artifactId;
-        }
-
-        public void setArtifactId(String artifactId) {
-            this.artifactId = artifactId;
-        }
-
-        public String getVersion() {
-            return this.version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
-        public VersionRange getRange() {
-            return this.range;
-        }
-
-        public String getVersionRange() {
-            return this.versionRange;
-        }
-
-        public void setVersionRange(String versionRange) {
-            this.versionRange = versionRange;
-        }
 
         public static Mapping create(String range, String groupId, String artifactId,
                                      String version) {
@@ -532,7 +402,5 @@ public class Dependency extends MetadataElement implements Describable {
             mapping.version = version;
             return mapping;
         }
-
     }
-
 }

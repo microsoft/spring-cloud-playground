@@ -4,6 +4,7 @@ import com.microsoft.azure.springcloudplayground.exception.InvalidProjectRequest
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadata;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.metadata.TypeCapability;
+import lombok.Getter;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +21,7 @@ public abstract class AbstractPlaygroundController {
 
     protected final GeneratorMetadataProvider metadataProvider;
 
+    @Getter
     private final Function<String, String> linkTo;
 
     private Boolean forceSsl;
@@ -35,11 +37,10 @@ public abstract class AbstractPlaygroundController {
 
     public boolean isForceSsl() {
         if (this.forceSsl == null) {
-            this.forceSsl = this.metadataProvider.get().getConfiguration().getEnv()
-                    .isForceSsl();
+            this.forceSsl = this.metadataProvider.get().getConfiguration().getEnv().isForceSsl();
         }
-        return this.forceSsl;
 
+        return this.forceSsl;
     }
 
     @ExceptionHandler
@@ -50,40 +51,37 @@ public abstract class AbstractPlaygroundController {
 
     /**
      * Render the home page with the specified template.
+     *
      * @param model the model data
      */
     protected void renderHome(Map<String, Object> model) {
         GeneratorMetadata metadata = this.metadataProvider.get();
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(metadata);
 
         model.put("serviceUrl", generateAppUrl());
-        BeanWrapperImpl wrapper = new BeanWrapperImpl(metadata);
+
         for (PropertyDescriptor descriptor : wrapper.getPropertyDescriptors()) {
             if ("types".equals(descriptor.getName())) {
                 model.put("types", removeTypes(metadata.getTypes()));
             }
             else {
-                model.put(descriptor.getName(),
-                        wrapper.getPropertyValue(descriptor.getName()));
+                model.put(descriptor.getName(), wrapper.getPropertyValue(descriptor.getName()));
             }
         }
 
         // Google analytics support
-        model.put("trackingCode",
-                metadata.getConfiguration().getEnv().getGoogleAnalyticsTrackingCode());
-
-    }
-
-    public Function<String, String> getLinkTo() {
-        return this.linkTo;
+        model.put("trackingCode", metadata.getConfiguration().getEnv().getGoogleAnalyticsTrackingCode());
     }
 
     private TypeCapability removeTypes(TypeCapability types) {
         TypeCapability result = new TypeCapability();
+
         result.setDescription(types.getDescription());
         result.setTitle(types.getTitle());
         result.getContent().addAll(types.getContent());
         // Only keep project type
         result.getContent().removeIf((t) -> !"project".equals(t.getTags().get("format")));
+
         return result;
     }
 
@@ -93,12 +91,12 @@ public abstract class AbstractPlaygroundController {
      * @see com.microsoft.azure.springcloudplayground.metadata.GeneratorConfiguration.Env#isForceSsl()
      */
     protected String generateAppUrl() {
-        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder
-                .fromCurrentServletMapping();
+        ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
+
         if (isForceSsl()) {
             builder.scheme("https");
         }
+
         return builder.build().toString();
     }
-
 }

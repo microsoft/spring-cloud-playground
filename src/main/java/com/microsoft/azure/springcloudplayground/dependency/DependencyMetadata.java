@@ -3,17 +3,22 @@ package com.microsoft.azure.springcloudplayground.dependency;
 import com.microsoft.azure.springcloudplayground.metadata.BillOfMaterials;
 import com.microsoft.azure.springcloudplayground.metadata.Repository;
 import com.microsoft.azure.springcloudplayground.util.Version;
+import lombok.Getter;
 
 import java.util.Map;
 
 public class DependencyMetadata {
 
+    @Getter
     final Version bootVersion;
 
+    @Getter
     final Map<String, Dependency> dependencies;
 
+    @Getter
     final Map<String, Repository> repositories;
 
+    @Getter
     final Map<String, BillOfMaterials> boms;
 
     public DependencyMetadata() {
@@ -27,21 +32,4 @@ public class DependencyMetadata {
         this.repositories = repositories;
         this.boms = boms;
     }
-
-    public Version getBootVersion() {
-        return this.bootVersion;
-    }
-
-    public Map<String, Dependency> getDependencies() {
-        return this.dependencies;
-    }
-
-    public Map<String, Repository> getRepositories() {
-        return this.repositories;
-    }
-
-    public Map<String, BillOfMaterials> getBoms() {
-        return this.boms;
-    }
-
 }

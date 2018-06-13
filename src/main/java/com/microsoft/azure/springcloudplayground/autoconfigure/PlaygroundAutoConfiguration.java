@@ -75,10 +75,8 @@ public class PlaygroundAutoConfiguration {
     public GeneratorMetadataProvider generatorMetadataProvider(
             GeneratorProperties properties, ObjectMapper objectMapper,
             RestTemplateBuilder restTemplateBuilder) {
-        GeneratorMetadata metadata = GeneratorMetadataBuilder
-                .fromGeneratorProperties(properties).build();
-        return new DefaultGeneratorMetadataProvider(metadata, objectMapper,
-                restTemplateBuilder.build());
+        GeneratorMetadata metadata = GeneratorMetadataBuilder.fromGeneratorProperties(properties).build();
+        return new DefaultGeneratorMetadataProvider(metadata, objectMapper, restTemplateBuilder.build());
     }
 
     @Bean
@@ -135,7 +133,5 @@ public class PlaygroundAutoConfiguration {
             return new MutableConfiguration<>().setStoreByValue(false)
                     .setManagementEnabled(true).setStatisticsEnabled(true);
         }
-
     }
-
 }
