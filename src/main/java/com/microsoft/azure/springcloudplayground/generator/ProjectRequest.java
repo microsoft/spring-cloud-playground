@@ -5,6 +5,9 @@ import com.microsoft.azure.springcloudplayground.exception.InvalidProjectRequest
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.StringUtils;
 
@@ -12,6 +15,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
 public class ProjectRequest extends BasicProjectRequest {
 
     /**
@@ -19,27 +23,34 @@ public class ProjectRequest extends BasicProjectRequest {
      */
     public static final String DEFAULT_STARTER = "root_starter";
 
+    @Getter
     private final Map<String, Object> parameters = new LinkedHashMap<>();
 
     // Resolved dependencies based on the ids provided by either "style" or "dependencies"
+    @Getter
+    @Setter
     private List<Dependency> resolvedDependencies;
 
+    @Getter
     private final Map<String, BillOfMaterials> boms = new LinkedHashMap<>();
 
+    @Getter
     private final Map<String, Repository> repositories = new LinkedHashMap<>();
 
+    @Getter
     private final BuildProperties buildProperties = new BuildProperties();
 
+    @Getter
+    @Setter
     private List<String> facets = new ArrayList<>();
 
     private List<String> services = new ArrayList<>();
 
     private final Map<String, ProjectRequest> subModules = new HashMap<>();
 
+    @Getter
+    @Setter
     private String build;
-
-    public ProjectRequest() {
-    }
 
     public ProjectRequest(ProjectRequest parentProject) {
         super(parentProject);
@@ -48,59 +59,11 @@ public class ProjectRequest extends BasicProjectRequest {
         this.build = parentProject.build;
     }
 
-    public List<Dependency> getResolvedDependencies() {
-        return this.resolvedDependencies;
-    }
-
-    public void setResolvedDependencies(List<Dependency> resolvedDependencies) {
-        this.resolvedDependencies = resolvedDependencies;
-    }
-
     public void removeDependency(String id) {
         if (this.resolvedDependencies != null) {
             Predicate<Dependency> filter = d -> d.getId().equals(id);
             this.resolvedDependencies.removeIf(filter);
         }
-    }
-
-    public List<String> getFacets() {
-        return this.facets;
-    }
-
-    public void setFacets(List<String> facets) {
-        this.facets = facets;
-    }
-
-    public String getBuild() {
-        return this.build;
-    }
-
-    public void setBuild(String build) {
-        this.build = build;
-    }
-
-    /**
-     * Return the additional parameters that can be used to further identify the request.
-     * @return the parameters
-     */
-    public Map<String, Object> getParameters() {
-        return this.parameters;
-    }
-
-    public Map<String, BillOfMaterials> getBoms() {
-        return this.boms;
-    }
-
-    public Map<String, Repository> getRepositories() {
-        return this.repositories;
-    }
-
-    /**
-     * Return the build properties.
-     * @return the build properties
-     */
-    public BuildProperties getBuildProperties() {
-        return this.buildProperties;
     }
 
     /**

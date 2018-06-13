@@ -8,6 +8,8 @@ import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapperImpl;
@@ -58,6 +60,7 @@ public class ProjectGenerator {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
+    @Getter
     private GeneratorMetadataProvider metadataProvider;
 
     @Autowired
@@ -70,47 +73,14 @@ public class ProjectGenerator {
     private ProjectResourceLocator projectResourceLocator = new ProjectResourceLocator();
 
     @Value("${TMPDIR:.}/playground")
+    @Setter
     private String tmpdir;
 
+    @Setter
     private File temporaryDirectory;
 
+    @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
-
-    public GeneratorMetadataProvider getMetadataProvider() {
-        return this.metadataProvider;
-    }
-
-    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
-
-    public void setMetadataProvider(GeneratorMetadataProvider metadataProvider) {
-        this.metadataProvider = metadataProvider;
-    }
-
-    public void setRequestResolver(ProjectRequestResolver requestResolver) {
-        this.requestResolver = requestResolver;
-    }
-
-    public void setTemplateRenderer(TemplateRenderer templateRenderer) {
-        this.templateRenderer = templateRenderer;
-    }
-
-    public void setProjectResourceLocator(ProjectResourceLocator projectResourceLocator) {
-        this.projectResourceLocator = projectResourceLocator;
-    }
-
-    public void setTmpdir(String tmpdir) {
-        this.tmpdir = tmpdir;
-    }
-
-    public void setTemporaryDirectory(File temporaryDirectory) {
-        this.temporaryDirectory = temporaryDirectory;
-    }
-
-    public void setTemporaryFiles(Map<String, List<File>> temporaryFiles) {
-        this.temporaryFiles = temporaryFiles;
-    }
 
     private void writeKubernetesFile(File dir, ProjectRequest request){
         List<Service> services = ServiceResolver.resolve(request.getServices());
