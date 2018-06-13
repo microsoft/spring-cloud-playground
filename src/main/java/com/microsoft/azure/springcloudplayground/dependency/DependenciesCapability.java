@@ -47,18 +47,17 @@ public class DependenciesCapability extends ServiceCapability<List<DependencyGro
     }
 
     public void updateVersionRange(VersionParser versionParser) {
-        this.indexedDependencies.values()
-                .forEach((it) -> it.updateVersionRanges(versionParser));
+        this.indexedDependencies.values().forEach((it) -> it.updateVersionRanges(versionParser));
     }
 
     @Override
     public void merge(List<DependencyGroup> otherContent) {
-        otherContent.forEach((group) -> {
-            if (this.content.stream().noneMatch((it) -> group.getName() != null
-                    && group.getName().equals(it.getName()))) {
-                this.content.add(group);
+        otherContent.forEach(g -> {
+            if (this.content.stream().noneMatch((it) -> g.getName() != null && g.getName().equals(it.getName()))) {
+                this.content.add(g);
             }
         });
+
         index();
     }
 
@@ -69,29 +68,30 @@ public class DependenciesCapability extends ServiceCapability<List<DependencyGro
             if (dependency.getVersionRange() == null && group.getVersionRange() != null) {
                 dependency.setVersionRange(group.getVersionRange());
             }
+
             if (dependency.getBom() == null && group.getBom() != null) {
                 dependency.setBom(group.getBom());
             }
+
             if (dependency.getRepository() == null && group.getRepository() != null) {
                 dependency.setRepository(group.getRepository());
             }
 
             dependency.resolve();
             indexDependency(dependency.getId(), dependency);
-            for (String alias : dependency.getAliases()) {
-                indexDependency(alias, dependency);
-            }
+            dependency.getAliases().forEach(alias -> indexDependency(alias, dependency));
         }));
     }
 
     private void indexDependency(String id, Dependency dependency) {
         Dependency existing = this.indexedDependencies.get(id);
+
         if (existing != null) {
             throw new IllegalArgumentException(
                     "Could not register " + dependency + " another dependency "
                             + "has also the '" + id + "' id " + existing);
         }
+
         this.indexedDependencies.put(id, dependency);
     }
-
 }

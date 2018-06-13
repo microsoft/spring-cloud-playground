@@ -38,14 +38,9 @@ public class DefaultDependencyMetadataProvider implements DependencyMetadataProv
             }
         }
         // Each resolved bom may require additional repositories
-        for (BillOfMaterials b : boms.values()) {
-            for (String id : b.getRepositories()) {
-                repositories.put(id,
-                        metadata.getConfiguration().getEnv().getRepositories().get(id));
-            }
-        }
+        boms.values().forEach(b -> b.getRepositories().forEach(id ->
+                repositories.put(id, metadata.getConfiguration().getEnv().getRepositories().get(id))));
 
         return new DependencyMetadata(bootVersion, dependencies, repositories, boms);
     }
-
 }

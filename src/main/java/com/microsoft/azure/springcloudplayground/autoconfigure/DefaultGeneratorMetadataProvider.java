@@ -53,8 +53,7 @@ public class DefaultGeneratorMetadataProvider implements GeneratorMetadataProvid
         if (StringUtils.hasText(url)) {
             try {
                 log.info("Fetching boot metadata from {}", url);
-                return new SpringBootMetadataReader(this.objectMapper, this.restTemplate,
-                        url).getBootVersions();
+                return new SpringBootMetadataReader(this.objectMapper, this.restTemplate, url).getBootVersions();
             }
             catch (Exception e) {
                 log.warn("Failed to fetch spring boot metadata", e);
