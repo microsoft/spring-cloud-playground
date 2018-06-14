@@ -98,3 +98,13 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     vertical-align: middle;
     line-height: 2.75rem;
 }
+
+#get-started {
+    background-color: #f4f4f4;
+    padding: 24px 0;
+}
+
+.start-video {
+    display: block;
+    margin: 0 auto;
+}

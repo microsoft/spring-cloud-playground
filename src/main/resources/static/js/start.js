@@ -192,6 +192,29 @@ $(function () {
         $("body").scrollTop(0);
         return false;
     });
+
+    // Switch between get started video tabs
+    var generateTab = $("#generate-tab");
+    var buildRunTab = $("#build-run-tab");
+    var generateVideo = $("#generate-animation");
+    var buildRunVideo = $("#build-run-animation");
+
+    generateTab.on("click", function() {
+        generateTab.addClass("is-active");
+        buildRunTab.removeClass("is-active");
+
+        generateVideo.removeClass("hidden");
+        buildRunVideo.addClass("hidden");
+
+    });
+    buildRunTab.on("click", function() {
+        buildRunTab.addClass("is-active");
+        generateTab.removeClass("is-active");
+
+        generateVideo.addClass("hidden");
+        buildRunVideo.removeClass("hidden");
+    });
+
     var maxSuggestions = 5;
     var starters = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'description', 'keywords', 'group'),
