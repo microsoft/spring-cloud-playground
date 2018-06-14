@@ -1,6 +1,9 @@
 package com.microsoft.azure.springcloudplayground.metadata;
 
 import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.util.StringUtils;
 
@@ -44,15 +47,18 @@ public class GeneratorConfiguration {
         if (!StringUtils.hasText(name)) {
             return this.env.fallbackApplicationName;
         }
+
         String text = splitCamelCase(name.trim());
         // TODO: fix this
         String result = unsplitWords(text);
+
         if (!result.endsWith("Application")) {
             result = result + "Application";
         }
+
         String candidate = StringUtils.capitalize(result);
-        if (hasInvalidChar(candidate)
-                || this.env.invalidApplicationNames.contains(candidate)) {
+
+        if (hasInvalidChar(candidate) || this.env.invalidApplicationNames.contains(candidate)) {
             return this.env.fallbackApplicationName;
         }
         else {
@@ -76,9 +82,10 @@ public class GeneratorConfiguration {
         if (!StringUtils.hasText(packageName)) {
             return defaultPackageName;
         }
+
         String candidate = cleanPackageName(packageName);
-        if (hasInvalidChar(candidate.replace(".", ""))
-                || this.env.invalidPackageNames.contains(candidate)) {
+
+        if (hasInvalidChar(candidate.replace(".", "")) || this.env.invalidPackageNames.contains(candidate)) {
             return defaultPackageName;
         }
         else {
@@ -89,6 +96,7 @@ public class GeneratorConfiguration {
     static String cleanPackageName(String packageName) {
         String[] elements = packageName.trim().replaceAll("-", "").split("\\W+");
         StringBuilder sb = new StringBuilder();
+
         for (String element : elements) {
             element = element.replaceFirst("^[0-9]+(?!$)", "");
             if (!element.matches("[0-9]+") && sb.length() > 0) {
@@ -96,6 +104,7 @@ public class GeneratorConfiguration {
             }
             sb.append(element);
         }
+
         return sb.toString();
     }
 
@@ -105,16 +114,16 @@ public class GeneratorConfiguration {
     }
 
     private static String splitCamelCase(String text) {
-        return String.join("",
-                Arrays.stream(text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"))
-                        .map((it) -> StringUtils.capitalize(it.toLowerCase()))
-                        .toArray(String[]::new));
+        return String.join("", Arrays.stream(text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"))
+                .map((it) -> StringUtils.capitalize(it.toLowerCase()))
+                .toArray(String[]::new));
     }
 
     private static boolean hasInvalidChar(String text) {
         if (!Character.isJavaIdentifierStart(text.charAt(0))) {
             return true;
         }
+
         if (text.length() > 1) {
             for (int i = 1; i < text.length(); i++) {
                 if (!Character.isJavaIdentifierPart(text.charAt(i))) {
@@ -122,6 +131,7 @@ public class GeneratorConfiguration {
                 }
             }
         }
+
         return false;
     }
 
@@ -133,28 +143,37 @@ public class GeneratorConfiguration {
         /**
          * The url of the repository servicing distribution bundle.
          */
+        @Getter
         private String artifactRepository = "https://repo.spring.io/release/";
 
         /**
          * The metadata url of the Spring Boot project.
          */
+        @Getter
+        @Setter
         private String springBootMetadataUrl = "https://spring.io/project_metadata/spring-boot";
 
         /**
          * Tracking code for Google Analytics. Only enabled if a value is explicitly
          * provided.
          */
+        @Getter
+        @Setter
         private String googleAnalyticsTrackingCode;
 
         /**
          * The application name to use if none could be generated.
          */
+        @Getter
+        @Setter
         private String fallbackApplicationName = "Application";
 
         /**
          * The list of invalid application names. If such name is chosen or generated, the
          * "fallbackApplicationName" should be used instead.
          */
+        @Getter
+        @Setter
         private List<String> invalidApplicationNames = new ArrayList<>(
                 Arrays.asList("SpringApplication", "SpringBootApplication"));
 
@@ -162,124 +181,63 @@ public class GeneratorConfiguration {
          * The list of invalid package names. If such name is chosen or generated, the the
          * default package name should be used instead.
          */
+        @Getter
+        @Setter
         private List<String> invalidPackageNames = new ArrayList<>(
                 Collections.singletonList("org.springframework"));
 
         /**
          * Force SSL support. When enabled, any access using http generate https links.
          */
+        @Getter
+        @Setter
         private boolean forceSsl = true;
 
         /**
          * The "BillOfMaterials" that are referenced in this instance, identified by an
          * arbitrary identifier that can be used in the dependencies definition.
          */
+        @Getter
         private final Map<String, BillOfMaterials> boms = new LinkedHashMap<>();
 
         /**
          * The "Repository" instances that are referenced in this instance, identified by
          * an arbitrary identifier that can be used in the dependencies definition.
          */
+        @Getter
         private final Map<String, Repository> repositories = new LinkedHashMap<>();
 
         /**
          * Gradle-specific settings.
          */
+        @Getter
         @NestedConfigurationProperty
         private final Gradle gradle = new Gradle();
 
         /**
          * Maven-specific settings.
          */
+        @Getter
         @NestedConfigurationProperty
         private final Maven maven = new Maven();
 
         public Env() {
             try {
                 this.repositories.put("spring-snapshots",
-                        new Repository("Spring Snapshots",
-                                new URL("https://repo.spring.io/snapshot"), true));
+                        new Repository("Spring Snapshots", new URL("https://repo.spring.io/snapshot"), true));
                 this.repositories.put("spring-milestones",
-                        new Repository("Spring Milestones",
-                                new URL("https://repo.spring.io/milestone"), false));
+                        new Repository("Spring Milestones", new URL("https://repo.spring.io/milestone"), false));
             }
             catch (MalformedURLException e) {
                 throw new IllegalStateException("Cannot parse URL", e);
             }
         }
 
-        public String getSpringBootMetadataUrl() {
-            return this.springBootMetadataUrl;
-        }
-
-        public void setSpringBootMetadataUrl(String springBootMetadataUrl) {
-            this.springBootMetadataUrl = springBootMetadataUrl;
-        }
-
-        public String getGoogleAnalyticsTrackingCode() {
-            return this.googleAnalyticsTrackingCode;
-        }
-
-        public void setGoogleAnalyticsTrackingCode(String googleAnalyticsTrackingCode) {
-            this.googleAnalyticsTrackingCode = googleAnalyticsTrackingCode;
-        }
-
-        public String getFallbackApplicationName() {
-            return this.fallbackApplicationName;
-        }
-
-        public void setFallbackApplicationName(String fallbackApplicationName) {
-            this.fallbackApplicationName = fallbackApplicationName;
-        }
-
-        public List<String> getInvalidApplicationNames() {
-            return this.invalidApplicationNames;
-        }
-
-        public void setInvalidApplicationNames(List<String> invalidApplicationNames) {
-            this.invalidApplicationNames = invalidApplicationNames;
-        }
-
-        public List<String> getInvalidPackageNames() {
-            return this.invalidPackageNames;
-        }
-
-        public void setInvalidPackageNames(List<String> invalidPackageNames) {
-            this.invalidPackageNames = invalidPackageNames;
-        }
-
-        public boolean isForceSsl() {
-            return this.forceSsl;
-        }
-
-        public void setForceSsl(boolean forceSsl) {
-            this.forceSsl = forceSsl;
-        }
-
-        public String getArtifactRepository() {
-            return this.artifactRepository;
-        }
-
-        public Map<String, BillOfMaterials> getBoms() {
-            return this.boms;
-        }
-
-        public Map<String, Repository> getRepositories() {
-            return this.repositories;
-        }
-
-        public Gradle getGradle() {
-            return this.gradle;
-        }
-
-        public Maven getMaven() {
-            return this.maven;
-        }
-
         public void setArtifactRepository(String artifactRepository) {
             if (!artifactRepository.endsWith("/")) {
                 artifactRepository = artifactRepository + "/";
             }
+
             this.artifactRepository = artifactRepository;
         }
 
@@ -319,11 +277,9 @@ public class GeneratorConfiguration {
                 return this.dependencyManagementPluginVersion;
             }
 
-            public void setDependencyManagementPluginVersion(
-                    String dependencyManagementPluginVersion) {
+            public void setDependencyManagementPluginVersion(String dependencyManagementPluginVersion) {
                 this.dependencyManagementPluginVersion = dependencyManagementPluginVersion;
             }
-
         }
 
         /**
@@ -334,11 +290,8 @@ public class GeneratorConfiguration {
             /**
              * Custom parent pom to use for generated projects.
              */
+            @Getter
             private final ParentPom parent = new ParentPom();
-
-            public ParentPom getParent() {
-                return this.parent;
-            }
 
             private void merge(Maven other) {
                 this.parent.groupId = other.parent.groupId;
@@ -354,44 +307,22 @@ public class GeneratorConfiguration {
              * @return the parent POM
              */
             public ParentPom resolveParentPom(String bootVersion) {
-                return StringUtils.hasText(this.parent.groupId) ? this.parent
-                        : new ParentPom("org.springframework.boot",
-                        "spring-boot-starter-parent", bootVersion);
+                ParentPom pom = new ParentPom("org.springframework.boot", "spring-boot-starter-parent", bootVersion);
+                return StringUtils.hasText(this.parent.groupId) ? this.parent : pom;
             }
 
             /**
              * Parent POM details.
              */
+            @NoArgsConstructor
             public static class ParentPom {
 
                 /**
                  * Parent pom groupId.
                  */
+//                @Getter
+//                @Setter
                 private String groupId;
-
-                /**
-                 * Parent pom artifactId.
-                 */
-                private String artifactId;
-
-                /**
-                 * Parent pom version.
-                 */
-                private String version;
-
-                /**
-                 * Add the "spring-boot-dependencies" BOM to the project.
-                 */
-                private boolean includeSpringBootBom;
-
-                public ParentPom(String groupId, String artifactId, String version) {
-                    this.groupId = groupId;
-                    this.artifactId = artifactId;
-                    this.version = version;
-                }
-
-                public ParentPom() {
-                }
 
                 public String getGroupId() {
                     return this.groupId;
@@ -401,46 +332,48 @@ public class GeneratorConfiguration {
                     this.groupId = groupId;
                 }
 
-                public String getArtifactId() {
-                    return this.artifactId;
-                }
+                /**
+                 * Parent pom artifactId.
+                 */
+                @Getter
+                @Setter
+                private String artifactId;
 
-                public void setArtifactId(String artifactId) {
+                /**
+                 * Parent pom version.
+                 */
+                @Getter
+                @Setter
+                private String version;
+
+                /**
+                 * Add the "spring-boot-dependencies" BOM to the project.
+                 */
+                @Getter
+                @Setter
+                private boolean includeSpringBootBom;
+
+                public ParentPom(String groupId, String artifactId, String version) {
+                    this.groupId = groupId;
                     this.artifactId = artifactId;
-                }
-
-                public String getVersion() {
-                    return this.version;
-                }
-
-                public void setVersion(String version) {
                     this.version = version;
                 }
 
-                public boolean isIncludeSpringBootBom() {
-                    return this.includeSpringBootBom;
-                }
-
-                public void setIncludeSpringBootBom(boolean includeSpringBootBom) {
-                    this.includeSpringBootBom = includeSpringBootBom;
-                }
-
                 public void validate() {
-                    if (!((!StringUtils.hasText(this.groupId)
-                            && !StringUtils.hasText(this.artifactId)
-                            && !StringUtils.hasText(this.version))
-                            || (StringUtils.hasText(this.groupId)
-                            && StringUtils.hasText(this.artifactId)
-                            && StringUtils.hasText(this.version)))) {
-                        throw new InvalidGeneratorMetadataException("Custom maven pom "
-                                + "requires groupId, artifactId and version");
+                    if (!StringUtils.hasText(this.groupId) && !StringUtils.hasText(this.artifactId)
+                            && !StringUtils.hasText(this.version)) {
+                        return;
                     }
+
+                    if (StringUtils.hasText(this.groupId) && StringUtils.hasText(this.artifactId)
+                            && StringUtils.hasText(this.version)) {
+                        return;
+                    }
+
+                    throw new InvalidGeneratorMetadataException("Custom maven pom "
+                            + "requires groupId, artifactId and version");
                 }
-
             }
-
         }
-
     }
-
 }

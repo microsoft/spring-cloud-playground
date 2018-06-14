@@ -1,11 +1,11 @@
 package com.microsoft.azure.springcloudplayground.metadata;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class DefaultMetadataElement extends MetadataElement {
 
     private boolean defaultValue;
-
-    public DefaultMetadataElement() {
-    }
 
     public DefaultMetadataElement(String id, String name, boolean defaultValue) {
         super(id, name);
@@ -28,9 +28,7 @@ public class DefaultMetadataElement extends MetadataElement {
         return new DefaultMetadataElement(id, defaultValue);
     }
 
-    public static DefaultMetadataElement create(String id, String name,
-                                                boolean defaultValue) {
+    public static DefaultMetadataElement create(String id, String name, boolean defaultValue) {
         return new DefaultMetadataElement(id, name, defaultValue);
     }
-
 }

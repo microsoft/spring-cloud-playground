@@ -4,32 +4,47 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
 import com.microsoft.azure.springcloudplayground.util.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class BillOfMaterials {
 
+    @Getter
+    @Setter
     private String groupId;
 
+    @Getter
+    @Setter
     private String artifactId;
 
+    @Getter
+    @Setter
     private String version;
 
+    @Getter
     private VersionProperty versionProperty;
 
+    @Getter
+    @Setter
     private Integer order = Integer.MAX_VALUE;
 
+    @Getter
+    @Setter
     private List<String> additionalBoms = new ArrayList<>();
 
+    @Getter
+    @Setter
     private List<String> repositories = new ArrayList<>();
 
+    @Getter
     private final List<Mapping> mappings = new ArrayList<>();
-
-    public BillOfMaterials() {
-    }
 
     private BillOfMaterials(String groupId, String artifactId) {
         this(groupId, artifactId, null);
@@ -41,100 +56,17 @@ public class BillOfMaterials {
         this.version = version;
     }
 
-    public String getGroupId() {
-        return this.groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public String getArtifactId() {
-        return this.artifactId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
-    }
-
-    /**
-     * Return the version of the BOM. Can be {@code null} if it is provided via a mapping.
-     * @return The version of the BOM or {@code null}
-     */
-    public String getVersion() {
-        return this.version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    /**
-     * Return the {@link VersionProperty} to use to externalize the version of the BOM.
-     * When this is set, a version property is automatically added rather than setting the
-     * version in the BOM declaration itself.
-     * @return the version property
-     */
-    public VersionProperty getVersionProperty() {
-        return this.versionProperty;
-    }
-
     public void setVersionProperty(VersionProperty versionProperty) {
         this.versionProperty = versionProperty;
     }
 
     public void setVersionProperty(String versionPropertyName) {
-        setVersionProperty(new VersionProperty(versionPropertyName));
-    }
-
-    /**
-     * Return the relative order of this BOM where lower values have higher priority. The
-     * default value is {@code Integer.MAX_VALUE}, indicating lowest priority. The Spring
-     * Boot dependencies BOM has an order of 100.
-     * @return the relative order of this BOM
-     */
-    public Integer getOrder() {
-        return this.order;
-    }
-
-    public void setOrder(Integer order) {
-        this.order = order;
-    }
-
-    /**
-     * Return the BOM(s) that should be automatically included if this BOM is required.
-     * Can be {@code null} if it is provided via a mapping.
-     * @return the additional BOMs
-     */
-    public List<String> getAdditionalBoms() {
-        return this.additionalBoms;
-    }
-
-    public void setAdditionalBoms(List<String> additionalBoms) {
-        this.additionalBoms = additionalBoms;
-    }
-
-    /**
-     * Return the repositories that are required if this BOM is required. Can be
-     * {@code null} if it is provided via a mapping.
-     * @return the repositories
-     */
-    public List<String> getRepositories() {
-        return this.repositories;
-    }
-
-    public void setRepositories(List<String> repositories) {
-        this.repositories = repositories;
-    }
-
-    public List<Mapping> getMappings() {
-        return this.mappings;
+        this.setVersionProperty(new VersionProperty(versionPropertyName));
     }
 
     public void validate() {
         if (this.version == null && this.mappings.isEmpty()) {
-            throw new InvalidGeneratorMetadataException(
-                    "No version available for " + this);
+            throw new InvalidGeneratorMetadataException("No version available for " + this);
         }
         updateVersionRange(VersionParser.DEFAULT);
     }
@@ -165,19 +97,19 @@ public class BillOfMaterials {
 
         for (Mapping mapping : this.mappings) {
             if (mapping.range.match(bootVersion)) {
-                BillOfMaterials resolvedBom = new BillOfMaterials(this.groupId,
-                        this.artifactId, mapping.version);
+                BillOfMaterials resolvedBom = new BillOfMaterials(this.groupId, this.artifactId, mapping.version);
+
                 resolvedBom.setVersionProperty(this.versionProperty);
                 resolvedBom.setOrder(this.order);
-                resolvedBom.repositories.addAll(!mapping.repositories.isEmpty()
-                        ? mapping.repositories : this.repositories);
-                resolvedBom.additionalBoms.addAll(!mapping.additionalBoms.isEmpty()
-                        ? mapping.additionalBoms : this.additionalBoms);
+                resolvedBom.repositories.addAll(mapping.repositories.isEmpty() ? repositories : mapping.repositories);
+                resolvedBom.additionalBoms.addAll(mapping.additionalBoms.isEmpty() ?
+                        additionalBoms : mapping.additionalBoms);
+
                 return resolvedBom;
             }
         }
-        throw new IllegalStateException("No suitable mapping was found for " + this
-                + " and version " + bootVersion);
+
+        throw new IllegalStateException("No suitable mapping was found for " + this + " and version " + bootVersion);
     }
 
     @Override
@@ -199,29 +131,36 @@ public class BillOfMaterials {
         return new BillOfMaterials(groupId, artifactId);
     }
 
-    public static BillOfMaterials create(String groupId, String artifactId,
-                                         String version) {
+    public static BillOfMaterials create(String groupId, String artifactId, String version) {
         return new BillOfMaterials(groupId, artifactId, version);
     }
 
     /**
      * Mapping information.
      */
+    @NoArgsConstructor
     public static class Mapping {
 
+        @Getter
+        @Setter
         private String versionRange;
 
+        @Getter
+        @Setter
         private String version;
 
+        @Getter
+        @Setter
         private List<String> repositories = new ArrayList<>();
 
+        @Getter
+        @Setter
         private List<String> additionalBoms = new ArrayList<>();
 
+        @Getter
+        @Setter
         @JsonIgnore
         private VersionRange range;
-
-        public Mapping() {
-        }
 
         private Mapping(String range, String version, String... repositories) {
             this.versionRange = range;
@@ -242,46 +181,6 @@ public class BillOfMaterials {
             return new Mapping(range, version, repositories);
         }
 
-        public String getVersionRange() {
-            return this.versionRange;
-        }
-
-        public String getVersion() {
-            return this.version;
-        }
-
-        public List<String> getRepositories() {
-            return this.repositories;
-        }
-
-        public List<String> getAdditionalBoms() {
-            return this.additionalBoms;
-        }
-
-        public VersionRange getRange() {
-            return this.range;
-        }
-
-        public void setVersionRange(String versionRange) {
-            this.versionRange = versionRange;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
-        public void setRepositories(List<String> repositories) {
-            this.repositories = repositories;
-        }
-
-        public void setAdditionalBoms(List<String> additionalBoms) {
-            this.additionalBoms = additionalBoms;
-        }
-
-        public void setRange(VersionRange range) {
-            this.range = range;
-        }
-
         @Override
         public String toString() {
             return "Mapping ["
@@ -296,5 +195,4 @@ public class BillOfMaterials {
         }
 
     }
-
 }
