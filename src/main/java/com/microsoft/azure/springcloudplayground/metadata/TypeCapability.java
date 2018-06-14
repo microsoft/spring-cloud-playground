@@ -6,8 +6,7 @@ import com.microsoft.azure.springcloudplayground.service.ServiceCapabilityType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TypeCapability extends ServiceCapability<List<Type>>
-        implements Defaultable<Type> {
+public class TypeCapability extends ServiceCapability<List<Type>> implements Defaultable<Type> {
 
     private final List<Type> content = new ArrayList<>();
 
@@ -27,9 +26,8 @@ public class TypeCapability extends ServiceCapability<List<Type>>
      * @return the Type or {@code null}
      */
     public Type get(String id) {
-        return this.content.stream()
-                .filter((it) -> id.equals(it.getId()) || id.equals(it.getStsId()))
-                .findFirst().orElse(null);
+        return this.content.stream().filter((it) -> id.equals(it.getId()) || id.equals(it.getStsId())).findFirst()
+                .orElse(null);
     }
 
     /**
@@ -37,17 +35,11 @@ public class TypeCapability extends ServiceCapability<List<Type>>
      */
     @Override
     public Type getDefault() {
-        return this.content.stream().filter(DefaultMetadataElement::isDefault).findFirst()
-                .orElse(null);
+        return this.content.stream().filter(DefaultMetadataElement::isDefault).findFirst().orElse(null);
     }
 
     @Override
     public void merge(List<Type> otherContent) {
-        otherContent.forEach((it) -> {
-            if (get(it.getId()) == null) {
-                this.content.add(it);
-            }
-        });
+        otherContent.stream().filter(c -> get(c.getId()) == null).forEach(this.content::add);
     }
-
 }

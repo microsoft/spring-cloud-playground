@@ -1,45 +1,29 @@
 package com.microsoft.azure.springcloudplayground.metadata;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.net.URL;
 
+@NoArgsConstructor
 public class Repository {
 
+    @Getter
+    @Setter
     private String name;
 
+    @Getter
+    @Setter
     private URL url;
 
+    @Getter
+    @Setter
     private boolean snapshotsEnabled;
-
-    public Repository() {
-    }
 
     public Repository(String name, URL url, boolean snapshotsEnabled) {
         this.name = name;
         this.url = url;
-        this.snapshotsEnabled = snapshotsEnabled;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public URL getUrl() {
-        return this.url;
-    }
-
-    public void setUrl(URL url) {
-        this.url = url;
-    }
-
-    public boolean isSnapshotsEnabled() {
-        return this.snapshotsEnabled;
-    }
-
-    public void setSnapshotsEnabled(boolean snapshotsEnabled) {
         this.snapshotsEnabled = snapshotsEnabled;
     }
 
@@ -65,13 +49,17 @@ public class Repository {
         if (this == obj) {
             return true;
         }
+
         if (obj == null) {
             return false;
         }
+
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         Repository other = (Repository) obj;
+
         if (this.name == null) {
             if (other.name != null) {
                 return false;
@@ -80,18 +68,16 @@ public class Repository {
         else if (!this.name.equals(other.name)) {
             return false;
         }
+
         if (this.snapshotsEnabled != other.snapshotsEnabled) {
             return false;
         }
-        if (this.url == null) {
-            if (other.url != null) {
-                return false;
-            }
-        }
-        else if (!this.url.equals(other.url)) {
-            return false;
-        }
-        return true;
-    }
 
+        if (this.url == null) {
+            return other.url == null;
+        }
+        else {
+            return this.url.equals(other.url);
+        }
+    }
 }

@@ -420,7 +420,8 @@ public class ProjectGenerator {
                 request.getBoms().put("spring-boot", metadata.createSpringBootBom(
                         request.getBootVersion(), "spring-boot.version"));
             }
-            if(request.getParent() != null){
+
+            if (request.getParent() != null){
                 model.put("mavenParentGroupId", request.getParent().getGroupId());
                 model.put("mavenParentArtifactId", request.getParent().getArtifactId());
                 model.put("mavenParentVersion", request.getParent().getVersion());

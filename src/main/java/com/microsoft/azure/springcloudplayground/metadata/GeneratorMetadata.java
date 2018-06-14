@@ -7,6 +7,7 @@ import com.microsoft.azure.springcloudplayground.service.ServiceModuleCapability
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionParser;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
+import lombok.Getter;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,40 +16,54 @@ import java.util.stream.Collectors;
 
 public class GeneratorMetadata {
 
+    @Getter
     private final GeneratorConfiguration configuration;
 
+    @Getter
     private final DependenciesCapability dependencies = new DependenciesCapability();
 
+    @Getter
     private final ServiceModuleCapability services = new ServiceModuleCapability();
 
+    @Getter
     private final TypeCapability types = new TypeCapability();
 
+    @Getter
     private final SingleSelectCapability bootVersions = new SingleSelectCapability(
             "bootVersion", "Spring Boot Version", "spring boot version");
 
+    @Getter
     private final SingleSelectCapability packagings = new SingleSelectCapability(
             "packaging", "Packaging", "project packaging");
 
+    @Getter
     private final SingleSelectCapability javaVersions = new SingleSelectCapability(
             "javaVersion", "Java Version", "language level");
 
+    @Getter
     private final SingleSelectCapability languages = new SingleSelectCapability(
             "language", "Language", "programming language");
 
+    @Getter
     private final TextCapability name = new TextCapability("name", "Name",
             "project name (infer application name)");
 
+    @Getter
     private final TextCapability description = new TextCapability("description",
             "Description", "project description");
 
+    @Getter
     private final TextCapability groupId = new TextCapability("groupId", "Group",
             "project coordinates");
 
+    @Getter
     private final TextCapability artifactId = new ArtifactIdCapability(this.name);
 
+    @Getter
     private final TextCapability version = new TextCapability("version", "Version",
             "project version");
 
+    @Getter
     private final TextCapability packageName = new PackageCapability(this.groupId,
             this.artifactId);
 
@@ -58,62 +73,6 @@ public class GeneratorMetadata {
 
     protected GeneratorMetadata(GeneratorConfiguration configuration) {
         this.configuration = configuration;
-    }
-
-    public GeneratorConfiguration getConfiguration() {
-        return this.configuration;
-    }
-
-    public DependenciesCapability getDependencies() {
-        return this.dependencies;
-    }
-
-    public ServiceModuleCapability getServices() {
-        return this.services;
-    }
-
-    public TypeCapability getTypes() {
-        return this.types;
-    }
-
-    public SingleSelectCapability getBootVersions() {
-        return this.bootVersions;
-    }
-
-    public SingleSelectCapability getPackagings() {
-        return this.packagings;
-    }
-
-    public SingleSelectCapability getJavaVersions() {
-        return this.javaVersions;
-    }
-
-    public SingleSelectCapability getLanguages() {
-        return this.languages;
-    }
-
-    public TextCapability getName() {
-        return this.name;
-    }
-
-    public TextCapability getDescription() {
-        return this.description;
-    }
-
-    public TextCapability getGroupId() {
-        return this.groupId;
-    }
-
-    public TextCapability getArtifactId() {
-        return this.artifactId;
-    }
-
-    public TextCapability getVersion() {
-        return this.version;
-    }
-
-    public TextCapability getPackageName() {
-        return this.packageName;
     }
 
     /**
@@ -145,9 +104,9 @@ public class GeneratorMetadata {
         this.dependencies.validate();
         this.services.validate();
 
-        Map<String, Repository> repositories = this.configuration.getEnv()
-                .getRepositories();
+        Map<String, Repository> repositories = this.configuration.getEnv().getRepositories();
         Map<String, BillOfMaterials> boms = this.configuration.getEnv().getBoms();
+
         for (Dependency dependency : this.dependencies.getAll()) {
             if (dependency.getBom() != null && !boms.containsKey(dependency.getBom())) {
                 throw new InvalidGeneratorMetadataException(
@@ -155,13 +114,13 @@ public class GeneratorMetadata {
                                 + dependency.getBom() + ", available boms " + boms);
             }
 
-            if (dependency.getRepository() != null
-                    && !repositories.containsKey(dependency.getRepository())) {
+            if (dependency.getRepository() != null && !repositories.containsKey(dependency.getRepository())) {
                 throw new InvalidGeneratorMetadataException("Dependency " + dependency
                         + "defines an invalid repository id " + dependency.getRepository()
                         + ", available repositories " + repositories);
             }
         }
+
         for (BillOfMaterials bom : boms.values()) {
             for (String r : bom.getRepositories()) {
                 if (!repositories.containsKey(r)) {
@@ -170,6 +129,7 @@ public class GeneratorMetadata {
                                     + ", available repositories " + repositories);
                 }
             }
+
             for (String b : bom.getAdditionalBoms()) {
                 if (!boms.containsKey(b)) {
                     throw new InvalidGeneratorMetadataException(
@@ -177,6 +137,7 @@ public class GeneratorMetadata {
                                     + ", available boms " + boms);
                 }
             }
+
             for (BillOfMaterials.Mapping m : bom.getMappings()) {
                 for (String r : m.getRepositories()) {
                     if (!repositories.containsKey(r)) {
@@ -186,6 +147,7 @@ public class GeneratorMetadata {
                     }
 
                 }
+
                 for (String b : m.getAdditionalBoms()) {
                     if (!boms.containsKey(b)) {
                         throw new InvalidGeneratorMetadataException(m + " of " + bom
@@ -204,12 +166,13 @@ public class GeneratorMetadata {
     public void updateSpringBootVersions(List<DefaultMetadataElement> versionsMetadata) {
         this.bootVersions.getContent().clear();
         this.bootVersions.getContent().addAll(versionsMetadata);
-        List<Version> bootVersions = this.bootVersions.getContent().stream()
-                .map((it) -> Version.parse(it.getId())).collect(Collectors.toList());
+
+        List<Version> bootVersions = this.bootVersions.getContent().stream().map(
+                (it) ->Version.parse(it.getId())).collect(Collectors.toList());
         VersionParser parser = new VersionParser(bootVersions);
+
         this.dependencies.updateVersionRange(parser);
-        this.configuration.getEnv().getBoms().values()
-                .forEach((it) -> it.updateVersionRange(parser));
+        this.configuration.getEnv().getBoms().values().forEach((it) -> it.updateVersionRange(parser));
     }
 
     /**
@@ -231,12 +194,12 @@ public class GeneratorMetadata {
      * @param versionProperty the property that contains the version
      * @return a new {@link BillOfMaterials} instance
      */
-    public BillOfMaterials createSpringBootBom(String bootVersion,
-                                               String versionProperty) {
+    public BillOfMaterials createSpringBootBom(String bootVersion, String versionProperty) {
         BillOfMaterials bom = BillOfMaterials.create("org.springframework.boot",
                 "spring-boot-dependencies", bootVersion);
         bom.setVersionProperty(new VersionProperty(versionProperty));
         bom.setOrder(100);
+
         return bom;
     }
 
@@ -246,6 +209,7 @@ public class GeneratorMetadata {
      */
     public Map<String, Object> defaults() {
         Map<String, Object> defaults = new LinkedHashMap<>();
+
         defaults.put("type", defaultId(this.types));
         defaults.put("bootVersion", defaultId(this.bootVersions));
         defaults.put("packaging", defaultId(this.packagings));
@@ -257,11 +221,11 @@ public class GeneratorMetadata {
         defaults.put("name", this.name.getContent());
         defaults.put("description", this.description.getContent());
         defaults.put("packageName", this.packageName.getContent());
+
         return defaults;
     }
 
-    private static String defaultId(
-            Defaultable<? extends DefaultMetadataElement> element) {
+    private static String defaultId(Defaultable<? extends DefaultMetadataElement> element) {
         DefaultMetadataElement defaultValue = element.getDefault();
         return defaultValue != null ? defaultValue.getId() : null;
     }
@@ -280,7 +244,6 @@ public class GeneratorMetadata {
             String value = super.getContent();
             return value == null ? this.nameCapability.getContent() : value;
         }
-
     }
 
     private static class PackageCapability extends TextCapability {
@@ -298,17 +261,16 @@ public class GeneratorMetadata {
         @Override
         public String getContent() {
             String value = super.getContent();
+
             if (value != null) {
                 return value;
             }
-            else if (this.groupId.getContent() != null
-                    && this.artifactId.getContent() != null) {
+            else if (this.groupId.getContent() != null && this.artifactId.getContent() != null) {
                 return GeneratorConfiguration.cleanPackageName(
                         this.groupId.getContent() + "." + this.artifactId.getContent());
             }
+
             return null;
         }
-
     }
-
 }
