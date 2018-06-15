@@ -2,20 +2,18 @@ package com.microsoft.azure.springcloudplayground.service;
 
 import com.microsoft.azure.springcloudplayground.metadata.Describable;
 import com.microsoft.azure.springcloudplayground.metadata.MetadataElement;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
 public class ServiceModule extends MetadataElement implements Describable {
+
+    @Setter
     private String description;
 
     @Override
     public String getDescription() {
         return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ServiceModule() {
     }
 
     public ServiceModule(ServiceModule module) {
@@ -36,9 +34,11 @@ public class ServiceModule extends MetadataElement implements Describable {
 
     public static ServiceModule withId(String id, String name, String description) {
         ServiceModule module = new ServiceModule();
+
         module.setId(id);
         module.setName(name);
         module.setDescription(description);
+
         return module;
     }
 }

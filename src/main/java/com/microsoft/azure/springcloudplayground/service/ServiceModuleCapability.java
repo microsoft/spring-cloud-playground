@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 
 public class ServiceModuleCapability extends ServiceCapability<List<ServiceModuleGroup>> {
+
     final List<ServiceModuleGroup> content = new ArrayList<>();
 
     @JsonIgnore
@@ -44,29 +45,27 @@ public class ServiceModuleCapability extends ServiceCapability<List<ServiceModul
 
     @Override
     public void merge(List<ServiceModuleGroup> otherContent) {
-        otherContent.forEach((group) -> {
-            if (this.content.stream().noneMatch((it) -> group.getName() != null
-                    && group.getName().equals(it.getName()))) {
-                this.content.add(group);
-            }
-        });
+        otherContent.stream().filter(g -> content.stream()
+                .noneMatch(c -> g.getName() != null && g.getName().equals(c.getName())))
+                .forEach(this.content::add);
+
         index();
     }
 
     private void index() {
         this.indexedServiceModules.clear();
-        this.content.forEach((group) -> group.content.forEach((serviceModule) -> {
-            indexServiceModules(serviceModule.getId(), serviceModule);
-        }));
+        this.content.forEach(group -> group.content.forEach(module -> indexServiceModules(module.getId(), module)));
     }
 
     private void indexServiceModules(String id, ServiceModule serviceModule) {
         ServiceModule existing = this.indexedServiceModules.get(id);
+
         if (existing != null) {
             throw new IllegalArgumentException(
                     "Could not register " + serviceModule + ", another serviceModule "
                             + "has also the '" + id + "' id " + existing);
         }
+
         this.indexedServiceModules.put(id, serviceModule);
     }
 }

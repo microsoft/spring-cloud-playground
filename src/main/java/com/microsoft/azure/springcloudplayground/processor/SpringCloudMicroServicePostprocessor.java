@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class SpringCloudMicroservicePostprocessor extends AbstractProjectRequestPostProcessor implements ProjectRequestPostProcessor {
+public class SpringCloudMicroServicePostprocessor extends AbstractProjectRequestPostProcessor implements ProjectRequestPostProcessor {
     private static final Map<String, List<String>> serviceToDependencies = new HashMap<>();
 
     static {
@@ -25,8 +25,7 @@ public class SpringCloudMicroservicePostprocessor extends AbstractProjectRequest
     }
 
     @Override
-    public void postProcessBeforeResolution(ProjectRequest request,
-                                            GeneratorMetadata metadata) {
+    public void postProcessBeforeResolution(ProjectRequest request, GeneratorMetadata metadata) {
         // Parent pom need these dependencies to determine whether include bom
         if(request.getParent() == null) {
             request.setDependencies(request.getServices().stream().map(serviceToDependencies::get).flatMap(List::stream).collect(Collectors.toList()));
@@ -34,8 +33,7 @@ public class SpringCloudMicroservicePostprocessor extends AbstractProjectRequest
     }
 
     @Override
-    public void postProcessAfterResolution(ProjectRequest request,
-                                           GeneratorMetadata metadata) {
+    public void postProcessAfterResolution(ProjectRequest request, GeneratorMetadata metadata) {
 
         for (String service : request.getServices()) {
             if (!serviceToDependencies.containsKey(service)) {
@@ -43,14 +41,14 @@ public class SpringCloudMicroservicePostprocessor extends AbstractProjectRequest
             }
 
             ProjectRequest subModule = new ProjectRequest(request);
+
             subModule.setName(service);
             subModule.setArtifactId(request.getArtifactId() + "." + service);
             subModule.setDependencies(serviceToDependencies.get(service));
             subModule.setBaseDir(service);
             subModule.resolve(metadata);
+
             request.addModule(subModule);
         }
-
-
     }
 }

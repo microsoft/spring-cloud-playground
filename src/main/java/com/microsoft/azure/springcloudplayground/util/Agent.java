@@ -1,5 +1,7 @@
 package com.microsoft.azure.springcloudplayground.util;
 
+import lombok.Getter;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,24 +10,18 @@ public class Agent {
     /**
      * The {@link AgentId}.
      */
+    @Getter
     private final AgentId id;
 
     /**
      * The version of the agent, if any.
      */
+    @Getter
     private final String version;
 
     public Agent(AgentId id, String version) {
         this.id = id;
         this.version = version;
-    }
-
-    public AgentId getId() {
-        return this.id;
-    }
-
-    public String getVersion() {
-        return this.version;
     }
 
     /**
@@ -92,23 +88,16 @@ public class Agent {
          */
         BROWSER("browser", "Browser");
 
+        @Getter
         final String id;
 
+        @Getter
         final String name;
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getName() {
-            return this.name;
-        }
 
         AgentId(String id, String name) {
             this.id = id;
             this.name = name;
         }
-
     }
 
     private static class UserAgentHandler {
@@ -123,6 +112,7 @@ public class Agent {
 
         public static Agent parse(String userAgent) {
             Matcher matcher = TOOL_REGEX.matcher(userAgent);
+
             if (matcher.matches()) {
                 String name = matcher.group(1);
                 for (AgentId id : AgentId.values()) {
@@ -132,10 +122,12 @@ public class Agent {
                     }
                 }
             }
+
             matcher = STS_REGEX.matcher(userAgent);
             if (matcher.matches()) {
                 return new Agent(AgentId.STS, matcher.group(1));
             }
+
             matcher = NETBEANS_REGEX.matcher(userAgent);
             if (matcher.matches()) {
                 return new Agent(AgentId.NETBEANS, matcher.group(1));
@@ -144,12 +136,12 @@ public class Agent {
             if (userAgent.equals(AgentId.INTELLIJ_IDEA.name)) {
                 return new Agent(AgentId.INTELLIJ_IDEA, null);
             }
+
             if (userAgent.contains("Mozilla/5.0")) { // Super heuristics
                 return new Agent(AgentId.BROWSER, null);
             }
+
             return null;
         }
-
     }
-
 }

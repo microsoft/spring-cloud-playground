@@ -31,6 +31,7 @@ public class AbstractProjectRequestPostProcessor implements ProjectRequestPostPr
                 return false;
             }
         }
+
         return true;
     }
 
@@ -43,8 +44,7 @@ public class AbstractProjectRequestPostProcessor implements ProjectRequestPostPr
      * define such dependency
      */
     protected Dependency getDependency(ProjectRequest request, String id) {
-        return request.getResolvedDependencies().stream()
-                .filter(d -> id.equals(d.getId())).findFirst().orElse(null);
+        return request.getResolvedDependencies().stream().filter(d -> id.equals(d.getId())).findFirst().orElse(null);
     }
 
     /**
@@ -55,10 +55,8 @@ public class AbstractProjectRequestPostProcessor implements ProjectRequestPostPr
      * @return {@code true} if the requested version is equal or higher than the specified
      * {@code version}
      */
-    protected boolean isSpringBootVersionAtLeastAfter(ProjectRequest request,
-                                                      Version version) {
+    protected boolean isSpringBootVersionAtLeastAfter(ProjectRequest request, Version version) {
         Version requestVersion = Version.safeParse(request.getBootVersion());
         return version.compareTo(requestVersion) <= 0;
     }
-
 }
