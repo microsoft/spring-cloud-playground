@@ -36,6 +36,7 @@
 		<azure.authentication.server>${your-azure-authentication-server}</azure.authentication.server>
 		<azure.resource.group>${your-azure-resource-group}</azure.resource.group>
 		<azure.cr.server>${your-azure-acr-server}</azure.cr.server>
+		<azure.applicationinsights.version>2.0.1</azure.applicationinsights.version>
 	</properties>
 
 	<dependencies>
@@ -98,6 +99,13 @@
             <artifactId>ant</artifactId>
             <version>1.10.2</version>
         </dependency>
+
+		<!-- Application Insights -->
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-core</artifactId>
+			<version>${azure.applicationinsights.version}</version>
+		</dependency>
     </dependencies>
 
 	<dependencyManagement>
@@ -113,6 +121,16 @@
 	</dependencyManagement>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>ApplicationInsights.xml</include>
+					<include>META-INF/project.properties</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
