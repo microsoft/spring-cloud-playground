@@ -1,15 +1,20 @@
 package com.microsoft.azure.springcloudplayground.util;
 
+import lombok.Getter;
 import org.springframework.util.Assert;
 
 public class VersionRange {
 
+    @Getter
     private final Version lowerVersion;
 
+    @Getter
     private final boolean lowerInclusive;
 
+    @Getter
     private final Version higherVersion;
 
+    @Getter
     private final boolean higherInclusive;
 
     // For Jackson
@@ -57,32 +62,19 @@ public class VersionRange {
         return true;
     }
 
-    public Version getLowerVersion() {
-        return this.lowerVersion;
-    }
-
-    public boolean isLowerInclusive() {
-        return this.lowerInclusive;
-    }
-
-    public Version getHigherVersion() {
-        return this.higherVersion;
-    }
-
-    public boolean isHigherInclusive() {
-        return this.higherInclusive;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+
         if (this.lowerVersion != null) {
             sb.append(this.lowerInclusive ? ">=" : ">").append(this.lowerVersion);
         }
+
         if (this.higherVersion != null) {
             sb.append(" and ").append(this.higherInclusive ? "<=" : "<")
                     .append(this.higherVersion);
         }
+
         return sb.toString();
     }
 
@@ -90,12 +82,12 @@ public class VersionRange {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+
         result = prime * result + (this.higherInclusive ? 1231 : 1237);
-        result = prime * result
-                + ((this.higherVersion == null) ? 0 : this.higherVersion.hashCode());
+        result = prime * result + ((this.higherVersion == null) ? 0 : this.higherVersion.hashCode());
         result = prime * result + (this.lowerInclusive ? 1231 : 1237);
-        result = prime * result
-                + ((this.lowerVersion == null) ? 0 : this.lowerVersion.hashCode());
+        result = prime * result + ((this.lowerVersion == null) ? 0 : this.lowerVersion.hashCode());
+
         return result;
     }
 
@@ -104,16 +96,21 @@ public class VersionRange {
         if (this == obj) {
             return true;
         }
+
         if (obj == null) {
             return false;
         }
+
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         VersionRange other = (VersionRange) obj;
+
         if (this.higherInclusive != other.higherInclusive) {
             return false;
         }
+
         if (this.higherVersion == null) {
             if (other.higherVersion != null) {
                 return false;
@@ -122,18 +119,16 @@ public class VersionRange {
         else if (!this.higherVersion.equals(other.higherVersion)) {
             return false;
         }
+
         if (this.lowerInclusive != other.lowerInclusive) {
             return false;
         }
-        if (this.lowerVersion == null) {
-            if (other.lowerVersion != null) {
-                return false;
-            }
-        }
-        else if (!this.lowerVersion.equals(other.lowerVersion)) {
-            return false;
-        }
-        return true;
-    }
 
+        if (this.lowerVersion == null) {
+            return other.lowerVersion == null;
+        }
+        else {
+            return this.lowerVersion.equals(other.lowerVersion);
+        }
+    }
 }

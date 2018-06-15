@@ -16,12 +16,10 @@ class SpringBoot2RequestPostProcessor extends AbstractProjectRequestPostProcesso
     private static final List<String> VALID_VERSIONS = Arrays.asList("1.8", "9", "10");
 
     @Override
-    public void postProcessAfterResolution(ProjectRequest request,
-                                           GeneratorMetadata metadata) {
+    public void postProcessAfterResolution(ProjectRequest request, GeneratorMetadata metadata) {
         if (!VALID_VERSIONS.contains(request.getJavaVersion())
                 && isSpringBootVersionAtLeastAfter(request, VERSION_2_0_0_M1)) {
             request.setJavaVersion("1.8");
         }
     }
-
 }

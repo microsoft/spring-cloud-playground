@@ -14,14 +14,12 @@ public class VersionParser {
     /**
      * The default {@link VersionParser}.
      */
-    public static final VersionParser DEFAULT = new VersionParser(
-            Collections.emptyList());
+    public static final VersionParser DEFAULT = new VersionParser(Collections.emptyList());
 
     private static final Pattern VERSION_REGEX = Pattern
             .compile("^(\\d+)\\.(\\d+|x)\\.(\\d+|x)(?:\\.([^0-9]+)(\\d+)?)?$");
 
-    private static final Pattern RANGE_REGEX = Pattern
-            .compile("(\\(|\\[)(.*),(.*)(\\)|\\])");
+    private static final Pattern RANGE_REGEX = Pattern.compile("(\\(|\\[)(.*),(.*)(\\)|\\])");
 
     private final List<Version> latestVersions;
 
@@ -40,16 +38,19 @@ public class VersionParser {
     public Version parse(String text) {
         Assert.notNull(text, "Text must not be null");
         Matcher matcher = VERSION_REGEX.matcher(text.trim());
+
         if (!matcher.matches()) {
             throw new InvalidVersionException(
                     "Could not determine version based on '" + text + "': version format "
                             + "is Minor.Major.Patch.Qualifier " + "(e.g. 1.0.5.RELEASE)");
         }
+
         Integer major = Integer.valueOf(matcher.group(1));
         String minor = matcher.group(2);
         String patch = matcher.group(3);
         Version.Qualifier qualifier = null;
         String qualifierId = matcher.group(4);
+
         if (StringUtils.hasText(qualifierId)) {
             qualifier = new Version.Qualifier(qualifierId);
             String o = matcher.group(5);
@@ -57,16 +58,18 @@ public class VersionParser {
                 qualifier.setVersion(Integer.valueOf(o));
             }
         }
+
         if ("x".equals(minor) || "x".equals(patch)) {
             Integer minorInt = "x".equals(minor) ? null : Integer.parseInt(minor);
             Version latest = findLatestVersion(major, minorInt, qualifier);
+
             if (latest == null) {
                 return new Version(major,
                         ("x".equals(minor) ? 999 : Integer.parseInt(minor)),
                         ("x".equals(patch) ? 999 : Integer.parseInt(patch)), qualifier);
             }
-            return new Version(major, latest.getMinor(), latest.getPatch(),
-                    latest.getQualifier());
+
+            return new Version(major, latest.getMinor(), latest.getPatch(), latest.getQualifier());
         }
         else {
             return new Version(major, Integer.parseInt(minor), Integer.parseInt(patch),
@@ -101,34 +104,38 @@ public class VersionParser {
     public VersionRange parseRange(String text) {
         Assert.notNull(text, "Text must not be null");
         Matcher matcher = RANGE_REGEX.matcher(text.trim());
+
         if (!matcher.matches()) {
             // Try to read it as simple string
             Version version = parse(text);
             return new VersionRange(version, true, null, true);
         }
+
         boolean lowerInclusive = matcher.group(1).equals("[");
         Version lowerVersion = parse(matcher.group(2));
         Version higherVersion = parse(matcher.group(3));
         boolean higherInclusive = matcher.group(4).equals("]");
-        return new VersionRange(lowerVersion, lowerInclusive, higherVersion,
-                higherInclusive);
+
+        return new VersionRange(lowerVersion, lowerInclusive, higherVersion, higherInclusive);
     }
 
-    private Version findLatestVersion(Integer major, Integer minor,
-                                      Version.Qualifier qualifier) {
+    private Version findLatestVersion(Integer major, Integer minor, Version.Qualifier qualifier) {
         List<Version> matches = this.latestVersions.stream().filter((it) -> {
             if (major != null && !major.equals(it.getMajor())) {
                 return false;
             }
+
             if (minor != null && !minor.equals(it.getMinor())) {
                 return false;
             }
+
             if (qualifier != null && !qualifier.equals(it.getQualifier())) {
                 return false;
             }
+
             return true;
         }).collect(Collectors.toList());
+
         return (matches.size() == 1 ? matches.get(0) : null);
     }
-
 }

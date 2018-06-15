@@ -4,8 +4,9 @@ import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.Compiler;
 import com.samskivert.mustache.Mustache.TemplateLoader;
 import com.samskivert.mustache.Template;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -16,10 +17,11 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+@Slf4j
 public class TemplateRenderer {
 
-    private static final Logger log = LoggerFactory.getLogger(TemplateRenderer.class);
-
+    @Getter
+    @Setter
     private boolean cache = true;
 
     private final Compiler mustache;
@@ -32,14 +34,6 @@ public class TemplateRenderer {
 
     public TemplateRenderer(Compiler mustache) {
         this.mustache = mustache;
-    }
-
-    public boolean isCache() {
-        return this.cache;
-    }
-
-    public void setCache(boolean cache) {
-        this.cache = cache;
     }
 
     public String process(String name, Map<String, ?> model) {
@@ -79,8 +73,8 @@ public class TemplateRenderer {
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         String prefix = "classpath:/templates/";
         Charset charset = Charset.forName("UTF-8");
-        return (name) -> new InputStreamReader(
-                resourceLoader.getResource(prefix + name).getInputStream(), charset);
+
+        return name -> new InputStreamReader(resourceLoader.getResource(prefix + name).getInputStream(), charset);
     }
 
 }

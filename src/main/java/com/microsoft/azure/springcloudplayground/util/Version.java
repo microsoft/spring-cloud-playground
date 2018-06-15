@@ -1,5 +1,7 @@
 package com.microsoft.azure.springcloudplayground.util;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -16,12 +18,16 @@ public final class Version implements Serializable, Comparable<Version> {
     private static final VersionParser parser = new VersionParser(
             Collections.emptyList());
 
+    @Getter
     private final Integer major;
 
+    @Getter
     private final Integer minor;
 
+    @Getter
     private final Integer patch;
 
+    @Getter
     private final Qualifier qualifier;
 
     // For Jackson
@@ -35,22 +41,6 @@ public final class Version implements Serializable, Comparable<Version> {
         this.minor = minor;
         this.patch = patch;
         this.qualifier = qualifier;
-    }
-
-    public Integer getMajor() {
-        return this.major;
-    }
-
-    public Integer getMinor() {
-        return this.minor;
-    }
-
-    public Integer getPatch() {
-        return this.patch;
-    }
-
-    public Qualifier getQualifier() {
-        return this.qualifier;
     }
 
     @Override
@@ -95,18 +85,25 @@ public final class Version implements Serializable, Comparable<Version> {
         if (other == null) {
             return 1;
         }
+
         int majorDiff = safeCompare(this.major, other.major);
+
         if (majorDiff != 0) {
             return majorDiff;
         }
+
         int minorDiff = safeCompare(this.minor, other.minor);
+
         if (minorDiff != 0) {
             return minorDiff;
         }
+
         int patch = safeCompare(this.patch, other.patch);
+
         if (patch != 0) {
             return patch;
         }
+
         return qualifierComparator.compare(this.qualifier, other.qualifier);
     }
 
@@ -120,11 +117,12 @@ public final class Version implements Serializable, Comparable<Version> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+
         result = prime * result + ((this.major == null) ? 0 : this.major.hashCode());
         result = prime * result + ((this.minor == null) ? 0 : this.minor.hashCode());
         result = prime * result + ((this.patch == null) ? 0 : this.patch.hashCode());
-        result = prime * result
-                + ((this.qualifier == null) ? 0 : this.qualifier.hashCode());
+        result = prime * result + ((this.qualifier == null) ? 0 : this.qualifier.hashCode());
+
         return result;
     }
 
@@ -133,13 +131,17 @@ public final class Version implements Serializable, Comparable<Version> {
         if (this == obj) {
             return true;
         }
+
         if (obj == null) {
             return false;
         }
+
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         Version other = (Version) obj;
+
         if (this.major == null) {
             if (other.major != null) {
                 return false;
@@ -148,6 +150,7 @@ public final class Version implements Serializable, Comparable<Version> {
         else if (!this.major.equals(other.major)) {
             return false;
         }
+
         if (this.minor == null) {
             if (other.minor != null) {
                 return false;
@@ -156,6 +159,7 @@ public final class Version implements Serializable, Comparable<Version> {
         else if (!this.minor.equals(other.minor)) {
             return false;
         }
+
         if (this.patch == null) {
             if (other.patch != null) {
                 return false;
@@ -164,6 +168,7 @@ public final class Version implements Serializable, Comparable<Version> {
         else if (!this.patch.equals(other.patch)) {
             return false;
         }
+
         if (this.qualifier == null) {
             if (other.qualifier != null) {
                 return false;
@@ -172,6 +177,7 @@ public final class Version implements Serializable, Comparable<Version> {
         else if (!this.qualifier.equals(other.qualifier)) {
             return false;
         }
+
         return true;
     }
 
@@ -184,25 +190,13 @@ public final class Version implements Serializable, Comparable<Version> {
             this.qualifier = qualifier;
         }
 
+        @Getter
+        @Setter
         private String qualifier;
 
+        @Getter
+        @Setter
         private Integer version;
-
-        public String getQualifier() {
-            return this.qualifier;
-        }
-
-        public void setQualifier(String qualifier) {
-            this.qualifier = qualifier;
-        }
-
-        public Integer getVersion() {
-            return this.version;
-        }
-
-        public void setVersion(Integer version) {
-            this.version = version;
-        }
 
         @Override
         public String toString() {
@@ -215,10 +209,9 @@ public final class Version implements Serializable, Comparable<Version> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((this.qualifier == null) ? 0 : this.qualifier.hashCode());
-            result = prime * result
-                    + ((this.version == null) ? 0 : this.version.hashCode());
+            result = prime * result + ((this.qualifier == null) ? 0 : this.qualifier.hashCode());
+            result = prime * result + ((this.version == null) ? 0 : this.version.hashCode());
+
             return result;
         }
 
@@ -227,13 +220,17 @@ public final class Version implements Serializable, Comparable<Version> {
             if (this == obj) {
                 return true;
             }
+
             if (obj == null) {
                 return false;
             }
+
             if (getClass() != obj.getClass()) {
                 return false;
             }
+
             Qualifier other = (Qualifier) obj;
+
             if (this.qualifier == null) {
                 if (other.qualifier != null) {
                     return false;
@@ -242,6 +239,7 @@ public final class Version implements Serializable, Comparable<Version> {
             else if (!this.qualifier.equals(other.qualifier)) {
                 return false;
             }
+
             if (this.version == null) {
                 if (other.version != null) {
                     return false;
@@ -250,9 +248,9 @@ public final class Version implements Serializable, Comparable<Version> {
             else if (!this.version.equals(other.version)) {
                 return false;
             }
+
             return true;
         }
-
     }
 
     private static class VersionQualifierComparator implements Comparator<Qualifier> {
@@ -262,8 +260,7 @@ public final class Version implements Serializable, Comparable<Version> {
         static final String MILESTONE = "M";
         static final String RC = "RC";
 
-        static final List<String> KNOWN_QUALIFIERS = Arrays.asList(MILESTONE, RC,
-                SNAPSHOT, RELEASE);
+        static final List<String> KNOWN_QUALIFIERS = Arrays.asList(MILESTONE, RC, SNAPSHOT, RELEASE);
 
         @Override
         public int compare(Qualifier o1, Qualifier o2) {
@@ -294,10 +291,7 @@ public final class Version implements Serializable, Comparable<Version> {
         }
 
         private static int getQualifierIndex(String qualifier) {
-            return StringUtils.hasText(qualifier) ? KNOWN_QUALIFIERS.indexOf(qualifier)
-                    : 0;
+            return StringUtils.hasText(qualifier) ? KNOWN_QUALIFIERS.indexOf(qualifier) : 0;
         }
     }
-
 }
-

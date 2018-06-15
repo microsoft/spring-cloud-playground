@@ -24,19 +24,17 @@ class SpringCloudStreamRequestPostProcessor extends AbstractProjectRequestPostPr
             Dependency.SCOPE_TEST);
 
     @Override
-    public void postProcessAfterResolution(ProjectRequest request,
-                                           GeneratorMetadata metadata) {
+    public void postProcessAfterResolution(ProjectRequest request, GeneratorMetadata metadata) {
         boolean hasSpringCloudStream = hasDependency(request, "cloud-stream");
-        boolean hasReactiveSpringCloudStream = hasDependency(request,
-                "reactive-cloud-stream");
+        boolean hasReactiveSpringCloudStream = hasDependency(request, "reactive-cloud-stream");
         boolean hasSpringCloudBus = hasDependency(request, "cloud-bus");
-        boolean hasSpringCloudTurbineStream = hasDependency(request,
-                "cloud-turbine-stream");
-        if (hasSpringCloudStream || hasReactiveSpringCloudStream || hasSpringCloudBus
-                || hasSpringCloudTurbineStream) {
+        boolean hasSpringCloudTurbineStream = hasDependency(request, "cloud-turbine-stream");
+
+        if (hasSpringCloudStream || hasReactiveSpringCloudStream || hasSpringCloudBus || hasSpringCloudTurbineStream) {
             if (hasDependencies(request, "amqp")) {
                 request.getResolvedDependencies().add(RABBIT_BINDER);
             }
+
             if (hasDependencies(request, "kafka")) {
                 request.getResolvedDependencies().add(KAFKA_BINDER);
             }
@@ -46,8 +44,8 @@ class SpringCloudStreamRequestPostProcessor extends AbstractProjectRequestPostPr
             if (hasDependencies(request, "kafka-streams")) {
                 request.getResolvedDependencies().add(KAFKA_STREAMS_BINDER);
             }
+
             request.getResolvedDependencies().add(SCS_TEST);
         }
     }
-
 }

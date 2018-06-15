@@ -24,6 +24,7 @@ public class VersionProperty implements Serializable, Comparable<VersionProperty
     public String toCamelCaseFormat() {
         String[] tokens = this.property.split("\\-|\\.");
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < tokens.length; i++) {
             String part = tokens[i];
             if (i > 0) {
@@ -31,6 +32,7 @@ public class VersionProperty implements Serializable, Comparable<VersionProperty
             }
             sb.append(part);
         }
+
         return sb.toString();
     }
 
@@ -45,11 +47,13 @@ public class VersionProperty implements Serializable, Comparable<VersionProperty
                 throw new IllegalArgumentException("Invalid property '" + property
                         + "', must not contain upper case");
             }
+
             if (!Character.isLetterOrDigit(c) && !SUPPORTED_CHARS.contains(c)) {
                 throw new IllegalArgumentException(
                         "Unsupported character '" + c + "' for '" + property + "'");
             }
         }
+
         return property;
     }
 
@@ -68,6 +72,7 @@ public class VersionProperty implements Serializable, Comparable<VersionProperty
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
@@ -81,5 +86,4 @@ public class VersionProperty implements Serializable, Comparable<VersionProperty
     public int hashCode() {
         return this.property.hashCode();
     }
-
 }
