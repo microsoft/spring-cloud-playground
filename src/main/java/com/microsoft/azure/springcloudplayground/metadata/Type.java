@@ -1,17 +1,25 @@
 package com.microsoft.azure.springcloudplayground.metadata;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Type extends DefaultMetadataElement implements Describable {
 
+    @Setter
     private String description;
 
+    @Getter
+    @Setter
     @Deprecated
     private String stsId;
 
+    @Getter
     private String action;
 
+    @Getter
     private final Map<String, String> tags = new LinkedHashMap<>();
 
     public void setAction(String action) {
@@ -26,25 +34,4 @@ public class Type extends DefaultMetadataElement implements Describable {
     public String getDescription() {
         return this.description;
     }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getStsId() {
-        return this.stsId;
-    }
-
-    public void setStsId(String stsId) {
-        this.stsId = stsId;
-    }
-
-    public String getAction() {
-        return this.action;
-    }
-
-    public Map<String, String> getTags() {
-        return this.tags;
-    }
-
 }

@@ -12,5 +12,4 @@ public class SimpleGeneratorMetadataProvider implements GeneratorMetadataProvide
     public GeneratorMetadata get() {
         return this.metadata;
     }
-
 }
