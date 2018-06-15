@@ -8,8 +8,7 @@ import com.microsoft.azure.springcloudplayground.service.ServiceCapabilityType;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class SingleSelectCapability
-        extends ServiceCapability<List<DefaultMetadataElement>>
+public class SingleSelectCapability extends ServiceCapability<List<DefaultMetadataElement>>
         implements Defaultable<DefaultMetadataElement> {
 
     private final List<DefaultMetadataElement> content = new CopyOnWriteArrayList<>();
@@ -33,8 +32,7 @@ public class SingleSelectCapability
      */
     @Override
     public DefaultMetadataElement getDefault() {
-        return this.content.stream().filter(DefaultMetadataElement::isDefault).findFirst()
-                .orElse(null);
+        return this.content.stream().filter(DefaultMetadataElement::isDefault).findFirst().orElse(null);
     }
 
     /**
@@ -43,17 +41,11 @@ public class SingleSelectCapability
      * @return the element or {@code null}
      */
     public DefaultMetadataElement get(String id) {
-        return this.content.stream().filter((it) -> id.equals(it.getId())).findFirst()
-                .orElse(null);
+        return this.content.stream().filter((it) -> id.equals(it.getId())).findFirst().orElse(null);
     }
 
     @Override
     public void merge(List<DefaultMetadataElement> otherContent) {
-        otherContent.forEach((it) -> {
-            if (get(it.getId()) == null) {
-                this.content.add(it);
-            }
-        });
+        otherContent.stream().filter(c -> get(c.getId()) == null).forEach(this.content::add);
     }
-
 }

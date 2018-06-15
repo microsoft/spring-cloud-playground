@@ -27,7 +27,8 @@ public class ModulePropertiesResolver {
 
     public static String getBootstrapTemplate(String module) {
         String templateFile = bootstrapPropTemplateMap.get(module);
-        if(StringUtils.isEmpty(templateFile)) {
+
+        if (StringUtils.isEmpty(templateFile)) {
             templateFile = "bootstrap-non-config-server.yml";
         }
 
@@ -36,7 +37,8 @@ public class ModulePropertiesResolver {
 
     public static String getSharedPropTemplate(String module) {
         String templateFile = sharedPropTemplateMap.get(module);
-        if(StringUtils.isEmpty(templateFile)) {
+
+        if (StringUtils.isEmpty(templateFile)) {
             templateFile = "common.yml";
         }
 
@@ -52,7 +54,7 @@ public class ModulePropertiesResolver {
     }
 
     public static boolean isInfraModule(String module) {
-        if(StringUtils.isEmpty(module)) {
+        if (StringUtils.isEmpty(module)) {
             return false;
         }
 
