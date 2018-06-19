@@ -137,6 +137,20 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Git Commit Id -->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>

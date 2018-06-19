@@ -137,7 +137,7 @@ public class MainController extends AbstractPlaygroundController {
         return "home";
     }
 
-    @RequestMapping("/starter.zip")
+    @RequestMapping("/microservice.zip")
     @ResponseBody
     public ResponseEntity<byte[]> springZip(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
             throws IOException {
@@ -174,7 +174,7 @@ public class MainController extends AbstractPlaygroundController {
         return upload(download, dir, generateFileName(request, "zip"), "application/zip");
     }
 
-    @RequestMapping(path = "/starter.tgz", produces = "application/x-compress")
+    @RequestMapping(path = "/microservice.tgz", produces = "application/x-compress")
     @ResponseBody
     public ResponseEntity<byte[]> springTgz(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
             throws IOException {
