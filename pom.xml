@@ -128,6 +128,10 @@
 				<includes>
 					<include>ApplicationInsights.xml</include>
 					<include>META-INF/project.properties</include>
+					<include>application.yml</include>
+					<include>project/**</include>
+					<include>static/**</include>
+					<include>templates/**</include>
 				</includes>
 			</resource>
 		</resources>
