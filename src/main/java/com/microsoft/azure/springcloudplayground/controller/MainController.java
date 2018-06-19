@@ -73,15 +73,15 @@ public class MainController extends AbstractPlaygroundController {
     }
 
     @GetMapping("/free-account")
-    public String freeAccount(Model model, HttpServletRequest request) {
-        this.triggerLoginEvent(FREE_ACCOUNT, request.getRemoteAddr());
+    public String freeAccount(Model model) {
+        this.triggerLoginEvent(FREE_ACCOUNT);
 
         return this.greeting(FREE_ACCOUNT, model);
     }
 
     @GetMapping("/login-account")
-    public String loginAccount(Model model, HttpServletRequest request) {
-        this.triggerLoginEvent(LOGIN_ACCOUNT, request.getRemoteAddr());
+    public String loginAccount(Model model) {
+        this.triggerLoginEvent(LOGIN_ACCOUNT);
 
         return this.greeting(LOGIN_ACCOUNT, model);
     }
@@ -101,38 +101,34 @@ public class MainController extends AbstractPlaygroundController {
         model.put("build.information", buildInfo);
     }
 
-    private void triggerGenerateEvent(@NonNull List<String> services, @NonNull String ipAddress) {
+    private void triggerGenerateEvent(@NonNull List<String> services) {
         final Map<String, String> properties = new HashMap<>();
 
         services.forEach(s -> properties.put(s, "selected"));
-        properties.put("accessIp", ipAddress);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
 
-    private void triggerAccessEvent(@NonNull String ipAddress) {
+    private void triggerAccessEvent() {
         final Map<String, String> properties = new HashMap<>();
-
-        properties.put("accessIp", ipAddress);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
     }
 
-    private void triggerLoginEvent(@NonNull String accountType, @NonNull String ipAddress) {
+    private void triggerLoginEvent(@NonNull String accountType) {
         final Map<String, String> properties = new HashMap<>();
 
         properties.put("accountType", accountType);
-        properties.put("accessIp", ipAddress);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
     }
 
     @RequestMapping(path = "/", produces = "text/html")
-    public String home(Map<String, Object> model, HttpServletRequest request) {
+    public String home(Map<String, Object> model) {
 
         this.addBuildInformation(model);
         this.renderHome(model);
-        this.triggerAccessEvent(request.getRemoteAddr());
+        this.triggerAccessEvent();
 
         return "home";
     }
@@ -146,7 +142,7 @@ public class MainController extends AbstractPlaygroundController {
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
         String wrapperScript = getWrapperScript(request);
 
-        this.triggerGenerateEvent(request.getServices(), httpRequest.getRemoteAddr());
+        this.triggerGenerateEvent(request.getServices());
         new File(dir, wrapperScript).setExecutable(true);
 
         Zip zip = new Zip();
@@ -183,7 +179,7 @@ public class MainController extends AbstractPlaygroundController {
         File download = this.projectGenerator.createDistributionFile(dir, ".tar.gz");
         String wrapperScript = getWrapperScript(request);
 
-        this.triggerGenerateEvent(request.getServices(), httpRequest.getRemoteAddr());
+        this.triggerGenerateEvent(request.getServices());
         new File(dir, wrapperScript).setExecutable(true);
 
         Tar zip = new Tar();
