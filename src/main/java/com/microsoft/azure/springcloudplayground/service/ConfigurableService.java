@@ -1,28 +1,21 @@
 package com.microsoft.azure.springcloudplayground.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class ConfigurableService extends ServiceModule {
+
+    @Getter
+    @Setter
     private String applicationName;
+
+    @Getter
+    @Setter
     private String port;
 
     public ConfigurableService(String applicationName, String port) {
         super("", applicationName, "");
         this.applicationName = applicationName;
-        this.port = port;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
         this.port = port;
     }
 

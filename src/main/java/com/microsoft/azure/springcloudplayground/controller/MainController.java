@@ -6,6 +6,7 @@ import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
+import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.samskivert.mustache.Mustache;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,14 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -33,6 +37,13 @@ import java.util.Map;
 public class MainController extends AbstractPlaygroundController {
 
     private final ProjectGenerator projectGenerator;
+    private final TelemetryProxy telemetryProxy;
+    private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
+    private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
+    private static final String TELEMETRY_EVENT_LOGIN = "SpringCloudPlaygroundLogin";
+    private static final String FREE_ACCOUNT = "FreeAccount";
+    private static final String LOGIN_ACCOUNT = "LoginAccount";
+    private static final String GREETING_HTML = "greeting";
 
     public MainController(GeneratorMetadataProvider metadataProvider,
                           TemplateRenderer templateRenderer, ResourceUrlProvider resourceUrlProvider,
@@ -40,6 +51,7 @@ public class MainController extends AbstractPlaygroundController {
                           DependencyMetadataProvider dependencyMetadataProvider) {
         super(metadataProvider, resourceUrlProvider);
         this.projectGenerator = projectGenerator;
+        this.telemetryProxy = new TelemetryProxy();
     }
 
     @ModelAttribute
@@ -57,7 +69,21 @@ public class MainController extends AbstractPlaygroundController {
     public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
         model.addAttribute("name", name);
 
-        return "greeting";
+        return GREETING_HTML;
+    }
+
+    @GetMapping("/free-account")
+    public String freeAccount(Model model) {
+        this.triggerLoginEvent(FREE_ACCOUNT);
+
+        return this.greeting(FREE_ACCOUNT, model);
+    }
+
+    @GetMapping("/login-account")
+    public String loginAccount(Model model) {
+        this.triggerLoginEvent(LOGIN_ACCOUNT);
+
+        return this.greeting(LOGIN_ACCOUNT, model);
     }
 
     @ModelAttribute("linkTo")
@@ -75,22 +101,48 @@ public class MainController extends AbstractPlaygroundController {
         model.put("build.information", buildInfo);
     }
 
+    private void triggerGenerateEvent(@NonNull List<String> services) {
+        final Map<String, String> properties = new HashMap<>();
+
+        services.forEach(s -> properties.put(s, "selected"));
+
+        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
+    }
+
+    private void triggerAccessEvent() {
+        final Map<String, String> properties = new HashMap<>();
+
+        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
+    }
+
+    private void triggerLoginEvent(@NonNull String accountType) {
+        final Map<String, String> properties = new HashMap<>();
+
+        properties.put("accountType", accountType);
+
+        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
+    }
+
     @RequestMapping(path = "/", produces = "text/html")
     public String home(Map<String, Object> model) {
+
         this.addBuildInformation(model);
         this.renderHome(model);
+        this.triggerAccessEvent();
 
         return "home";
     }
 
-    @RequestMapping("/starter.zip")
+    @RequestMapping("/microservice.zip")
     @ResponseBody
-    public ResponseEntity<byte[]> springZip(BasicProjectRequest basicRequest) throws IOException {
+    public ResponseEntity<byte[]> springZip(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
+            throws IOException {
         ProjectRequest request = (ProjectRequest) basicRequest;
         File dir = this.projectGenerator.generateProjectStructure(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
         String wrapperScript = getWrapperScript(request);
 
+        this.triggerGenerateEvent(request.getServices());
         new File(dir, wrapperScript).setExecutable(true);
 
         Zip zip = new Zip();
@@ -118,14 +170,16 @@ public class MainController extends AbstractPlaygroundController {
         return upload(download, dir, generateFileName(request, "zip"), "application/zip");
     }
 
-    @RequestMapping(path = "/starter.tgz", produces = "application/x-compress")
+    @RequestMapping(path = "/microservice.tgz", produces = "application/x-compress")
     @ResponseBody
-    public ResponseEntity<byte[]> springTgz(BasicProjectRequest basicRequest) throws IOException {
+    public ResponseEntity<byte[]> springTgz(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
+            throws IOException {
         ProjectRequest request = (ProjectRequest) basicRequest;
         File dir = this.projectGenerator.generateProjectStructure(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".tar.gz");
         String wrapperScript = getWrapperScript(request);
 
+        this.triggerGenerateEvent(request.getServices());
         new File(dir, wrapperScript).setExecutable(true);
 
         Tar zip = new Tar();

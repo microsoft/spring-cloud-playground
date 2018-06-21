@@ -2,6 +2,8 @@ package com.microsoft.azure.springcloudplayground.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -9,18 +11,24 @@ import org.springframework.util.StringUtils;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class ServiceCapability<T> implements Cloneable {
 
+    @Getter
     private final String id;
 
+    @Getter
     private final ServiceCapabilityType type;
 
     /**
      * A title of the capability, used as a header text or label.
      */
+    @Getter
+    @Setter
     private String title;
 
     /**
      * A description of the capability, used in help usage or UI tooltips.
      */
+    @Getter
+    @Setter
     private String description;
 
     protected ServiceCapability(String id, ServiceCapabilityType type, String title,
@@ -29,30 +37,6 @@ public abstract class ServiceCapability<T> implements Cloneable {
         this.type = type;
         this.title = title;
         this.description = description;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getId() {
-        return this.id;
-    }
-
-    public ServiceCapabilityType getType() {
-        return this.type;
     }
 
     /**
@@ -79,13 +63,15 @@ public abstract class ServiceCapability<T> implements Cloneable {
         Assert.notNull(other, "Other must not be null");
         Assert.isTrue(this.id.equals(other.id), "Ids must be equals");
         Assert.isTrue(this.type.equals(other.type), "Types must be equals");
+
         if (StringUtils.hasText(other.title)) {
             this.title = other.title;
         }
+
         if (StringUtils.hasText(other.description)) {
             this.description = other.description;
         }
+
         merge(other.getContent());
     }
-
 }

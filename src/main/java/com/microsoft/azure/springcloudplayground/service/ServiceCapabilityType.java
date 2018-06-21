@@ -1,5 +1,7 @@
 package com.microsoft.azure.springcloudplayground.service;
 
+import lombok.Getter;
+
 public enum ServiceCapabilityType {
 
     /**
@@ -23,14 +25,10 @@ public enum ServiceCapabilityType {
      */
     HIERARCHICAL_MULTI_SELECT("hierarchical-multi-select");
 
+    @Getter
     private final String name;
 
     ServiceCapabilityType(String name) {
         this.name = name;
     }
-
-    public String getName() {
-        return this.name;
-    }
-
 }

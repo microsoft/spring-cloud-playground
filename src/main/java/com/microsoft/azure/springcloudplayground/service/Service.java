@@ -1,5 +1,7 @@
 package com.microsoft.azure.springcloudplayground.service;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,12 +14,20 @@ public enum Service {
     GATEWAY("cloud-gateway", 9999, "/actuator/health", "demo/cloud-gateway"),
     AZURE_SERVICE_BUS("azure-service-bus", 8081, "/azure-service-bus/actuator/health", "demo/azure-service-bus");
 
+    @Getter
     private final String name;
+
+    @Getter
     private final int port;
+
+    @Getter
     private final String healthCheckPath;
+
+    @Getter
     private final String image;
 
-    private static Map<String, Service> nameToServices = Arrays.stream(Service.values()).collect(Collectors.toMap(Service::getName, Function.identity()));
+    private static Map<String, Service> nameToServices = Arrays.stream(Service.values()).collect(
+            Collectors.toMap(Service::getName, Function.identity()));
 
     Service(String name, int port, String healthCheckPath, String image) {
         this.name = name;
@@ -27,26 +37,10 @@ public enum Service {
     }
 
     public static Service toService(String name){
-        if(!nameToServices.containsKey(name)){
+        if (!nameToServices.containsKey(name)){
             throw new IllegalArgumentException(String.format("Invalid Service with name '%s'", name));
         }
 
         return nameToServices.get(name);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getHealthCheckPath() {
-        return healthCheckPath;
-    }
-
-    public String getImage() {
-        return image;
     }
 }
