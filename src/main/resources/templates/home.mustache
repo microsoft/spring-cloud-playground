@@ -19,106 +19,124 @@
     </script>
 </head>
 <body>
-<form id="form" action="/microservice.zip" method="get" role="form">
-    <nav class="navbar header-nav" role="navigation" aria-label="main navigation">
-        <div class="small-container container">
-            <div class="navbar-brand">
-                <a href="https://azure.microsoft.com/en-us/" class="navbar-item azure-logo">
-                    Microsoft Azure
-                </a>
+<nav class="navbar header-nav" role="navigation" aria-label="main navigation">
+    <div class="small-container container">
+        <div class="navbar-brand">
+            <a href="https://azure.microsoft.com/en-us/" class="navbar-item azure-logo">
+                Microsoft Azure
+            </a>
+        </div>
+        <div class="navbar-menu is-active">
+            <div class="navbar-start">
+                <h1 class="navbar-item nav-title" >
+                    Azure Spring Cloud Playground
+                </h1>
             </div>
-            <div class="navbar-menu is-active">
-                <div class="navbar-start">
-                    <h1 class="navbar-item nav-title" >
-                        Azure Spring Cloud Playground
-                    </h1>
-                </div>
-                <div class="navbar-end" id="free_link">
-                    <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" >Free account</a>
-                </div>
-                <div class="navbar-end" id="login_link">
-                    <a>Login</a>
-                </div>
-                <div class="navbar-end" id="user_dropdown">
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="truncate" id="logged_user">
+            <div class="navbar-end" id="free_link">
+                <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" >Free account</a>
+            </div>
+            <div class="navbar-end" id="login_link">
+                <a>Login</a>
+            </div>
+            <div class="navbar-end" id="user_dropdown">
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="truncate" id="logged_user">
+                    </a>
+                    <div class="navbar-dropdown" id="logout_link">
+                        <a class="navbar-item">
+                            Logout
                         </a>
-                        <div class="navbar-dropdown" id="logout_link">
-                            <a class="navbar-item">
-                               Logout
-                            </a>
-                        </div>
                     </div>
                 </div>
-                <div class="navbar-end" id="about_link">
-                    <a title="{{build.information}}">About</a>
+            </div>
+            <div class="navbar-end" id="about_link">
+                <a title="{{build.information}}">About</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<div id="get-started">
+    <div class="tabs small-container container">
+        <ul>
+            <li id="generate-tab" class="is-active"><a>Generate Project</a></li>
+            <li id="build-run-tab"><a>Build & Run</a></li>
+        </ul>
+    </div>
+    <div id="generate-animation"  class="small-container container">
+        <video class="start-video" width="800px" height="430px" autoplay muted loop controls>
+            <source src="{{#linkTo}}/img/generate-project.mp4{{/linkTo}}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="build-run-animation" class="hidden small-container container">
+        <video class="start-video" width="800px" height="430px" autoplay muted loop controls>
+            <source src="{{#linkTo}}/img/run.mp4{{/linkTo}}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</div>
+<form id="form" action="/microservice.zip" method="get" role="form">
+    <div class="small-container container">
+        <p class="help is-danger app-error"></p>
+        <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
+
+        <div class="row metadata-row">
+            <h4 class="title is-5">Generate your Spring Cloud application</h4>
+            <div class="columns">
+                <div class="column">
+                    <label for="groupId" class="label">{{groupId.title}}</label>
+                    <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
+                           name="groupId">
+                </div>
+                <div class="column">
+                    <label for="artifactId" class="label">{{artifactId.title}}</label>
+                    <input tabindex="5" id="artifactId" class="input" type="text"
+                           value="{{artifactId.content}}"
+                           name="artifactId">
+                </div>
+                <div class="column hidden">
+                    <label for="name" class="label">{{name.title}}</label>
+                    <input tabindex="6" id="name" class="input" type="text" value="{{name.content}}"
+                           name="name">
+                </div>
+                <div class="column hidden">
+                    <label for="description" class="label">{{description.title}}</label>
+                    <input tabindex="7" id="description" class="input" type="text"
+                           value="{{description.content}}" name="description">
+                </div>
+                <div class="column hidden">
+                    <label for="packageName" class="label">{{packageName.title}}</label>
+                    <input tabindex="8" id="packageName" class="input" type="text"
+                           value="{{packageName.content}}"
+                           name="packageName">
                 </div>
             </div>
         </div>
-    </nav>
-    <div class="small-container container">
-        <div class="small-container container">
-            <p class="help is-danger app-error"></p>
-            <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
-
-            <div class="row metadata-row">
-                <h4 class="title is-5">Generate your Spring Cloud application</h4>
-                <div class="columns">
-                    <div class="column">
-                        <label for="groupId" class="label">{{groupId.title}}</label>
-                        <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
-                               name="groupId">
+        <div class="row">
+            <div id="services" class="columns">
+                {{#services.content}}
+                <div class="column is-half medium-top-margin">
+                    <h3 class="title is-6">Select {{name}}</h3>
+                    {{#content}}
+                    <div class="small-top-margin">
+                        <label class="checkbox module-checkbox">
+                            <input tabindex="13" type="checkbox" name="services" value="{{id}}">
+                            {{name}}
+                            <p class="help-block">{{#description}}{{.}}{{/description}}</p>
+                        </label>
                     </div>
-                    <div class="column">
-                        <label for="artifactId" class="label">{{artifactId.title}}</label>
-                        <input tabindex="5" id="artifactId" class="input" type="text"
-                               value="{{artifactId.content}}"
-                               name="artifactId">
-                    </div>
-                    <div class="column hidden">
-                        <label for="name" class="label">{{name.title}}</label>
-                        <input tabindex="6" id="name" class="input" type="text" value="{{name.content}}"
-                               name="name">
-                    </div>
-                    <div class="column hidden">
-                        <label for="description" class="label">{{description.title}}</label>
-                        <input tabindex="7" id="description" class="input" type="text"
-                               value="{{description.content}}" name="description">
-                    </div>
-                    <div class="column hidden">
-                        <label for="packageName" class="label">{{packageName.title}}</label>
-                        <input tabindex="8" id="packageName" class="input" type="text"
-                               value="{{packageName.content}}"
-                               name="packageName">
-                    </div>
+                    {{/content}}
                 </div>
+               {{/services.content}}
             </div>
-            <div class="row">
-                <div id="services" class="columns">
-                    {{#services.content}}
-                    <div class="column is-half medium-top-margin">
-                        <h3 class="title is-6">Select {{name}}</h3>
-                        {{#content}}
-                        <div class="small-top-margin">
-                            <label class="checkbox module-checkbox">
-                                <input tabindex="13" type="checkbox" name="services" value="{{id}}">
-                                {{name}}
-                                <p class="help-block">{{#description}}{{.}}{{/description}}</p>
-                            </label>
-                        </div>
-                        {{/content}}
-                    </div>
-                   {{/services.content}}
-                </div>
-            </div>
-            <div class="large-vertical-margin">
-                <p class="has-text-centered">
-                    <button tabindex="12" id="generate-project" type="submit" class="button"
-                            role="button">
-                        Generate Project
-                    </button>
-                </p>
-            </div>
+        </div>
+        <div class="large-vertical-margin">
+            <p class="has-text-centered">
+                <button tabindex="12" id="generate-project" type="submit" class="button"
+                        role="button">
+                    Generate Project
+                </button>
+            </p>
         </div>
     </div>
 </form>
