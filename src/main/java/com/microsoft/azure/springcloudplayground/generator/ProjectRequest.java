@@ -6,16 +6,16 @@ import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
 public class ProjectRequest extends BasicProjectRequest {
 
     /**
@@ -44,6 +44,13 @@ public class ProjectRequest extends BasicProjectRequest {
     @Setter
     private List<String> facets = new ArrayList<>();
 
+    @Getter
+    private Map<String, Integer> servicesPorts;
+
+    @Getter
+    @Setter
+    private Integer port;
+
     private List<String> services = new ArrayList<>();
 
     private final Map<String, ProjectRequest> subModules = new HashMap<>();
@@ -52,11 +59,21 @@ public class ProjectRequest extends BasicProjectRequest {
     @Setter
     private String build;
 
+    public ProjectRequest() {
+        servicesPorts = new HashMap<>();
+    }
+
     public ProjectRequest(ProjectRequest parentProject) {
         super(parentProject);
         this.resolvedDependencies = parentProject.resolvedDependencies;
         this.facets = parentProject.facets;
         this.build = parentProject.build;
+    }
+
+    public Integer getServicePort(@NonNull String serviceName) {
+        Assert.isNull(this.getParent(), "should be parent module of Request");
+
+        return this.servicesPorts.get(serviceName);
     }
 
     public void removeDependency(String id) {
@@ -149,8 +166,7 @@ public class ProjectRequest extends BasicProjectRequest {
         }
 
         if (!StringUtils.hasText(getApplicationName())) {
-            setApplicationName(
-                    metadata.getConfiguration().generateApplicationName(getName()));
+            setApplicationName(metadata.getConfiguration().generateApplicationName(getName()));
         }
         setPackageName(metadata.getConfiguration().cleanPackageName(getPackageName(),
                 metadata.getPackageName().getContent()));
@@ -203,8 +219,7 @@ public class ProjectRequest extends BasicProjectRequest {
         if (!this.boms.containsKey(bomId)) {
             BillOfMaterials bom = metadata.getConfiguration().getEnv().getBoms()
                     .get(bomId).resolve(requestedVersion);
-            bom.getAdditionalBoms()
-                    .forEach((id) -> resolveBom(metadata, id, requestedVersion));
+            bom.getAdditionalBoms().forEach((id) -> resolveBom(metadata, id, requestedVersion));
             this.boms.put(bomId, bom);
         }
     }
@@ -264,5 +279,25 @@ public class ProjectRequest extends BasicProjectRequest {
 
     public void addModule(ProjectRequest module) {
         this.subModules.put(module.getName(), module);
+    }
+
+    public void setCloudConfigServerPort(@NonNull Integer port) {
+        this.servicesPorts.put("cloud-config-server", port);
+    }
+
+    public void setCloudGatewayPort(@NonNull Integer port) {
+        this.servicesPorts.put("cloud-gateway", port);
+    }
+
+    public void setCloudEurekaServerPort(@NonNull Integer port) {
+        this.servicesPorts.put("cloud-eureka-server", port);
+    }
+
+    public void setCloudHystrixDashboardPort(@NonNull Integer port) {
+        this.servicesPorts.put("cloud-hystrix-dashboard", port);
+    }
+
+    public void setAzureServiceBusPort(@NonNull Integer port) {
+        this.servicesPorts.put("azure-service-bus", port);
     }
 }

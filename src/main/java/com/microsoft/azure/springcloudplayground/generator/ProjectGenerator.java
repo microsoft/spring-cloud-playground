@@ -89,7 +89,7 @@ public class ProjectGenerator {
         writeText(new File(dir, KUBERNETES_FILE), templateRenderer.process(Paths.get(DOCKER_PATH, KUBERNETES_FILE).toString(), model));
     }
 
-    private void generateDockerStructure(@NonNull File rootDir, @NonNull String baseDir, Map<String, Boolean> modulesModel, ProjectRequest request) {
+    private void generateDockerStructure(@NonNull File rootDir, @NonNull String baseDir, Map<String, Object> modulesModel, ProjectRequest request) {
         final File dockerDir = Paths.get(rootDir.getPath(),baseDir, "docker").toFile();
         final String template = "docker";
         final String dockerComposeName = "docker-compose.yml";
@@ -98,6 +98,8 @@ public class ProjectGenerator {
         final String readMe = "README.md";
 
         dockerDir.mkdir();
+
+        request.getModules().forEach(m -> modulesModel.put(m.getName() + "-" + "port", m.getPort()));
 
         writeText(new File(dockerDir, dockerComposeName), templateRenderer.process(Paths.get(template, dockerComposeName).toString(), modulesModel));
         writeText(new File(dockerDir, runBash), templateRenderer.process(Paths.get(template, runBash).toString(), null));
@@ -116,16 +118,15 @@ public class ProjectGenerator {
         try {
             Map<String, Object> model = resolveModel(request);
             File rootDir = generateProjectStructure(request, model);
+            final Map<String, Object> modulesModel = new HashMap<>();
 
-            final Map<String, Boolean> modulesModel = new HashMap<>();
             for(ProjectRequest subModule: request.getModules()){
-                generateProjectModuleStructure(subModule, resolveModel(subModule),
-                        new File(rootDir, request.getBaseDir()), request);
+                final File subModuleDir = new File(rootDir, request.getBaseDir());
+                generateProjectModuleStructure(subModule, resolveModel(subModule), subModuleDir, request);
                 modulesModel.put(subModule.getName(), Boolean.TRUE);
             }
 
             generateDockerStructure(rootDir, request.getBaseDir(), modulesModel, request);
-            //publishProjectGeneratedEvent(request);
 
             return rootDir;
         }
@@ -135,6 +136,23 @@ public class ProjectGenerator {
         }
     }
 
+    private void servicesPortsUpdate(@NonNull ProjectRequest request) {
+        Assert.isNull(request.getParent(), "should be parent project.");
+
+        final Set<Integer> set = new HashSet<>();
+        final Map<String, Integer> ports = request.getServicesPorts();
+        final List<String> services = request.getServices();
+
+        services.stream().filter(s -> ports.get(s) != null && ports.get(s) >= 1024 && ports.get(s) <= 65535)
+                .forEach(s -> set.add(ports.get(s)));
+
+        if (set.size() < services.size()) {
+            ports.forEach((key, value) -> ports.put(key, ServiceMetadata.portMap.get(key)));
+        }
+
+        request.getModules().forEach(m -> m.setPort(ports.get(m.getName())));
+    }
+
     /**
      * Generate a project structure for the specified {@link ProjectRequest} and resolved
      * model.
@@ -142,8 +160,7 @@ public class ProjectGenerator {
      * @param model the source model
      * @return the generated project structure
      */
-    protected File generateProjectStructure(ProjectRequest request,
-                                            Map<String, Object> model) {
+    protected File generateProjectStructure(ProjectRequest request, Map<String, Object> model) {
         File rootDir;
         try {
             rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
@@ -171,6 +188,7 @@ public class ProjectGenerator {
         }
 
         generateGitIgnore(dir, request);
+        servicesPortsUpdate(request);
 
         return rootDir;
     }
@@ -193,16 +211,17 @@ public class ProjectGenerator {
             writeText(new File(dir, "settings.gradle"), settings);
         }
         else {
+            // Write Dockerfile to module
             final String dockerFileName = "Dockerfile";
             final String exposePortVariable = "EXPOSE_PORT";
             final String dockerTemplateDir = "docker";
             final Map<String, Integer> portModel = new HashMap<>();
-            portModel.put(exposePortVariable, ServiceMetadata.portMap.get(request.getName()));
+            final String path = Paths.get(dockerTemplateDir, dockerFileName).toString();
 
-            // Write Dockerfile to module
+            portModel.put(exposePortVariable, request.getPort());
+            writeText(new File(dir, dockerFileName), templateRenderer.process(path, portModel));
+
             log.info("Writing Dockerfile to module " + request.getName());
-            writeText(new File(dir, dockerFileName),
-                    templateRenderer.process(Paths.get(dockerTemplateDir, dockerFileName).toString(), portModel));
 
             // Write pom file
             String pom = new String(doGenerateMavenPom(model, "module-pom.xml"));
@@ -216,13 +235,10 @@ public class ProjectGenerator {
                 request.getPackageName().replace(".", "/"));
         src.mkdirs();
         if(request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")){
-            write(new File(src, applicationName + "." + language),
-                    "HystrixDashboardApplication." + language, model);
-            write(new File(src, "MockStreamServlet.java"),
-                    "MockStreamServlet.java", model);
+            write(new File(src, applicationName + "." + language), "HystrixDashboardApplication." + language, model);
+            write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", model);
         } else {
-            write(new File(src, applicationName + "." + language),
-                    "Application." + language, model);
+            write(new File(src, applicationName + "." + language), "Application." + language, model);
         }
 
         if (request.getDependencies().contains("web")) {
@@ -299,7 +315,7 @@ public class ProjectGenerator {
                     model.put("services", azureServices);
                 } else if(!ModulePropertiesResolver.isInfraModule(moduleName)){
                     model.put("applicationName", module.getName());
-                    model.put("port", getPort(module.getName()));
+                    model.put("port", request.getPort());
                 }
 
                 String content = templateRenderer.process(templateFile, model);
@@ -318,10 +334,6 @@ public class ProjectGenerator {
         String templateFile = ModulePropertiesResolver.getBootstrapTemplate(request.getName());
         String content = templateRenderer.process(templateFile, model);
         writeText(new File(resourceDir, "bootstrap.yml"), content);
-    }
-
-    private int getPort(String serviceName) {
-        return ServiceMetadata.portMap.get(serviceName);
     }
 
     /**

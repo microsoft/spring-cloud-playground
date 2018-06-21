@@ -34,7 +34,7 @@
     padding-left: 20px;
 }
 
-.module-checkbox input {
+.module-checkbox input:first-child {
     margin-left: -20px;
 }
 
