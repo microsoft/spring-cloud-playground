@@ -19,7 +19,7 @@ public class ServiceModule extends MetadataElement implements Describable {
     private String description;
 
     @Getter
-    private String portId;
+    private String portName;
 
     @Override
     public String getDescription() {
@@ -29,10 +29,10 @@ public class ServiceModule extends MetadataElement implements Describable {
     public ServiceModule(String id, String name, String description) {
         super(id, name);
         this.description = description;
-        this.portId = toPortId(id);
+        this.portName = toPortName(id);
     }
 
-    private String toPortId(@NonNull String id) {
+    private String toPortName(@NonNull String id) {
         final List<String> tails = new ArrayList<>(Arrays.asList(id.split("-")));
         final String head = tails.remove(0);
         final String tail = String.join("", tails.stream().map(StringUtils::capitalize).toArray(String[]::new));
@@ -43,7 +43,7 @@ public class ServiceModule extends MetadataElement implements Describable {
     @Override
     public void setId(@NonNull String id) {
         this.id = id;
-        this.portId = toPortId(id);
+        this.portName = toPortName(id);
     }
 
     @Override

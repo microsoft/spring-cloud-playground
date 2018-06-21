@@ -45,7 +45,7 @@ public class ProjectRequest extends BasicProjectRequest {
     private List<String> facets = new ArrayList<>();
 
     @Getter
-    private Map<String, Integer> servicesPorts;
+    private Map<String, Integer> servicesPortsMap;
 
     @Getter
     @Setter
@@ -60,7 +60,7 @@ public class ProjectRequest extends BasicProjectRequest {
     private String build;
 
     public ProjectRequest() {
-        servicesPorts = new HashMap<>();
+        servicesPortsMap = new HashMap<>();
     }
 
     public ProjectRequest(ProjectRequest parentProject) {
@@ -73,7 +73,7 @@ public class ProjectRequest extends BasicProjectRequest {
     public Integer getServicePort(@NonNull String serviceName) {
         Assert.isNull(this.getParent(), "should be parent module of Request");
 
-        return this.servicesPorts.get(serviceName);
+        return this.servicesPortsMap.get(serviceName);
     }
 
     public void removeDependency(String id) {
@@ -282,22 +282,22 @@ public class ProjectRequest extends BasicProjectRequest {
     }
 
     public void setCloudConfigServerPort(@NonNull Integer port) {
-        this.servicesPorts.put("cloud-config-server", port);
+        this.servicesPortsMap.put("cloud-config-server", port);
     }
 
     public void setCloudGatewayPort(@NonNull Integer port) {
-        this.servicesPorts.put("cloud-gateway", port);
+        this.servicesPortsMap.put("cloud-gateway", port);
     }
 
     public void setCloudEurekaServerPort(@NonNull Integer port) {
-        this.servicesPorts.put("cloud-eureka-server", port);
+        this.servicesPortsMap.put("cloud-eureka-server", port);
     }
 
     public void setCloudHystrixDashboardPort(@NonNull Integer port) {
-        this.servicesPorts.put("cloud-hystrix-dashboard", port);
+        this.servicesPortsMap.put("cloud-hystrix-dashboard", port);
     }
 
     public void setAzureServiceBusPort(@NonNull Integer port) {
-        this.servicesPorts.put("azure-service-bus", port);
+        this.servicesPortsMap.put("azure-service-bus", port);
     }
 }

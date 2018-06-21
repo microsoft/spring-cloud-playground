@@ -139,18 +139,16 @@ public class ProjectGenerator {
     private void servicesPortsUpdate(@NonNull ProjectRequest request) {
         Assert.isNull(request.getParent(), "should be parent project.");
 
-        final Set<Integer> set = new HashSet<>();
-        final Map<String, Integer> ports = request.getServicesPorts();
+        final Map<String, Integer> servicesPortsMap = request.getServicesPortsMap();
         final List<String> services = request.getServices();
 
-        services.stream().filter(s -> ports.get(s) != null && ports.get(s) >= 1024 && ports.get(s) <= 65535)
-                .forEach(s -> set.add(ports.get(s)));
+        final long configuredCount = services.stream().filter(s -> servicesPortsMap.get(s) != null).count();
 
-        if (set.size() < services.size()) {
-            ports.forEach((key, value) -> ports.put(key, ServiceMetadata.portMap.get(key)));
+        if (configuredCount < services.size()) {
+            servicesPortsMap.forEach((key, value) -> servicesPortsMap.put(key, ServiceMetadata.portMap.get(key)));
         }
 
-        request.getModules().forEach(m -> m.setPort(ports.get(m.getName())));
+        request.getModules().forEach(m -> m.setPort(servicesPortsMap.get(m.getName())));
     }
 
     /**
