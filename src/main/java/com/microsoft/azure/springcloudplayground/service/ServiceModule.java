@@ -25,7 +25,6 @@ public class ServiceModule extends MetadataElement implements Describable {
     @Getter
     private Integer defaultPort;
 
-    @Override
     public String getDescription() {
         return this.description;
     }
@@ -45,17 +44,17 @@ public class ServiceModule extends MetadataElement implements Describable {
         return head + tail + "Port";
     }
 
-    private Integer getDefaultPort(@NonNull String id) {
-        final Integer port = ServiceMetadata.portMap.get(id);
-
-        return port == null ? 0 : port;
-    }
-
     @Override
     public void setId(@NonNull String id) {
         this.id = id;
         this.portName = toPortName(id);
         this.defaultPort = getDefaultPort(id);
+    }
+
+    private Integer getDefaultPort(@NonNull String id) {
+        final Integer port = ServiceMetadata.portMap.get(id);
+
+        return port == null ? 0 : port;
     }
 
     @Override
