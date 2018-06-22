@@ -1,5 +1,6 @@
 package com.microsoft.azure.springcloudplayground.service;
 
+import com.microsoft.azure.springcloudplayground.generator.ServiceMetadata;
 import com.microsoft.azure.springcloudplayground.metadata.Describable;
 import com.microsoft.azure.springcloudplayground.metadata.MetadataElement;
 import lombok.Getter;
@@ -21,6 +22,9 @@ public class ServiceModule extends MetadataElement implements Describable {
     @Getter
     private String portName;
 
+    @Getter
+    private Integer defaultPort;
+
     @Override
     public String getDescription() {
         return this.description;
@@ -30,6 +34,7 @@ public class ServiceModule extends MetadataElement implements Describable {
         super(id, name);
         this.description = description;
         this.portName = toPortName(id);
+        this.defaultPort = getDefaultPort(id);
     }
 
     private String toPortName(@NonNull String id) {
@@ -40,10 +45,17 @@ public class ServiceModule extends MetadataElement implements Describable {
         return head + tail + "Port";
     }
 
+    private Integer getDefaultPort(@NonNull String id) {
+        final Integer port = ServiceMetadata.portMap.get(id);
+
+        return port == null ? 0 : port;
+    }
+
     @Override
     public void setId(@NonNull String id) {
         this.id = id;
         this.portName = toPortName(id);
+        this.defaultPort = getDefaultPort(id);
     }
 
     @Override

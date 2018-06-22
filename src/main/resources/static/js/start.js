@@ -208,6 +208,22 @@ $(function () {
     var generateVideo = $("#generate-animation");
     var buildRunVideo = $("#build-run-animation");
 
+    // Switch between configuration and default
+    var configPort = $("#config-port");
+    var port = $(".port-input");
+
+    configPort.on("click", function () {
+        if (port.hasClass("hidden")) {
+            port.addClass("is-active");
+            port.removeClass("hidden");
+            configPort.text("take default configuration ?")
+        } else {
+            port.removeClass("is-active");
+            port.addClass("hidden");
+            configPort.text("configure your services ?")
+        }
+    });
+
     generateTab.on("click", function() {
         generateTab.addClass("is-active");
         buildRunTab.removeClass("is-active");
