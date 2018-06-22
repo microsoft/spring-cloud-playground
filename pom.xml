@@ -106,7 +106,7 @@
 			<artifactId>applicationinsights-core</artifactId>
 			<version>${azure.applicationinsights.version}</version>
 		</dependency>
-    </dependencies>
+	</dependencies>
 
 	<dependencyManagement>
 		<dependencies>
