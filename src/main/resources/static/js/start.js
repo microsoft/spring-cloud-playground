@@ -216,7 +216,7 @@ $(function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
             port.removeClass("hidden");
-            configPort.text("take default configuration ?")
+            configPort.text("reset to default configuration ?")
         } else {
             port.removeClass("is-active");
             port.addClass("hidden");
