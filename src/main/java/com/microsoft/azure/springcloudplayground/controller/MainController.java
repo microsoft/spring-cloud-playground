@@ -103,27 +103,27 @@ public class MainController extends AbstractPlaygroundController {
         model.put("build.information", buildInfo);
     }
 
-    private void triggerGenerateEvent(@NonNull List<String> services, @NonNull String accessId) {
+    private void triggerGenerateEvent(@NonNull List<String> services, @NonNull String instanceId) {
         final Map<String, String> properties = new HashMap<>();
 
-        properties.put("accessId", accessId);
+        properties.put("instanceId", instanceId);
         services.forEach(s -> properties.put(s, "selected"));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
 
-    private void triggerAccessEvent(@NonNull String accessId) {
+    private void triggerAccessEvent(@NonNull String instanceId) {
         final Map<String, String> properties = new HashMap<>();
 
-        properties.put("accessId", accessId);
+        properties.put("instanceId", instanceId);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
     }
 
-    private void triggerLoginEvent(@NonNull String accountType, @NonNull String accessId) {
+    private void triggerLoginEvent(@NonNull String accountType, @NonNull String instanceId) {
         final Map<String, String> properties = new HashMap<>();
 
-        properties.put("accessId", accessId);
+        properties.put("instanceId", instanceId);
         properties.put("accountType", accountType);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
