@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.microsoft.applicationinsights.core.dependencies.apachecommons.codec.digest.DigestUtils.sha256Hex;
+
 @Controller
 @Slf4j
 public class MainController extends AbstractPlaygroundController {
@@ -73,15 +75,15 @@ public class MainController extends AbstractPlaygroundController {
     }
 
     @GetMapping("/free-account")
-    public String freeAccount(Model model) {
-        this.triggerLoginEvent(FREE_ACCOUNT);
+    public String freeAccount(Model model, HttpServletRequest request) {
+        this.triggerLoginEvent(FREE_ACCOUNT, sha256Hex(request.getRemoteAddr()));
 
         return this.greeting(FREE_ACCOUNT, model);
     }
 
     @GetMapping("/login-account")
-    public String loginAccount(Model model) {
-        this.triggerLoginEvent(LOGIN_ACCOUNT);
+    public String loginAccount(Model model, HttpServletRequest request) {
+        this.triggerLoginEvent(LOGIN_ACCOUNT, sha256Hex(request.getRemoteAddr()));
 
         return this.greeting(LOGIN_ACCOUNT, model);
     }
@@ -101,34 +103,38 @@ public class MainController extends AbstractPlaygroundController {
         model.put("build.information", buildInfo);
     }
 
-    private void triggerGenerateEvent(@NonNull List<String> services) {
+    private void triggerGenerateEvent(@NonNull List<String> services, @NonNull String accessId) {
         final Map<String, String> properties = new HashMap<>();
 
+        properties.put("accessId", accessId);
         services.forEach(s -> properties.put(s, "selected"));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
 
-    private void triggerAccessEvent() {
+    private void triggerAccessEvent(@NonNull String accessId) {
         final Map<String, String> properties = new HashMap<>();
+
+        properties.put("accessId", accessId);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
     }
 
-    private void triggerLoginEvent(@NonNull String accountType) {
+    private void triggerLoginEvent(@NonNull String accountType, @NonNull String accessId) {
         final Map<String, String> properties = new HashMap<>();
 
+        properties.put("accessId", accessId);
         properties.put("accountType", accountType);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
     }
 
     @RequestMapping(path = "/", produces = "text/html")
-    public String home(Map<String, Object> model) {
+    public String home(Map<String, Object> model, HttpServletRequest request) {
 
         this.addBuildInformation(model);
         this.renderHome(model);
-        this.triggerAccessEvent();
+        this.triggerAccessEvent(sha256Hex(request.getRemoteAddr()));
 
         return "home";
     }
@@ -142,7 +148,7 @@ public class MainController extends AbstractPlaygroundController {
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
         String wrapperScript = getWrapperScript(request);
 
-        this.triggerGenerateEvent(request.getServices());
+        this.triggerGenerateEvent(request.getServices(), sha256Hex(httpRequest.getRemoteAddr()));
         new File(dir, wrapperScript).setExecutable(true);
 
         Zip zip = new Zip();
@@ -179,7 +185,7 @@ public class MainController extends AbstractPlaygroundController {
         File download = this.projectGenerator.createDistributionFile(dir, ".tar.gz");
         String wrapperScript = getWrapperScript(request);
 
-        this.triggerGenerateEvent(request.getServices());
+        this.triggerGenerateEvent(request.getServices(), sha256Hex(httpRequest.getRemoteAddr()));
         new File(dir, wrapperScript).setExecutable(true);
 
         Tar zip = new Tar();
