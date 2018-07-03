@@ -34,13 +34,20 @@
     padding-left: 20px;
 }
 
-.module-checkbox input {
+.module-checkbox input:first-child {
     margin-left: -20px;
 }
 
 .module-checkbox p {
     margin: 2px 0 0 -2px;
     color: grey;
+}
+
+.port-input {
+    height: 18px;
+    width: 50px;
+    color: #04a6d7;
+    text-align: right;
 }
 
 body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
