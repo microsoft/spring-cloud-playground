@@ -296,7 +296,7 @@ public class ProjectGenerator {
             // How many properties file will be written is decided by parent request
             List<ConfigurableService> azureServices = parentRequest.getModules().stream()
                     .filter(module -> !ModulePropertiesResolver.isInfraModule(module.getName()))
-                    .map(module -> new ConfigurableService(module.getApplicationName(), "0"))
+                    .map(module -> new ConfigurableService(module.getName(), "0"))
                     .collect(Collectors.toList());
 
             for(ProjectRequest module : parentRequest.getModules()) {
