@@ -1,0 +1,36 @@
+<nav class="navbar header-nav" role="navigation" aria-label="main navigation">
+    <div class="small-container container">
+        <div class="navbar-brand">
+            <a href="https://azure.microsoft.com/en-us/" class="navbar-item azure-logo">
+                Microsoft Azure
+            </a>
+        </div>
+        <div class="navbar-menu is-active">
+            <div class="navbar-start">
+                <h1 class="navbar-item nav-title" >
+                    Azure Spring Cloud Playground
+                </h1>
+            </div>
+            <div class="navbar-end" id="free_link">
+                <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" >Free account</a>
+            </div>
+            <div class="navbar-end" id="login_link">
+                <a>Login</a>
+            </div>
+            <div class="navbar-end" id="user_dropdown">
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="truncate" id="logged_user">
+                    </a>
+                    <div class="navbar-dropdown" id="logout_link">
+                        <a class="navbar-item">
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-end" id="about_link">
+                <a title="{{build.information}}">About</a>
+            </div>
+        </div>
+    </div>
+</nav>
