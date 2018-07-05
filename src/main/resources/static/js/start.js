@@ -159,14 +159,6 @@ $(function () {
     };
     */
 
-    $("#free_link").on("click", function() {
-        $.get("/free-account");
-    });
-
-    $("#login_link").on("click", function() {
-        $.get("/login-account");
-    });
-
     var generatePackageName = function() {
         var groupId = $("#groupId").val();
         var artifactId = $("#artifactId").val();
