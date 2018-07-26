@@ -4,6 +4,7 @@ import com.microsoft.azure.springcloudplayground.dependency.DependencyMetadataPr
 import com.microsoft.azure.springcloudplayground.generator.BasicProjectRequest;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
+import com.microsoft.azure.springcloudplayground.generator.SimpleProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
@@ -131,6 +132,14 @@ public class MainController extends AbstractPlaygroundController {
         this.triggerAccessEvent();
 
         return "home";
+    }
+
+    @ResponseBody
+    @PostMapping("/project.zip")
+    public ResponseEntity<byte[]> getProject(@RequestBody @NonNull SimpleProjectRequest request) {
+        this.projectGenerator.generate(request);
+
+        throw new UnsupportedOperationException("Unimplemented Post Request.");
     }
 
     @RequestMapping("/microservice.zip")
