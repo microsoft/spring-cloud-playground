@@ -1,23 +1,21 @@
 <div id="azure-selection" class="hidden">
-    <div class="row">
-        <div id="services" class="columns">
-            {{#services.content.1}}
-                <div class="column medium-top-margin">
-                    <h3 class="title is-6">Select {{name}}</h3>
-                    {{#content}}
-                        <div class="small-top-margin">
-                            <label class="checkbox module-checkbox">
-                                <input tabindex="13" type="checkbox" name="services" value="{{id}}">
-                                {{name}}
-                                <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
-                                <p class="help-block">{{#description}}{{.}}{{/description}}</p>
-                            </label>
-                        </div>
-                    {{/content}}
-                </div>
-            {{/services.content.1}}
+    {{#services.content.1}}
+        <h3 class="title is-6">Select {{name}}</h3>
+        <div id="services">
+            <div class="columns is-multiline">
+                {{#content}}
+                    <div class="column is-half">
+                        <label class="checkbox module-checkbox">
+                            <input tabindex="13" type="checkbox" name="services" value="{{id}}">
+                            {{name}}
+                            <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
+                            <p class="help-block">{{#description}}{{.}}{{/description}}</p>
+                        </label>
+                    </div>
+                {{/content}}
+            </div>
         </div>
-    </div>
+    {{/services.content.1}}
     <div class="large-vertical-margin">
         <p class="has-text-centered">
             <button onclick="gtag('event', 'click', { event_category: 'Go to infra config', event_action: 'click'});"

@@ -115,3 +115,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     display: block;
     margin: 0 auto;
 }
+
+#services .columns .column {
+    padding: 0.75rem 0 0 0.75rem;
+}
