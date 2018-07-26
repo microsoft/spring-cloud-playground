@@ -94,52 +94,10 @@
                            value="{{artifactId.content}}"
                            name="artifactId">
                 </div>
-                <div class="column hidden">
-                    <label for="name" class="label">{{name.title}}</label>
-                    <input tabindex="6" id="name" class="input" type="text" value="{{name.content}}"
-                           name="name">
-                </div>
-                <div class="column hidden">
-                    <label for="description" class="label">{{description.title}}</label>
-                    <input tabindex="7" id="description" class="input" type="text"
-                           value="{{description.content}}" name="description">
-                </div>
-                <div class="column hidden">
-                    <label for="packageName" class="label">{{packageName.title}}</label>
-                    <input tabindex="8" id="packageName" class="input" type="text"
-                           value="{{packageName.content}}"
-                           name="packageName">
-                </div>
             </div>
         </div>
-        <div class="row">
-            <div id="services" class="columns">
-                {{#services.content}}
-                <div class="column is-half medium-top-margin">
-                    <h3 class="title is-6">Select {{name}}</h3>
-                    {{#content}}
-                    <div class="small-top-margin">
-                        <label class="checkbox module-checkbox">
-                            <input tabindex="13" type="checkbox" name="services" value="{{id}}">
-                            {{name}}
-                            <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
-                            <p class="help-block">{{#description}}{{.}}{{/description}}</p>
-                        </label>
-                    </div>
-                    {{/content}}
-                </div>
-               {{/services.content}}
-            </div>
-        </div>
-        <div class="large-vertical-margin">
-            <p class="has-text-centered">
-                <button onclick="gtag('event', 'click', { event_category: 'Project Generation', event_action: 'click'});"
-                        tabindex="12" id="generate-project" type="submit" class="button" role="button">
-                    Generate Project
-                </button>
-            </p>
-            Want to <a id="config-port" class="is-7">configure your services ?</a>
-        </div>
+        {{> config-infra-service}}
+        {{> config-azure-service}}
     </div>
 </form>
 <script src="{{#linkTo}}/js/jquery-3.1.1.min.js{{/linkTo}}"></script>

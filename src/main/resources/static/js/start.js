@@ -29,6 +29,12 @@ $(function () {
     var configPort = $("#config-port");
     var port = $(".port-input");
 
+    // Modules selection elements
+    var infraModulesSelector = $("#infra-selection");
+    var azureModulesSelector = $("#azure-selection");
+    var nextStepButton = $("#next-step");
+    var prevStepButton = $("#previous-step");
+
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
@@ -49,6 +55,7 @@ $(function () {
         buildRunVideo.addClass("hidden");
 
     });
+
     buildRunTab.on("click", function() {
         buildRunTab.addClass("is-active");
         generateTab.removeClass("is-active");
@@ -56,4 +63,22 @@ $(function () {
         generateVideo.addClass("hidden");
         buildRunVideo.removeClass("hidden");
     });
+
+    nextStepButton.on("click", function() {
+       showAzureModules();
+    });
+
+    prevStepButton.on("click", function() {
+       showInfraModules();
+    });
+
+    function showInfraModules() {
+        infraModulesSelector.removeClass("hidden");
+        azureModulesSelector.addClass("hidden");
+    }
+
+    function showAzureModules() {
+        infraModulesSelector.addClass("hidden");
+        azureModulesSelector.removeClass("hidden");
+    }
 });
