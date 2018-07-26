@@ -82,7 +82,7 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
-    private void writeKubernetesFile(File dir, ProjectRequest request){
+    private void writeKubernetesFile(File dir, ProjectRequest request) {
         List<Service> services = ServiceResolver.resolve(request.getServices());
         Map<String, Object> model = new HashMap<>();
         model.put("services", services);
@@ -90,7 +90,7 @@ public class ProjectGenerator {
     }
 
     private void generateDockerStructure(@NonNull File rootDir, @NonNull String baseDir, Map<String, Object> modulesModel, ProjectRequest request) {
-        final File dockerDir = Paths.get(rootDir.getPath(),baseDir, "docker").toFile();
+        final File dockerDir = Paths.get(rootDir.getPath(), baseDir, "docker").toFile();
         final String template = "docker";
         final String dockerComposeName = "docker-compose.yml";
         final String runBash = "run.sh";
@@ -108,9 +108,49 @@ public class ProjectGenerator {
         writeKubernetesFile(dockerDir, request);
     }
 
+    private void generateBaseDirectory(@NonNull File rootDir, @NonNull SimpleProjectRequest request,
+                                       @NonNull Map<String, Object> model) {
+        Assert.hasText(request.getBaseDir(), "Basedir should have text.");
+
+        File dir = new File(rootDir, request.getBaseDir());
+        dir.mkdir();
+
+        String pom = new String(doGenerateMavenPom(model, "parent-pom.xml"));
+        writeText(new File(dir, "pom.xml"), pom);
+
+        writeMavenWrapper(dir);
+        write(new File(dir, ".gitignore"), "gitignore.tmpl", model);
+    }
+
+    private File generateRootProject(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+        File rootDir;
+
+        try {
+            rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create temp dir", e);
+        }
+
+        addTempFile(rootDir.getName(), rootDir);
+        rootDir.delete();
+        rootDir.mkdir();
+
+        this.generateBaseDirectory(rootDir, request, model);
+
+        return rootDir;
+    }
+
+    public File generate(@NonNull SimpleProjectRequest request) {
+        Map<String, Object> model = this.resolveModel(request);
+        File rootDir = this.generateRootProject(request, model);
+
+        return rootDir;
+    }
+
     /**
      * Generate a project structure for the specified {@link ProjectRequest}. Returns a
      * directory containing the project.
+     *
      * @param request the project request
      * @return the generated project structure
      */
@@ -120,7 +160,7 @@ public class ProjectGenerator {
             File rootDir = generateProjectStructure(request, model);
             final Map<String, Object> modulesModel = new HashMap<>();
 
-            for(ProjectRequest subModule: request.getModules()){
+            for (ProjectRequest subModule : request.getModules()) {
                 final File subModuleDir = new File(rootDir, request.getBaseDir());
                 generateProjectModuleStructure(subModule, resolveModel(subModule), subModuleDir, request);
                 modulesModel.put(subModule.getName(), Boolean.TRUE);
@@ -129,8 +169,7 @@ public class ProjectGenerator {
             generateDockerStructure(rootDir, request.getBaseDir(), modulesModel, request);
 
             return rootDir;
-        }
-        catch (GeneratorException ex) {
+        } catch (GeneratorException ex) {
             //publishProjectFailedEvent(request, ex);
             throw ex;
         }
@@ -154,16 +193,16 @@ public class ProjectGenerator {
     /**
      * Generate a project structure for the specified {@link ProjectRequest} and resolved
      * model.
+     *
      * @param request the project request
-     * @param model the source model
+     * @param model   the source model
      * @return the generated project structure
      */
     protected File generateProjectStructure(ProjectRequest request, Map<String, Object> model) {
         File rootDir;
         try {
             rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new IllegalStateException("Cannot create temp dir", e);
         }
         addTempFile(rootDir.getName(), rootDir);
@@ -178,8 +217,7 @@ public class ProjectGenerator {
             String settings = new String(doGenerateGradleSettings(model));
             writeText(new File(dir, "settings.gradle"), settings);
             writeGradleWrapper(dir, Version.safeParse(request.getBootVersion()));
-        }
-        else {
+        } else {
             String pom = new String(doGenerateMavenPom(model, "parent-pom.xml"));
             writeText(new File(dir, "pom.xml"), pom);
             writeMavenWrapper(dir);
@@ -194,8 +232,9 @@ public class ProjectGenerator {
     /**
      * Generate a module structure for the specified {@link ProjectRequest} and resolved
      * model.
+     *
      * @param request the project request
-     * @param model the source model
+     * @param model   the source model
      * @return the generated project structure
      */
     protected File generateProjectModuleStructure(ProjectRequest request,
@@ -207,8 +246,7 @@ public class ProjectGenerator {
             writeText(new File(dir, "build.gradle"), gradle);
             String settings = new String(doGenerateGradleSettings(model));
             writeText(new File(dir, "settings.gradle"), settings);
-        }
-        else {
+        } else {
             // Write Dockerfile to module
             final String dockerFileName = "Dockerfile";
             final String exposePortVariable = "EXPOSE_PORT";
@@ -232,7 +270,7 @@ public class ProjectGenerator {
         File src = new File(new File(dir, "src/main/" + language),
                 request.getPackageName().replace(".", "/"));
         src.mkdirs();
-        if(request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")){
+        if (request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")) {
             write(new File(src, applicationName + "." + language), "HystrixDashboardApplication." + language, model);
             write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", model);
         } else {
@@ -240,20 +278,20 @@ public class ProjectGenerator {
         }
 
         if (request.getDependencies().contains("web")) {
-            write(new File(src, "Controller." + language), "Controller.java" , model);
+            write(new File(src, "Controller." + language), "Controller.java", model);
         }
 
         // Write index page if is gateway module
-        if(ModulePropertiesResolver.isGatewayModule(request.getName())) {
+        if (ModulePropertiesResolver.isGatewayModule(request.getName())) {
             // Only java supported, WebFilter for root request mapping
-            write(new File(src, "CustomWebFilter.java"),"CustomWebFilter.java", model);
+            write(new File(src, "CustomWebFilter.java"), "CustomWebFilter.java", model);
 
             File resourceFolder = new File(dir, "src/main/resources/static");
             resourceFolder.mkdirs();
 
             writeText(new File(resourceFolder, "index.html"),
                     templateRenderer.process("GatewayIndex.tmpl", ServiceMetadata.getLinksMap(parentModule)));
-            writeText(new File(resourceFolder, "bulma.min.css"), templateRenderer.process("bulma.min.css",null));
+            writeText(new File(resourceFolder, "bulma.min.css"), templateRenderer.process("bulma.min.css", null));
         }
 
         File test = new File(new File(dir, "src/test/" + language),
@@ -267,7 +305,7 @@ public class ProjectGenerator {
         resources.mkdirs();
         writePropertiesFile(request, resources, parentModule);
 
-        if(request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")){
+        if (request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")) {
             writeTextResource(resources, "hystrix.stream", "hystrix.stream");
         }
 
@@ -279,7 +317,7 @@ public class ProjectGenerator {
     }
 
     private void writePropertiesFile(ProjectRequest request, File resourceDir, ProjectRequest parentRequest) {
-        if(ModulePropertiesResolver.isConfigServer(request.getName())) {
+        if (ModulePropertiesResolver.isConfigServer(request.getName())) {
             // Write bootstap.yml
             writeBootstrapYaml(request, resourceDir);
 
@@ -299,25 +337,25 @@ public class ProjectGenerator {
                     .map(module -> new ConfigurableService(module.getName(), "0"))
                     .collect(Collectors.toList());
 
-            for(ProjectRequest module : parentRequest.getModules()) {
+            for (ProjectRequest module : parentRequest.getModules()) {
                 String templateFile = ModulePropertiesResolver.getSharedPropTemplate(module.getName());
                 Map<String, Object> model = new HashMap<>();
 
                 String moduleName = module.getName();
-                if(ModulePropertiesResolver.isConfigServer(moduleName)) {
+                if (ModulePropertiesResolver.isConfigServer(moduleName)) {
                     // No shared properties file is required to be generated for config server itself
                     continue;
                 }
 
-                if(ModulePropertiesResolver.isGatewayModule(moduleName)) {
+                if (ModulePropertiesResolver.isGatewayModule(moduleName)) {
                     model.put("services", azureServices);
-                } else if(!ModulePropertiesResolver.isInfraModule(moduleName)){
+                } else if (!ModulePropertiesResolver.isInfraModule(moduleName)) {
                     model.put("applicationName", module.getName());
                     model.put("port", request.getPort());
                 }
 
                 String content = templateRenderer.process(templateFile, model);
-                writeText(new File(sharedPropFolder,  module.getName() + ".yml"), content);
+                writeText(new File(sharedPropFolder, module.getName() + ".yml"), content);
             }
         } else {
             // Write bootstrap.yml
@@ -337,7 +375,8 @@ public class ProjectGenerator {
     /**
      * Create a distribution file for the specified project structure directory and
      * extension.
-     * @param dir the directory
+     *
+     * @param dir       the directory
      * @param extension the file extension
      * @return the distribution file
      */
@@ -357,6 +396,7 @@ public class ProjectGenerator {
 
     /**
      * Clean all the temporary files that are related to this root directory.
+     *
      * @param dir the directory to clean
      * @see #createDistributionFile
      */
@@ -366,8 +406,7 @@ public class ProjectGenerator {
             tempFiles.forEach((File file) -> {
                 if (file.isDirectory()) {
                     FileSystemUtils.deleteRecursively(file);
-                }
-                else if (file.exists()) {
+                } else if (file.exists()) {
                     file.delete();
                 }
             });
@@ -384,9 +423,11 @@ public class ProjectGenerator {
         this.eventPublisher.publishEvent(event);
     }
 */
+
     /**
      * Generate a {@code .gitignore} file for the specified {@link ProjectRequest}.
-     * @param dir the root directory of the project
+     *
+     * @param dir     the root directory of the project
      * @param request the request to handle
      */
     protected void generateGitIgnore(File dir, ProjectRequest request) {
@@ -394,16 +435,93 @@ public class ProjectGenerator {
         if (isMavenBuild(request)) {
             model.put("build", "maven");
             model.put("mavenBuild", true);
-        }
-        else {
+        } else {
             model.put("build", "gradle");
         }
         write(new File(dir, ".gitignore"), "gitignore.tmpl", model);
     }
 
+    private Map<String, String> getBomModel(@NonNull BillOfMaterials bom) {
+        Map<String, String> model = new HashMap<>();
+
+        model.put("groupId", bom.getGroupId());
+        model.put("artifactId", bom.getArtifactId());
+
+        String version = bom.getVersion();
+
+        if (bom.getVersionProperty() != null) {
+            version = String.format("${%s}", bom.getVersionProperty().toStandardFormat());
+        }
+
+        model.put("versionToken", version);
+
+        return model;
+    }
+
+    private BillOfMaterials getBomBillofMaterials(@NonNull String bom, @NonNull GeneratorMetadata metadata,
+                                                  @NonNull Version version) {
+        return metadata.getConfiguration().getEnv().getBoms().get(bom).resolve(version);
+    }
+
+    private Map<String, BillOfMaterials> getBoms(@NonNull String bootVersion) {
+        Version version = Version.parse(bootVersion);
+        Map<String, BillOfMaterials> boms = new LinkedHashMap<>();
+        GeneratorMetadata metadata = this.metadataProvider.get();
+
+        metadata.getDependencies().getAll().stream().filter(d -> d.getBom() != null)
+                .forEach(d -> boms.putIfAbsent(d.getBom(), getBomBillofMaterials(d.getBom(), metadata, version)));
+
+        return boms;
+    }
+
+    private void resolveBomsModel(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+        Map<String, BillOfMaterials> boms = getBoms(request.getBootVersion());
+
+        model.put("hasBoms", true);
+        model.put("resolvedBoms", boms.values().stream().sorted(Comparator.comparing(BillOfMaterials::getOrder))
+                .map(this::getBomModel).collect(Collectors.toList()));
+    }
+
+    private void resolveBuildPropertiesModel(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+        Map<String, String> versions = new HashMap<>();
+        Map<String, String> maven = new HashMap<>();
+
+        maven.put("project.build.sourceEncoding", "UTF-8");
+        maven.put("project.reporting.outputEncoding", "UTF-8");
+
+        versions.put("java.version", request.getJavaVersion());
+        this.getBoms(request.getBootVersion()).entrySet().stream()
+                .filter(e -> e.getValue().getVersionProperty() != null)
+                .forEach(e -> versions.putIfAbsent(e.getValue().getVersionProperty().toStandardFormat(),
+                        e.getValue().getVersion()));
+
+        model.put("buildPropertiesVersions", versions.entrySet());
+        model.put("buildPropertiesMaven", maven.entrySet());
+    }
+
+    private Map<String, Object> resolveModel(@NonNull SimpleProjectRequest request) {
+        Map<String, Object> model = new LinkedHashMap<>();
+
+        model.put("mavenBuild", true);
+        model.put("build", "maven");
+        model.put("mavenParentGroupId", "org.springframework.boot");
+        model.put("mavenParentArtifactId", "spring-boot-starter-parent");
+        model.put("mavenParentVersion", request.getBootVersion());
+
+        BeanWrapperImpl wrapper = new BeanWrapperImpl(request);
+        Arrays.stream(wrapper.getPropertyDescriptors()).forEach(
+                p -> model.put(p.getName(), wrapper.getPropertyValue(p.getName())));
+
+        this.resolveBomsModel(request, model);
+        this.resolveBuildPropertiesModel(request, model);
+
+        return model;
+    }
+
     /**
      * Resolve the specified {@link ProjectRequest} and return the model to use to
      * generate the project.
+     *
      * @param originalRequest the request to handle
      * @return a model for that request
      */
@@ -431,7 +549,7 @@ public class ProjectGenerator {
                         request.getBootVersion(), "spring-boot.version"));
             }
 
-            if (request.getParent() != null){
+            if (request.getParent() != null) {
                 model.put("mavenParentGroupId", request.getParent().getGroupId());
                 model.put("mavenParentArtifactId", request.getParent().getArtifactId());
                 model.put("mavenParentVersion", request.getParent().getVersion());
@@ -558,8 +676,7 @@ public class ProjectGenerator {
         if (ServiceMetadata.importMap.containsKey(request.getName()) && ServiceMetadata.annotationMap.containsKey(request.getName())) {
             ServiceMetadata.importMap.get(request.getName()).forEach(imports::add);
             ServiceMetadata.annotationMap.get(request.getName()).forEach(annotations::add);
-        }
-        else {
+        } else {
             imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration")
                     .add("org.springframework.context.annotation.ComponentScan")
                     .add("org.springframework.context.annotation.Configuration");
@@ -578,8 +695,7 @@ public class ProjectGenerator {
         if (newTestInfrastructure) {
             imports.add("org.springframework.boot.test.context.SpringBootTest")
                     .add("org.springframework.test.context.junit4.SpringRunner");
-        }
-        else {
+        } else {
             imports.add("org.springframework.boot.test.SpringApplicationConfiguration")
                     .add("org.springframework.test.context.junit4.SpringJUnit4ClassRunner");
         }
@@ -594,8 +710,8 @@ public class ProjectGenerator {
                 testAnnotations.withFinalCarriageReturn().toString());
     }
 
-    private void setupModulesModel(ProjectRequest request, Map<String, Object> model){
-        if(!request.getServices().isEmpty()) {
+    private void setupModulesModel(ProjectRequest request, Map<String, Object> model) {
+        if (!request.getServices().isEmpty()) {
             model.put("modules", request.getServices());
         }
     }
@@ -682,8 +798,7 @@ public class ProjectGenerator {
         if (binary) {
             writeBinary(target, this.projectResourceLocator
                     .getBinaryResource("classpath:project/" + location));
-        }
-        else {
+        } else {
             writeText(target, this.projectResourceLocator
                     .getTextResource("classpath:project/" + location));
         }
@@ -695,8 +810,7 @@ public class ProjectGenerator {
             File dir = new File(rootDir, request.getBaseDir());
             dir.mkdirs();
             return dir;
-        }
-        else {
+        } else {
             return rootDir;
         }
     }
@@ -709,8 +823,7 @@ public class ProjectGenerator {
     private void writeText(File target, String body) {
         try (OutputStream stream = new FileOutputStream(target)) {
             StreamUtils.copy(body, Charset.forName("UTF-8"), stream);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Cannot write file " + target, e);
         }
     }
@@ -718,8 +831,7 @@ public class ProjectGenerator {
     private void writeBinary(File target, byte[] body) {
         try (OutputStream stream = new FileOutputStream(target)) {
             StreamUtils.copy(body, stream);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Cannot write file " + target, e);
         }
     }
