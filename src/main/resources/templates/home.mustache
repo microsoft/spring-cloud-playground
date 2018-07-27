@@ -4,6 +4,7 @@
     <title>Azure Spring Cloud Playground</title>
     <link href="//fonts.googleapis.com/css?family=Varela+Round|Montserrat:400,700" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{{#linkTo}}/css/bulma.min.css{{/linkTo}}"/>
+    <link rel="stylesheet" href="{{#linkTo}}/css/bulma-steps.min.css{{/linkTo}}"/>
     <link rel="stylesheet" href="{{#linkTo}}/css/customize.css{{/linkTo}}"/>
     <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -79,9 +80,9 @@
     <div class="small-container container large-bottom-margin">
         <p class="help is-danger app-error"></p>
         <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
-
         <div class="row metadata-row">
             <h4 class="title is-5">Generate your Spring Cloud application</h4>
+            {{> select-steps}}
             <div class="columns">
                 <div class="column">
                     <label for="groupId" class="label">{{groupId.title}}</label>
