@@ -34,6 +34,8 @@ $(function () {
     var azureModulesSelector = $("#azure-selection");
     var nextStepButton = $("#next-step");
     var prevStepButton = $("#previous-step");
+    var infraStep = $("#infra-step")[0];
+    var azureStep = $("#azure-step")[0];
 
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
@@ -66,10 +68,14 @@ $(function () {
 
     nextStepButton.on("click", function() {
        showAzureModules();
+       completeStep(infraStep);
+       activateStep(azureStep);
     });
 
     prevStepButton.on("click", function() {
        showInfraModules();
+       disActivateStep(azureStep);
+       activateStep(infraStep);
     });
 
     function showInfraModules() {
@@ -80,5 +86,17 @@ $(function () {
     function showAzureModules() {
         infraModulesSelector.addClass("hidden");
         azureModulesSelector.removeClass("hidden");
+    }
+
+    function activateStep(stepElement) {
+        stepElement.className = "step-item is-active";
+    }
+
+    function disActivateStep(stepElement) {
+        stepElement.className = "step-item";
+    }
+
+    function completeStep(stepElement) {
+        stepElement.className = "step-item is-completed is-success";
     }
 });
