@@ -18,16 +18,20 @@
     margin: 3rem 0 1rem;
 }
 
-.large-vertical-margin {
-    margin: 4rem 0;
+.button-group {
+    margin: 4rem 2rem 0;
 }
 
 .small-top-margin {
-    margin: 1rem 0 0;
+    margin-top: 1rem;
 }
 
 .medium-top-margin {
-    margin: 2rem 0 0;
+    margin-top: 2rem;
+}
+
+.large-bottom-margin {
+    margin-bottom: 4rem;
 }
 
 .module-checkbox {
@@ -114,4 +118,8 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .start-video {
     display: block;
     margin: 0 auto;
+}
+
+.module-input {
+    padding: 0.75rem 0 0 0.75rem;
 }
