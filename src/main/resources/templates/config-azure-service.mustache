@@ -7,7 +7,6 @@
                         <label class="checkbox module-checkbox">
                             <input tabindex="13" type="checkbox" name="services" value="{{id}}">
                             {{name}}
-                            <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
                             <p class="help-block">{{#description}}{{.}}{{/description}}</p>
                         </label>
                     </div>
@@ -15,7 +14,20 @@
             </div>
         </div>
     {{/services.content.1}}
-    <hr class="small-top-margin"/>
+    <div class="field has-addons medium-top-margin">
+        <p class="subtitle is-6">
+            <strong>Create a new service:</strong>
+        </p>
+        <p class="control">
+            <input class="input" type="text" placeholder="Your service name">
+        </p>
+        <p class="control">
+            <button class="button">
+                + Create service
+            </button>
+        </p>
+    </div>
+    <hr class="medium-top-margin"/>
     <div class="medium-top-margin">
         <h3 class="title is-6">Configured services</h3>
         <ul id="selected-modules-list">
