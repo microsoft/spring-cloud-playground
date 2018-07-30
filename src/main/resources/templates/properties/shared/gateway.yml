@@ -1,13 +1,13 @@
 server:
-  port: 9999
+  port: {{port}}
 
 spring:
   cloud:
     gateway:
       routes:
-      {{#services}}
-      - id: {{applicationName}}
-        uri: lb://{{applicationName}}
+      {{#azureServices}}
+      - id: {{name}}
+        uri: lb://{{name}}
         predicates:
-        - Path=/{{applicationName}}/**
-      {{/services}}
+        - Path=/{{name}}/**
+      {{/azureServices}}
