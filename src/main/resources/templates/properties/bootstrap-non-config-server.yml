@@ -1,6 +1,6 @@
 spring:
   application:
-    name: {{applicationName}}
+    name: {{name}}
   cloud:
     config:
       uri: http://config-server:8888
