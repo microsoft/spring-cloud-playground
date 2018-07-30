@@ -25,6 +25,14 @@ $(function () {
         return this.serviceName;
     }
 
+    microservice.prototype.getModuleList = function() {
+        return this.modules;
+    }
+
+    microservice.prototype.getPort = function() {
+        return this.port;
+    }
+
     var serviceList = new microservices([]);
 
     if (navigator.appVersion.indexOf("Mac") != -1) {
@@ -150,7 +158,7 @@ $(function () {
     function addServiceOnPage(service) {
         serviceList.addService(service);
         // Append selected services into the list on the page
-        selectedModules.append('<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><span>' + service.getName() + '</span></li>');
+        selectedModules.append(serviceItemDom(service));
         $("#" + service.getName() + " a").on("click", function(){
             deleteServiceOnPage(service.getName());
             $("input[value='" + service.getName() + "']").prop('checked', false);
@@ -160,5 +168,11 @@ $(function () {
     function deleteServiceOnPage(serviceName) {
         serviceList.deleteServiceByName(serviceName);
         $("#selected-modules-list #" + serviceName).remove();
+    }
+
+    function serviceItemDom(service) {
+        return '<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><strong>' + service.getName() +
+            '</strong>, modules: ' + service.getModuleList().toString() +
+            ', port: ' + service.getPort() + '</li>';
     }
 });
