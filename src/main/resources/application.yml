@@ -263,6 +263,18 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-storage
               description: Reference doc
+        - name: Azure Event Hub Stream Binder
+          id: azure-eventhub-binder
+          groupId: com.microsoft.azure
+          artifactId: spring-cloud-azure-eventhub-stream-binder
+          description: Spring Cloud Stream Event Hub Binder
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
+              description: Spring Cloud Stream with Event Hub Binder sample
+            - rel: reference
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-eventhub-stream-binder
+              description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
