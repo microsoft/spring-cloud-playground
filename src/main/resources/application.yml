@@ -239,6 +239,18 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-cache
               description: Reference doc
+        - name: Azure Sql Server Database
+          id: azure-sql-server
+          groupId: com.microsoft.azure
+          artifactId: spring-cloud-azure-starter-sql-sqlserver
+          description: Azure Sql Server Database Integration
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-sql-sample
+              description: Spring Cloud Azure redis cache sample
+            - rel: reference
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-sql-sqlserver
+              description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
