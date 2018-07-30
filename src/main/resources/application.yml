@@ -251,6 +251,18 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-sql-sqlserver
               description: Reference doc
+        - name: Azure Storage
+          id: azure-storage
+          groupId: com.microsoft.azure
+          artifactId: spring-cloud-azure-starter-storage
+          description: Azure Storage Integration
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-storage-sample
+              description: Spring Cloud Azure storage sample
+            - rel: reference
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-storage
+              description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
