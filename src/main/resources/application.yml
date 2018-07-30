@@ -227,6 +227,18 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-servicebus-spring-boot-starter
               description: Reference doc
+        - name: Azure Redis Cache
+          id: azure-redis-cache
+          groupId: com.microsoft.azure
+          artifactId: spring-cloud-azure-starter-cache
+          description: Azure Redis Cache Integration
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-cache-sample
+              description: Spring Cloud Azure redis cache sample
+            - rel: reference
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-cache
+              description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
