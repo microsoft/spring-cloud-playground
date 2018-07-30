@@ -1,5 +1,7 @@
 package com.microsoft.azure.springcloudplayground.generator;
 
+import org.springframework.lang.NonNull;
+
 import java.util.*;
 
 public class ServiceMetadata {
@@ -76,6 +78,24 @@ public class ServiceMetadata {
         }
 
         linksMap.put("services", filteredLinks);
+        return linksMap;
+    }
+
+    public static Map<String, List<ServiceLink>> getLinksMap(@NonNull List<String> microServices) {
+        Map<String, List<ServiceLink>> linksMap = new HashMap<>();
+        List<ServiceLink> filteredLinks = new ArrayList<>();
+
+        for (String serviceName: microServices) {
+            Optional<ServiceLink> linkOp = serviceLinks.stream().filter(link -> serviceName.equals(link.getServiceName())).findFirst();
+            if(!linkOp.isPresent()) {
+                throw new IllegalStateException("Failed to find ServiceLink for module " + serviceName);
+            }
+
+            filteredLinks.add(linkOp.get());
+        }
+
+        linksMap.put("services", filteredLinks);
+
         return linksMap;
     }
 }

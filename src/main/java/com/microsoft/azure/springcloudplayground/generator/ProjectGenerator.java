@@ -54,7 +54,23 @@ public class ProjectGenerator {
     private static final Version VERSION_2_0_0_M6 = Version.parse("2.0.0.M6");
 
     private static final String KUBERNETES_FILE = "kubernetes.yaml";
+
     private static final String DOCKER_PATH = "docker";
+
+    private static final Map<String, List<String>> serviceToDependencies = new HashMap<>();
+
+    static {
+        serviceToDependencies.put("cloud-config-server",
+                Arrays.asList("cloud-config-server"));
+        serviceToDependencies.put("cloud-gateway",
+                Arrays.asList("cloud-gateway", "cloud-eureka-client", "cloud-config-client"));
+        serviceToDependencies.put("cloud-eureka-server",
+                Arrays.asList("cloud-eureka-server", "cloud-config-client"));
+        serviceToDependencies.put("cloud-hystrix-dashboard",
+                Arrays.asList("cloud-hystrix-dashboard", "cloud-config-client", "cloud-eureka-client", "web"));
+        serviceToDependencies.put("azure-service-bus",
+                Arrays.asList("azure-service-bus", "cloud-config-client", "cloud-eureka-client", "web"));
+    }
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -81,6 +97,135 @@ public class ProjectGenerator {
 
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
+
+    private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
+        Map<String, String> properties = new HashMap<>();
+
+        properties.put("project.build.sourceEncoding", "UTF-8");
+        properties.put("project.reporting.outputEncoding", "UTF-8");
+
+        serviceModel.put("buildPropertiesMaven", properties.entrySet());
+    }
+
+    @NonNull
+    private void resolveMicroServiceDependency(@NonNull MicroService service, @NonNull Map<String, Object> serviceModel,
+                                               @NonNull String bootVersion) {
+        Version version = Version.parse(bootVersion);
+        GeneratorMetadata metadata = this.metadataProvider.get();
+        HashSet<String> set = new HashSet<>();
+        service.getModules().forEach(s -> set.addAll(serviceToDependencies.get(s)));
+
+        List<String> dependencyIdList = new ArrayList<>(set);
+        List<Dependency> dependencies = dependencyIdList.stream().map(
+                d -> metadata.getDependencies().get(d).resolve(version)).collect(Collectors.toList());
+
+        serviceModel.put("dependencyIdList", dependencyIdList);
+        serviceModel.put("compileDependencies", filterDependencies(dependencies, Dependency.SCOPE_COMPILE));
+        serviceModel.put("runtimeDependencies", filterDependencies(dependencies, Dependency.SCOPE_RUNTIME));
+        serviceModel.put("compileOnlyDependencies", filterDependencies(dependencies, Dependency.SCOPE_COMPILE_ONLY));
+        serviceModel.put("providedDependencies", filterDependencies(dependencies, Dependency.SCOPE_PROVIDED));
+        serviceModel.put("testDependencies", filterDependencies(dependencies, Dependency.SCOPE_TEST));
+    }
+
+    @NonNull
+    private String resolveMicroServiceSourceImports(@NonNull String serviceName) {
+        Imports imports = new Imports("java");
+
+        if (ServiceMetadata.importMap.containsKey(serviceName)) {
+            ServiceMetadata.importMap.get(serviceName).forEach(imports::add);
+        } else {
+            imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration");
+            imports.add("org.springframework.context.annotation.ComponentScan");
+            imports.add("org.springframework.context.annotation.Configuration");
+        }
+
+        return imports.withFinalCarriageReturn().toString();
+    }
+
+    @NonNull
+    private String resolveMicroServiceSourceAnnotations(@NonNull String serviceName) {
+        Annotations annotations = new Annotations();
+
+        if (ServiceMetadata.annotationMap.containsKey(serviceName)) {
+            ServiceMetadata.annotationMap.get(serviceName).forEach(annotations::add);
+        } else {
+            annotations.add("@EnableAutoConfiguration");
+            annotations.add("@ComponentScan");
+            annotations.add("@Configuration");
+        }
+
+        return annotations.withFinalCarriageReturn().toString();
+    }
+
+    @NonNull
+    private String resolveMicroServiceTestImports() {
+        Imports imports = new Imports("java");
+
+        imports.add("org.springframework.boot.test.context.SpringBootTest");
+        imports.add("org.springframework.test.context.junit4.SpringRunner");
+        imports.add("org.junit.Ignore");
+
+        return imports.withFinalCarriageReturn().toString();
+    }
+
+    @NonNull
+    private String resolveMicroServiceTestAnnotations() {
+        Annotations annotations = new Annotations();
+
+        annotations.add("@Ignore");
+
+        return annotations.withFinalCarriageReturn().toString();
+    }
+
+    private List<String> getMicroServiceNames(@NonNull Map<String, Object> model) {
+        List<MicroService> services = (List<MicroService>) model.get("microServices");
+        return services.stream().map(MicroService::getName).collect(Collectors.toList());
+    }
+
+    @NonNull
+    private Map<String, Object> resolveMicroServiceModel(@NonNull MicroService service,
+                                                         @NonNull Map<String, Object> model) {
+        GeneratorMetadata metadata = this.metadataProvider.get();
+        Map<String, Object> serviceModel = new HashMap<>();
+
+        model.put(service.getName(), serviceModel);
+
+        serviceModel.put("EXPOSE_PORT", service.getPort());
+
+        serviceModel.put("groupId", model.get("groupId"));
+        serviceModel.put("artifactId", String.format("%s.%s", model.get("artifactId").toString(), service.getName()));
+        serviceModel.put("version", model.get("version"));
+        serviceModel.put("packaging", "jar");
+        serviceModel.put("packageName", model.get("packageName"));
+
+        serviceModel.put("name", service.getName());
+        serviceModel.put("description", model.get("description"));
+
+        serviceModel.put("mavenParentGroupId", model.get("groupId"));
+        serviceModel.put("mavenParentArtifactId", model.get("artifactId"));
+        serviceModel.put("mavenParentVersion", model.get("version"));
+
+        this.resolveMicroServiceBuildProperties(serviceModel);
+        this.resolveMicroServiceDependency(service, serviceModel, model.get("bootVersion").toString());
+
+        serviceModel.put("applicationName", metadata.getConfiguration().generateApplicationName(service.getName()));
+
+        serviceModel.put("applicationImports", resolveMicroServiceSourceImports(service.getName()));
+        serviceModel.put("applicationAnnotations", resolveMicroServiceSourceAnnotations(service.getName()));
+        serviceModel.put("testImports", resolveMicroServiceTestImports());
+        serviceModel.put("testAnnotations", resolveMicroServiceTestAnnotations());
+
+        if (service.getName().equalsIgnoreCase("cloud-gateway")) {
+            List<String> serviceNames = getMicroServiceNames(model);
+            List<ConfigurableService> azureServices = serviceNames.stream()
+                    .filter(s -> !ModulePropertiesResolver.isInfraModule(s))
+                    .map(s -> new ConfigurableService(s, "0"))
+                    .collect(Collectors.toList());
+            serviceModel.put("services", azureServices);
+        }
+
+        return serviceModel;
+    }
 
     private void writeKubernetesFile(File dir, ProjectRequest request) {
         List<Service> services = ServiceResolver.resolve(request.getServices());
@@ -140,9 +285,119 @@ public class ProjectGenerator {
         return rootDir;
     }
 
+    private void generateMicroServiceDockerfile(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
+        String dockerFile = "Dockerfile";
+        String dockerTemplate = Paths.get("docker", dockerFile).toString();
+
+        writeText(new File(serviceDir, dockerFile), templateRenderer.process(dockerTemplate, serviceModel));
+    }
+
+    private void generateMicroServicePom(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
+        String pom = new String(doGenerateMavenPom(serviceModel, "module-pom.xml"));
+        writeText(new File(serviceDir, "pom.xml"), pom);
+    }
+
+    private void generateCloudConfigSourceCode(@NonNull File serviceDir, @NonNull File src,
+                                               @NonNull Map<String, Object> serviceModel,
+                                               @NonNull Map<String, Object> model) {
+        write(new File(src, "CustomWebFilter.java"), "CustomWebFilter.java", serviceModel);
+        File resources = new File(serviceDir, "src/main/resources/");
+        File staticResources = new File(serviceDir, "src/main/resources/static");
+
+        staticResources.mkdirs();
+
+        List<String> serviceNames = getMicroServiceNames(model);
+        writeText(new File(staticResources, "index.html"),
+                templateRenderer.process("GatewayIndex.tmpl", ServiceMetadata.getLinksMap(serviceNames)));
+        writeText(new File(staticResources, "bulma.min.css"), templateRenderer.process("bulma.min.css", null));
+
+        String yamlFile = ModulePropertiesResolver.getBootstrapTemplate(serviceModel.get("name").toString());
+        writeText(new File(resources, "bootstrap.yml"), templateRenderer.process(yamlFile, serviceModel));
+
+        File shared = new File(resources, "shared");
+        shared.mkdir();
+
+        yamlFile = ModulePropertiesResolver.getSharedCommonPropTemplate();
+        writeText(new File(shared, "application.yml"), templateRenderer.process(yamlFile, null));
+    }
+
+    private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
+                                                @NonNull Map<String, Object> model) {
+        List<String> dependencies = (List<String>) serviceModel.get("dependencyIdList");
+        String applicationName = serviceModel.get("applicationName").toString();
+        String serviceName = serviceModel.get("name").toString();
+        File resources = new File(serviceDir, "src/main/resources");
+        File src = new File(new File(serviceDir, "src/main/java"),
+                serviceModel.get("packageName").toString().replace(".", "/"));
+        src.mkdirs();
+        resources.mkdirs();
+
+        if (serviceName.equalsIgnoreCase("cloud-hystrix-dashboard")) {
+            write(new File(src, applicationName + ".java"), "HystrixDashboardApplication.java", serviceModel);
+            write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", serviceModel);
+            writeTextResource(resources, "hystrix.stream", "hystrix.stream");
+        } else {
+            write(new File(src, applicationName + ".java"), "Application.java", serviceModel);
+        }
+
+        if (dependencies.contains("web")) {
+            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
+        }
+
+        if (serviceName.equalsIgnoreCase("cloud-config")) {
+            this.generateCloudConfigSourceCode(serviceDir, src, serviceModel, model);
+        } else {
+            String yamlFile = ModulePropertiesResolver.getBootstrapTemplate(serviceModel.get("name").toString());
+            writeText(new File(resources, "bootstrap.yml"), templateRenderer.process(yamlFile, serviceModel));
+        }
+
+        List<String> dependencyIdList = (List<String>) serviceModel.get("dependencyIdList");
+        if (dependencyIdList.contains("web")) {
+            new File(serviceDir, "src/main/resources/templates").mkdirs();
+            new File(serviceDir, "src/main/resources/static").mkdirs();
+        }
+    }
+
+    private void generateMicroServiceTestCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
+        String applicationName = serviceModel.get("applicationName").toString();
+        File test = new File(new File(serviceDir, "src/test/java"),
+                serviceModel.get("packageName").toString().replace(".", "/"));
+        test.mkdirs();
+
+        write(new File(test, applicationName + "Tests.java"), "ApplicationTests.java", serviceModel);
+    }
+
+    private void generateMicroServiceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
+                                          @NonNull Map<String, Object> model) {
+        generateMicroServiceSourceCode(serviceDir, serviceModel, model);
+        generateMicroServiceTestCode(serviceDir, serviceModel);
+    }
+
+    private void generateMicroService(@NonNull MicroService service, @NonNull Map<String, Object> model,
+                                      @NonNull File projectDir) {
+        File serviceDir = new File(projectDir, service.getName());
+        serviceDir.mkdir();
+
+        Map<String, Object> serviceModel = this.resolveMicroServiceModel(service, model);
+        model.put(service.getName(), serviceModel);
+
+        this.generateMicroServiceDockerfile(serviceDir, serviceModel);
+        this.generateMicroServicePom(serviceDir, serviceModel);
+        this.generateMicroServiceCode(serviceDir, serviceModel, model);
+    }
+
+    private void generateMicroServicesProject(@NonNull File projectDir, @NonNull Map<String, Object> model) {
+        List<MicroService> services = (List<MicroService>) model.get("microServices");
+
+        services.forEach(s -> generateMicroService(s, model, projectDir));
+    }
+
     public File generate(@NonNull SimpleProjectRequest request) {
         Map<String, Object> model = this.resolveModel(request);
         File rootDir = this.generateRootProject(request, model);
+        File projectDir = new File(rootDir, request.getBaseDir());
+
+        this.generateMicroServicesProject(projectDir, model);
 
         return rootDir;
     }
