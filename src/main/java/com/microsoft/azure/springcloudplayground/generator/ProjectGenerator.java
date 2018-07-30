@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import retrofit2.http.HEAD;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -214,6 +215,7 @@ public class ProjectGenerator {
         serviceModel.put("version", model.get("version"));
         serviceModel.put("packaging", "jar");
         serviceModel.put("packageName", model.get("packageName"));
+
         serviceModel.put("description", model.get("description"));
 
         serviceModel.put("mavenParentGroupId", model.get("groupId"));
