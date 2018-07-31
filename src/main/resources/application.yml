@@ -246,7 +246,7 @@ playground:
     - name: Azure Spring Cloud Modules
       content:
         - name: Stream (Azure Event Hub)
-          id: azure-event-hub-binder
+          id: azure-eventhub-binder
           description: Spring Cloud Stream Binder for Azure Event Hub
         - name: Cache (Azure Redis Cache)
           id: azure-redis-cache
