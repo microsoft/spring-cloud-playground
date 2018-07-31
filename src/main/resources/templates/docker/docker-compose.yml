@@ -4,9 +4,9 @@ services:
   config-server:
     image: "demo/cloud-config-server"
     ports:
-      - "{{cloud-config-server-port}}:{{cloud-config-server-port}}"
+      - "{{port}}:{{port}}"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://config-server:{{cloud-config-server-port}}/gateway-server.yml"]
+      test: ["CMD", "curl", "-f", "http://config-server:{{port}}/gateway-server.yml"]
       interval: 5s
       retries: 20
 {{/cloud-config-server}}
@@ -14,14 +14,14 @@ services:
   eureka-server:
     image: "demo/cloud-eureka-server"
     ports:
-      - "{{cloud-eureka-server-port}}:{{cloud-eureka-server-port}}"
+      - "{{port}}:{{port}}"
     links:
       - config-server
     depends_on:
       config-server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://eureka-server:{{cloud-eureka-server-port}}"]
+      test: ["CMD", "curl", "-f", "http://eureka-server:{{port}}"]
       interval: 5s
       retries: 20
 {{/cloud-eureka-server}}
@@ -29,7 +29,7 @@ services:
   service-bus-server:
     image: "demo/azure-service-bus"
     ports:
-      - "{{azure-service-bus-port}}:{{azure-service-bus-port}}"
+      - "{{port}}:{{port}}"
     links:
       - eureka-server
       - config-server
@@ -37,7 +37,7 @@ services:
       eureka-server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://service-bus-server:{{azure-service-bus-port}}/azure-service-bus/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://service-bus-server:{{port}}/azure-service-bus/actuator/health"]
       interval: 5s
       retries: 20
 {{/azure-service-bus}}
@@ -45,7 +45,7 @@ services:
   hystrix-server:
     image: "demo/cloud-hystrix-dashboard"
     ports:
-      - "{{cloud-hystrix-dashboard-port}}:{{cloud-hystrix-dashboard-port}}"
+      - "{{port}}:{{port}}"
     links:
       - eureka-server
       - config-server
@@ -60,9 +60,9 @@ services:
       - eureka-server
       - config-server
     ports:
-      - "{{cloud-gateway-port}}:{{cloud-gateway-port}}"
+      - "{{port}}:{{port}}"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://gateway-server:{{cloud-gateway-port}}/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://gateway-server:{{port}}/actuator/health"]
       interval: 5s
       retries: 20
 {{/cloud-gateway}}
