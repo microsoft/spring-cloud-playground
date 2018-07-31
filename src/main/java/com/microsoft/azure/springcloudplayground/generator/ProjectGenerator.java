@@ -5,6 +5,7 @@ import com.microsoft.azure.springcloudplayground.exception.GeneratorException;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.service.ConfigurableService;
 import com.microsoft.azure.springcloudplayground.service.Service;
+import com.microsoft.azure.springcloudplayground.service.ServiceMetadata;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
@@ -140,15 +141,12 @@ public class ProjectGenerator {
         Assert.isNull(request.getParent(), "should be parent project.");
 
         final Map<String, Integer> servicesPortsMap = request.getServicesPortsMap();
-        final List<String> services = request.getServices();
 
-        final long configuredCount = services.stream().filter(s -> servicesPortsMap.get(s) != null).count();
-
-        if (configuredCount < services.size()) {
-            servicesPortsMap.forEach((key, value) -> servicesPortsMap.put(key, ServiceMetadata.portMap.get(key)));
-        }
-
-        request.getModules().forEach(m -> m.setPort(servicesPortsMap.get(m.getName())));
+        request.getModules().forEach(m -> {
+            if(servicesPortsMap.containsKey(m.getName())) {
+                m.setPort(servicesPortsMap.get(m.getName()));
+            }
+        });
     }
 
     /**
@@ -550,25 +548,19 @@ public class ProjectGenerator {
 
     protected void setupApplicationModel(ProjectRequest request,
                                          Map<String, Object> model) {
+        if (request.getParent() == null) {
+            return;
+        }
+
         Imports imports = new Imports(request.getLanguage());
         Annotations annotations = new Annotations();
-        boolean useSpringBootApplication = VERSION_1_2_0_RC1
-                .compareTo(Version.safeParse(request.getBootVersion())) <= 0;
 
-        if (ServiceMetadata.importMap.containsKey(request.getName()) && ServiceMetadata.annotationMap.containsKey(request.getName())) {
-            ServiceMetadata.importMap.get(request.getName()).forEach(imports::add);
-            ServiceMetadata.annotationMap.get(request.getName()).forEach(annotations::add);
-        }
-        else {
-            imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration")
-                    .add("org.springframework.context.annotation.ComponentScan")
-                    .add("org.springframework.context.annotation.Configuration");
-            annotations.add("@EnableAutoConfiguration").add("@ComponentScan")
-                    .add("@Configuration");
-        }
+        Service service = ServiceMetadata.getService(request.getName());
+        service.getImports().forEach(imports::add);
+        service.getAnnotations().forEach(annotations::add);
+
         model.put("applicationImports", imports.toString());
         model.put("applicationAnnotations", annotations.toString());
-
     }
 
     protected void setupTestModel(ProjectRequest request, Map<String, Object> model) {
