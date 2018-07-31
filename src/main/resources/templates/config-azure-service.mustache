@@ -5,9 +5,8 @@
                 {{#content}}
                     <div class="column is-half module-input">
                         <label class="checkbox module-checkbox">
-                            <input tabindex="13" type="checkbox" name="services" value="{{id}}">
+                            <input tabindex="13" type="checkbox" name="azure-modules" value="{{id}}">
                             {{name}}
-                            <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
                             <p class="help-block">{{#description}}{{.}}{{/description}}</p>
                         </label>
                     </div>
@@ -15,7 +14,12 @@
             </div>
         </div>
     {{/services.content.1}}
-    <hr class="small-top-margin"/>
+    <div id="service-info-input">
+            <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Your service name" alt="Name of the service will be generated">
+            <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="port" alt="Runtime port for this service">
+            <input type="button" class="button" id="create-azure-service" value="+ Create service"/>
+    </div>
+    <hr class="medium-top-margin"/>
     <div class="medium-top-margin">
         <h3 class="title is-6">Configured services</h3>
         <ul id="selected-modules-list">

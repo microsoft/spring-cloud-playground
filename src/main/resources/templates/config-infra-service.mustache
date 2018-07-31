@@ -1,4 +1,17 @@
 <div id="infra-selection">
+    <div class="columns">
+        <div class="column">
+            <label for="groupId" class="label">{{groupId.title}}</label>
+            <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
+                   name="groupId">
+        </div>
+        <div class="column">
+            <label for="artifactId" class="label">{{artifactId.title}}</label>
+            <input tabindex="5" id="artifactId" class="input" type="text"
+                   value="{{artifactId.content}}"
+                   name="artifactId">
+        </div>
+    </div>
     {{#services.content.0}}
         <div id="services">
             <div class="columns is-multiline">
@@ -23,4 +36,5 @@
             </button>
         </p>
     </div>
+    Want to <a id="config-port" class="is-7">configure your services ?</a>
 </div>

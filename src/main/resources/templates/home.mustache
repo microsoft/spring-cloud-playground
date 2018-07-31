@@ -84,23 +84,9 @@
         <div class="row metadata-row">
             <h4 class="title is-5">Generate your Spring Cloud application</h4>
             {{> select-steps}}
-            <div class="columns">
-                <div class="column">
-                    <label for="groupId" class="label">{{groupId.title}}</label>
-                    <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
-                           name="groupId">
-                </div>
-                <div class="column">
-                    <label for="artifactId" class="label">{{artifactId.title}}</label>
-                    <input tabindex="5" id="artifactId" class="input" type="text"
-                           value="{{artifactId.content}}"
-                           name="artifactId">
-                </div>
-            </div>
         </div>
         {{> config-infra-service}}
         {{> config-azure-service}}
-        Want to <a id="config-port" class="is-7">configure your services ?</a>
     </div>
 </form>
 <script src="{{#linkTo}}/js/jquery-3.1.1.min.js{{/linkTo}}"></script>
