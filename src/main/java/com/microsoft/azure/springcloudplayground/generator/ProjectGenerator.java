@@ -21,7 +21,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import retrofit2.http.HEAD;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
