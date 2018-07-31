@@ -76,7 +76,8 @@
         </video>
     </div>
 </div>
-<form id="form" action="/microservice.zip" method="get" role="form">
+<form id="form" action="/microservice.zip" method="post" role="form">
+    <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     <div class="small-container container large-bottom-margin">
         <p class="help is-danger app-error"></p>
         <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
