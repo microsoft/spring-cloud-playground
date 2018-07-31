@@ -9,20 +9,20 @@ $(function () {
 
     microservices.prototype.deleteServiceByName = function(serviceName) {
         this.serviceList = this.serviceList.filter(function(service) {
-            return service.serviceName != serviceName;
+            return service.name != serviceName;
         });
 
         return this.serviceList;
     }
 
     function microservice(serviceName, moduleList, port) {
-        this.serviceName = serviceName;
+        this.name = serviceName;
         this.modules = moduleList;
         this.port = port;
     }
 
     microservice.prototype.getName = function() {
-        return this.serviceName;
+        return this.name;
     }
 
     microservice.prototype.getModuleList = function() {
@@ -76,6 +76,8 @@ $(function () {
     var selectedModules = $("#selected-modules-list");
     var createAzureServiceBtn = $("#create-azure-service");
 
+    var serviceForm = $("#form");
+
     // Checkbox
     var infraCheckbox = $(".infra-checkbox");
 
@@ -121,8 +123,6 @@ $(function () {
     });
 
     infraCheckbox.on("change", function() {
-        console.log($(this).val() + ": " + $(this)[0].checked);
-
         var serviceName = $(this).val();
         var moduleList = [serviceName];
         var port = $(this).next("input").val();
@@ -156,6 +156,36 @@ $(function () {
                 $(this).prop('checked', false);
             });
         }
+    });
+
+    serviceForm.submit(function(event) {
+        var csrfToken = $("input[name='_csrf']").val();
+        var csrfTokenHeader = $("input[name='_csrf_header']").val();
+        var groupId = $("#groupId").val();
+        var artifactId = $("#artifactId").val();
+
+        var data = {
+            name: artifactId,
+            groupId: groupId,
+            artifactId: artifactId,
+            baseDir: artifactId,
+            packageName: groupId + "." + artifactId,
+            microServices: allServiceList.serviceList
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/project.zip",
+            data: JSON.stringify(data),
+            beforeSend: function(request) {
+                request.setRequestHeader(csrfTokenHeader, csrfToken);
+            },
+            success: console.log("post success"),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        });
+
+        event.preventDefault();
     });
 
     function showInfraModules() {
