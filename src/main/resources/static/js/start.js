@@ -33,7 +33,7 @@ $(function () {
         return this.port;
     }
 
-    var serviceList = new microservices([]);
+    var allServiceList = new microservices([]);
 
     if (navigator.appVersion.indexOf("Mac") != -1) {
         $(".btn-primary").append("<kbd>&#8984; + &#9166;</kbd>");
@@ -72,7 +72,9 @@ $(function () {
     var prevStepButton = $("#previous-step");
     var infraStep = $("#infra-step")[0];
     var azureStep = $("#azure-step")[0];
+
     var selectedModules = $("#selected-modules-list");
+    var createAzureServiceBtn = $("#create-azure-service");
 
     // Checkbox
     var infraCheckbox = $(".infra-checkbox");
@@ -133,6 +135,29 @@ $(function () {
         }
     });
 
+    createAzureServiceBtn.on("click", function() {
+        var serviceName = $("#azure-service-name").val();
+        var servicePort = $("#azure-service-port").val();
+
+        var azureModuleCheckboxs = $("input[name='azure-modules']");
+        var moduleList = [];
+        azureModuleCheckboxs.each(function() {
+            if($(this)[0].checked) {
+                moduleList.push($(this).val());
+            }
+        })
+
+        var azureMicroService = new microservice(serviceName, moduleList, servicePort);
+        if(addServiceOnPage(azureMicroService)) {
+            // Clear input values
+            $("#azure-service-name").val("");
+            $("#azure-service-port").val("");
+            azureModuleCheckboxs.each(function() {
+                $(this).prop('checked', false);
+            });
+        }
+    });
+
     function showInfraModules() {
         infraModulesSelector.removeClass("hidden");
         azureModulesSelector.addClass("hidden");
@@ -156,17 +181,24 @@ $(function () {
     }
 
     function addServiceOnPage(service) {
-        serviceList.addService(service);
+        if(!service.getName() || !service.getPort() || isNaN(service.getPort())
+            || typeof service.getModuleList() === 'undefined' || service.getModuleList().length === 0) {
+            console.warn("Some service property is empty or format illegal, " + JSON.stringify(service));
+            return false;
+        }
+
+        allServiceList.addService(service);
         // Append selected services into the list on the page
         selectedModules.append(serviceItemDom(service));
         $("#" + service.getName() + " a").on("click", function(){
             deleteServiceOnPage(service.getName());
             $("input[value='" + service.getName() + "']").prop('checked', false);
         });
+        return true;
     }
 
     function deleteServiceOnPage(serviceName) {
-        serviceList.deleteServiceByName(serviceName);
+        allServiceList.deleteServiceByName(serviceName);
         $("#selected-modules-list #" + serviceName).remove();
     }
 
