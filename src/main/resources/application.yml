@@ -1,3 +1,7 @@
+spring:
+  mustache:
+    expose-request-attributes: true
+
 playground:
   env:
     boms:
