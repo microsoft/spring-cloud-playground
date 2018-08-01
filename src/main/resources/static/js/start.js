@@ -200,7 +200,7 @@ $(function () {
     function getAttachmentName(xhttprequest) {
         var disposition = xhttprequest.getResponseHeader('content-disposition');
         var matches = /"([^"]*)"/.exec(disposition);
-        return (matches != null && matches[1] ? matches[1] : 'demo2.zip');
+        return (matches != null && matches[1] ? matches[1] : 'demo.zip');
     }
 
     function showInfraModules() {
