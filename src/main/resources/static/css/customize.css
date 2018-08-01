@@ -30,6 +30,10 @@
     margin-top: 2rem;
 }
 
+.large-top-margin {
+    margin-top: 4rem;
+}
+
 .large-bottom-margin {
     margin-bottom: 4rem;
 }
@@ -133,7 +137,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 }
 
 #service-info-input {
-    margin-top: 2rem;
+    margin-top: 4rem;
     display: flex;
     justify-content: center;
     padding: 0.25em;
@@ -149,4 +153,9 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 
 .steps {
     margin: 2rem 0;
+}
+
+.mandatory-label:before{
+    content:"*" ;
+    color:red
 }

@@ -65,18 +65,16 @@ $(function () {
     var configPort = $("#config-port");
     var port = $(".port-input");
 
-    // Modules selection elements
+    // Configurable steps
+    var metaDataConfig = $("#meta-data-config");
     var infraModulesSelector = $("#infra-selection");
     var azureModulesSelector = $("#azure-selection");
-    var nextStepButton = $("#next-step");
-    var prevStepButton = $("#previous-step");
+    var metaDataStep = $("#meta-data-step")[0];
     var infraStep = $("#infra-step")[0];
     var azureStep = $("#azure-step")[0];
 
     var selectedModules = $("#selected-modules-list");
     var createAzureServiceBtn = $("#create-azure-service");
-
-    var serviceForm = $("#form");
 
     // Checkbox
     var infraCheckbox = $(".infra-checkbox");
@@ -110,16 +108,20 @@ $(function () {
         buildRunVideo.removeClass("hidden");
     });
 
-    nextStepButton.on("click", function() {
-       showAzureModules();
-       completeStep(infraStep);
-       activateStep(azureStep);
+    $("#next-goto-infra-step").on("click", function() {
+        showInfraModulesConfig();
     });
 
-    prevStepButton.on("click", function() {
-       showInfraModules();
-       disActivateStep(azureStep);
-       activateStep(infraStep);
+    $("#next-goto-azure-step").on("click", function() {
+       showAzureModulesConfig();
+    });
+
+    $("#prev-goto-meta-step").on("click", function() {
+        showMetaDataConfig();
+    });
+
+    $("#prev-goto-infra-step").on("click", function() {
+       showInfraModulesConfig();
     });
 
     infraCheckbox.on("change", function() {
@@ -158,17 +160,20 @@ $(function () {
         }
     });
 
-    serviceForm.submit(function(event) {
+    $("#form").submit(function(event) {
         var csrfToken = $("input[name='_csrf']").val();
         var csrfTokenHeader = $("input[name='_csrf_header']").val();
         var groupId = $("#groupId").val();
         var artifactId = $("#artifactId").val();
+        var projectName = $("#project-name").val();
+        var description = $("#description").val();
 
         var data = {
-            name: artifactId,
+            name: projectName,
             groupId: groupId,
             artifactId: artifactId,
             baseDir: artifactId,
+            description: description,
             packageName: groupId + "." + artifactId,
             microServices: allServiceList.serviceList
         };
@@ -203,14 +208,43 @@ $(function () {
         return (matches != null && matches[1] ? matches[1] : 'demo.zip');
     }
 
-    function showInfraModules() {
-        infraModulesSelector.removeClass("hidden");
-        azureModulesSelector.addClass("hidden");
+    function showMetaDataConfig() {
+        showElements([metaDataConfig]);
+        hideElements([infraModulesSelector, azureModulesSelector]);
+
+        activateStep(metaDataStep);
+        disActivateStep(infraStep);
+        disActivateStep(azureStep);
     }
 
-    function showAzureModules() {
-        infraModulesSelector.addClass("hidden");
-        azureModulesSelector.removeClass("hidden");
+    function showInfraModulesConfig() {
+        hideElements([metaDataConfig, azureModulesSelector]);
+        showElements([infraModulesSelector]);
+
+        completeStep(metaDataStep);
+        activateStep(infraStep);
+        disActivateStep(azureStep);
+    }
+
+    function showAzureModulesConfig() {
+        hideElements([metaDataConfig, infraModulesSelector]);
+        showElements([azureModulesSelector]);
+
+        completeStep(metaDataStep);
+        completeStep(infraStep);
+        activateStep(azureStep);
+    }
+
+    function showElements(elements) {
+        elements.forEach(function(element) {
+            element.removeClass("hidden");
+        })
+    }
+
+    function hideElements(elements) {
+        elements.forEach(function(element) {
+            element.addClass("hidden");
+        })
     }
 
     function activateStep(stepElement) {

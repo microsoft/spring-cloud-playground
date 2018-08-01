@@ -31,7 +31,7 @@ public class SimpleProjectRequest {
 
     private String packaging = "pom";
 
-    private String description = "Project for spring cloud on azure";
+    private String description;
 
     private List<MicroService> microServices;
 }
