@@ -76,8 +76,6 @@ $(function () {
     var selectedModules = $("#selected-modules-list");
     var createAzureServiceBtn = $("#create-azure-service");
 
-    var serviceForm = $("#form");
-
     // Checkbox
     var infraCheckbox = $(".infra-checkbox");
 
@@ -162,17 +160,20 @@ $(function () {
         }
     });
 
-    serviceForm.submit(function(event) {
+    $("#form").submit(function(event) {
         var csrfToken = $("input[name='_csrf']").val();
         var csrfTokenHeader = $("input[name='_csrf_header']").val();
         var groupId = $("#groupId").val();
         var artifactId = $("#artifactId").val();
+        var projectName = $("#project-name").val();
+        var description = $("#description").val();
 
         var data = {
-            name: artifactId,
+            name: projectName,
             groupId: groupId,
             artifactId: artifactId,
             baseDir: artifactId,
+            description: description,
             packageName: groupId + "." + artifactId,
             microServices: allServiceList.serviceList
         };
