@@ -1,17 +1,4 @@
-<div id="infra-selection">
-    <div class="columns">
-        <div class="column">
-            <label for="groupId" class="label">{{groupId.title}}</label>
-            <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
-                   name="groupId">
-        </div>
-        <div class="column">
-            <label for="artifactId" class="label">{{artifactId.title}}</label>
-            <input tabindex="5" id="artifactId" class="input" type="text"
-                   value="{{artifactId.content}}"
-                   name="artifactId">
-        </div>
-    </div>
+<div id="infra-selection" class="hidden">
     {{#services.content.0}}
         <div id="services">
             <div class="columns is-multiline">
@@ -30,8 +17,12 @@
     {{/services.content.0}}
     <div class="button-group">
         <p class="has-text-centered">
+            <button onclick="gtag('event', 'click', { event_category: 'Go to meta data config', event_action: 'click'});"
+                    tabindex="13" id="prev-goto-meta-step" type="button" class="button" role="button">
+                Previous
+            </button>
             <button onclick="gtag('event', 'click', { event_category: 'Go to azure config', event_action: 'click'});"
-                    tabindex="12" id="next-step" type="button" class="button" role="button">
+                    tabindex="12" id="next-goto-azure-step" type="button" class="button" role="button">
                 Next
             </button>
         </p>
