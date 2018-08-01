@@ -1,9 +1,13 @@
 package {{packageName}};
 
 import org.springframework.boot.SpringApplication;
-{{applicationImports}}
+{{#applicationImports}}
+import {{this}};
+{{/applicationImports}}
 
-{{applicationAnnotations}}
+{{#applicationAnnotations}}
+{{this}}
+{{/applicationAnnotations}}
 public class {{applicationName}} {
 
 	public static void main(String[] args) {
