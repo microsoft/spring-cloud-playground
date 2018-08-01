@@ -4,7 +4,9 @@ import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.exception.GeneratorException;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.service.ConfigurableService;
+import com.microsoft.azure.springcloudplayground.service.Modules;
 import com.microsoft.azure.springcloudplayground.service.Service;
+import com.microsoft.azure.springcloudplayground.service.ServiceMetadata;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
@@ -21,6 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import retrofit2.http.HEAD;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -142,16 +145,16 @@ public class ProjectGenerator {
     }
 
     @NonNull
-    private String resolveMicroServiceSourceImports(@NonNull String serviceName) {
+    private String resolveMicroServiceSourceImports(@NonNull Service service) {
         Imports imports = new Imports("java");
 
-        if (ServiceMetadata.importMap.containsKey(serviceName)) {
-            ServiceMetadata.importMap.get(serviceName).forEach(imports::add);
-        } else {
-            imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration");
-            imports.add("org.springframework.context.annotation.ComponentScan");
-            imports.add("org.springframework.context.annotation.Configuration");
-        }
+//        if (ServiceMetadata.importMap.containsKey(serviceName)) {
+//            ServiceMetadata.importMap.get(serviceName).forEach(imports::add);
+//        } else {
+//            imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration");
+//            imports.add("org.springframework.context.annotation.ComponentScan");
+//            imports.add("org.springframework.context.annotation.Configuration");
+//        }
 
         return imports.toString();
     }
@@ -160,13 +163,13 @@ public class ProjectGenerator {
     private String resolveMicroServiceSourceAnnotations(@NonNull String serviceName) {
         Annotations annotations = new Annotations();
 
-        if (ServiceMetadata.annotationMap.containsKey(serviceName)) {
-            ServiceMetadata.annotationMap.get(serviceName).forEach(annotations::add);
-        } else {
-            annotations.add("@EnableAutoConfiguration");
-            annotations.add("@ComponentScan");
-            annotations.add("@Configuration");
-        }
+//        if (ServiceMetadata.annotationMap.containsKey(serviceName)) {
+//            ServiceMetadata.annotationMap.get(serviceName).forEach(annotations::add);
+//        } else {
+//            annotations.add("@EnableAutoConfiguration");
+//            annotations.add("@ComponentScan");
+//            annotations.add("@Configuration");
+//        }
 
         return annotations.toString();
     }
@@ -201,11 +204,9 @@ public class ProjectGenerator {
     }
 
     @NonNull
-    private Map<String, Object> resolveMicroServiceModel(@NonNull MicroService service,
-                                                         @NonNull Map<String, Object> model) {
+    private Map<String, Object> resolveMicroServiceModel(@NonNull Service service, @NonNull Map<String, Object> model) {
         GeneratorMetadata metadata = this.metadataProvider.get();
         Map<String, Object> serviceModel = (Map<String, Object>) model.get(service.getName());
-        Service serviceData = Service.toService(service.getName());
 
         model.put(service.getName(), serviceModel);
 
@@ -221,18 +222,17 @@ public class ProjectGenerator {
         serviceModel.put("mavenParentArtifactId", model.get("artifactId"));
         serviceModel.put("mavenParentVersion", model.get("version"));
 
-        this.resolveMicroServiceBuildProperties(serviceModel);
-        this.resolveMicroServiceDependency(serviceModel, model.get("bootVersion").toString());
+        resolveMicroServiceBuildProperties(serviceModel);
+        resolveMicroServiceDependency(serviceModel, model.get("bootVersion").toString());
 
         serviceModel.put("applicationName", metadata.getConfiguration().generateApplicationName(service.getName()));
-
-        serviceModel.put("applicationImports", resolveMicroServiceSourceImports(service.getName()));
-        serviceModel.put("applicationAnnotations", resolveMicroServiceSourceAnnotations(service.getName()));
+        serviceModel.put("applicationImports", service.getImports());
+        serviceModel.put("applicationAnnotations", service.getAnnotations());
         serviceModel.put("testImports", resolveMicroServiceTestImports());
         serviceModel.put("testAnnotations", resolveMicroServiceTestAnnotations());
 
-        serviceModel.put("healthCheckPath", serviceData.getHealthCheckPath());
-        serviceModel.put("image", serviceData.getImage());
+        serviceModel.put("healthCheckPath", service.getHealthCheckPath());
+        serviceModel.put("dockerImage", service.getDockerImage());
 
         return serviceModel;
     }
@@ -391,7 +391,7 @@ public class ProjectGenerator {
         generateMicroServiceTestCode(serviceDir, serviceModel);
     }
 
-    private void generateMicroService(@NonNull MicroService service, @NonNull Map<String, Object> model,
+    private void generateMicroService(@NonNull Service service, @NonNull Map<String, Object> model,
                                       @NonNull File projectDir) {
         File serviceDir = new File(projectDir, service.getName());
         serviceDir.mkdir();
@@ -405,7 +405,7 @@ public class ProjectGenerator {
 
     private void generateMicroServicesProject(@NonNull List<MicroService> microServices, @NonNull File projectDir,
                                               @NonNull Map<String, Object> model) {
-        microServices.forEach(s -> generateMicroService(s, model, projectDir));
+        microServices.forEach(s -> generateMicroService(Service.getInstanceByMicroService(s), model, projectDir));
     }
 
     private void generateDockerDirectory(@NonNull File projectDir, @NonNull Map<String, Object> model) {
@@ -469,15 +469,12 @@ public class ProjectGenerator {
         Assert.isNull(request.getParent(), "should be parent project.");
 
         final Map<String, Integer> servicesPortsMap = request.getServicesPortsMap();
-        final List<String> services = request.getServices();
 
-        final long configuredCount = services.stream().filter(s -> servicesPortsMap.get(s) != null).count();
-
-        if (configuredCount < services.size()) {
-            servicesPortsMap.forEach((key, value) -> servicesPortsMap.put(key, ServiceMetadata.portMap.get(key)));
-        }
-
-        request.getModules().forEach(m -> m.setPort(servicesPortsMap.get(m.getName())));
+        request.getModules().forEach(m -> {
+            if(servicesPortsMap.containsKey(m.getName())) {
+                m.setPort(servicesPortsMap.get(m.getName()));
+            }
+        });
     }
 
     /**
@@ -1025,24 +1022,19 @@ public class ProjectGenerator {
 
     protected void setupApplicationModel(ProjectRequest request,
                                          Map<String, Object> model) {
+        if (request.getParent() == null) {
+            return;
+        }
+
         Imports imports = new Imports(request.getLanguage());
         Annotations annotations = new Annotations();
-        boolean useSpringBootApplication = VERSION_1_2_0_RC1
-                .compareTo(Version.safeParse(request.getBootVersion())) <= 0;
 
-        if (ServiceMetadata.importMap.containsKey(request.getName()) && ServiceMetadata.annotationMap.containsKey(request.getName())) {
-            ServiceMetadata.importMap.get(request.getName()).forEach(imports::add);
-            ServiceMetadata.annotationMap.get(request.getName()).forEach(annotations::add);
-        } else {
-            imports.add("org.springframework.boot.autoconfigure.EnableAutoConfiguration")
-                    .add("org.springframework.context.annotation.ComponentScan")
-                    .add("org.springframework.context.annotation.Configuration");
-            annotations.add("@EnableAutoConfiguration").add("@ComponentScan")
-                    .add("@Configuration");
-        }
+        Service service = ServiceMetadata.getService(request.getName());
+        service.getImports().forEach(imports::add);
+        service.getAnnotations().forEach(annotations::add);
+
         model.put("applicationImports", imports.toString());
         model.put("applicationAnnotations", annotations.toString());
-
     }
 
     protected void setupTestModel(ProjectRequest request, Map<String, Object> model) {
