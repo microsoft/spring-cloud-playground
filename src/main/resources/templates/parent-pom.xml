@@ -30,13 +30,12 @@
 	</properties>
 
 	<modules>
-		{{#modules}}
-		<module>{{.}}</module>
-		{{/modules}}
+		{{#microServices}}
+		<module>{{name}}</module>
+		{{/microServices}}
 	</modules>
 
 {{#hasBoms}}
-
 	<dependencyManagement>
 		<dependencies>
 		    {{#resolvedBoms}}
@@ -81,8 +80,8 @@
 			</plugin>
 		</plugins>
 	</build>
-{{#hasRepositories}}
 
+{{#hasRepositories}}
 	<repositories>
 		{{#repositoryValues}}
 		<repository>
@@ -96,8 +95,8 @@
 		{{/repositoryValues}}
 	</repositories>
 {{/hasRepositories}}
-{{^isRelease}}
 
+{{^isRelease}}
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-snapshots</id>
@@ -117,6 +116,4 @@
 		</pluginRepository>
 	</pluginRepositories>
 {{/isRelease}}
-
-
 </project>

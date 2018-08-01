@@ -14,7 +14,7 @@ public class ConfigurableService extends ServiceModule {
     private String port;
 
     public ConfigurableService(String applicationName, String port) {
-        super("", applicationName, "");
+        super(applicationName, applicationName, "");
         this.applicationName = applicationName;
         this.port = port;
     }

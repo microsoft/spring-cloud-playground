@@ -7,4 +7,4 @@ COPY target/${JAR_FILE} /app.jar
 
 ENTRYPOINT ["java","-jar","/app.jar"]
 
-EXPOSE {{EXPOSE_PORT}}
+EXPOSE {{port}}
