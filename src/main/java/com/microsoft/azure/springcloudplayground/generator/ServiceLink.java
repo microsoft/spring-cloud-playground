@@ -8,6 +8,5 @@ import lombok.Data;
 public class ServiceLink {
     private String serviceName;
     private String serviceUrl;
-    private boolean isBasic;
 }
 
