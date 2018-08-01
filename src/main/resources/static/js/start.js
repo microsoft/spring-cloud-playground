@@ -83,11 +83,11 @@ $(function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
             port.removeClass("hidden");
-            configPort.text("reset to default configuration ?")
+            configPort.text("hide service configuration?")
         } else {
             port.removeClass("is-active");
             port.addClass("hidden");
-            configPort.text("configure your services ?")
+            configPort.text("configure your services?")
         }
     });
 
@@ -202,6 +202,10 @@ $(function () {
         event.preventDefault();
     });
 
+    $("input[name='azure-modules']").on("change", addServiceBtnChecker());
+    $("#azure-service-name").on("change", addServiceBtnChecker());
+    $("#azure-service-port").on("change", addServiceBtnChecker());
+
     function getAttachmentName(xhttprequest) {
         var disposition = xhttprequest.getResponseHeader('content-disposition');
         var matches = /"([^"]*)"/.exec(disposition);
@@ -285,5 +289,23 @@ $(function () {
         return '<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><strong>' + service.getName() +
             '</strong>, modules: ' + service.getModuleList().toString() +
             ', port: ' + service.getPort() + '</li>';
+    }
+
+    function addServiceBtnChecker() {
+        // TODO detect input changes and change disable status of add service button
+        var azureModuleSelected = false;
+        var azureModuleCheckboxs = $("input[name='azure-modules']");
+        azureModuleCheckboxs.each(function() {
+            azureModuleSelected = azureModuleSelected || $(this)[0].checked;
+        });
+
+        var serviceName = $("#azure-service-name").val();
+        var servicePort = $("#azure-service-port").val();
+
+        if(azureModuleSelected && serviceName && servicePort && !isNaN(servicePort)) {
+            createAzureServiceBtn.prop('disabled', false);
+        } else {
+            createAzureServiceBtn.prop('disabled', true);
+        }
     }
 });
