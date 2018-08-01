@@ -150,3 +150,8 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .steps {
     margin: 2rem 0;
 }
+
+.mandatory-label:before{
+    content:"*" ;
+    color:red
+}
