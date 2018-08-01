@@ -678,7 +678,7 @@ public class ProjectGenerator {
 
     private File getTemporaryDirectory() {
         if (this.temporaryDirectory == null) {
-            this.temporaryDirectory = new File(this.tmpdir, "playground");
+            this.temporaryDirectory = new File(this.tmpdir);
             this.temporaryDirectory.mkdirs();
         }
         return this.temporaryDirectory;
