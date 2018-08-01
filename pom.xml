@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.microsoft.azure</groupId>
+	<artifactId>spring-cloud-playground</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>spring-cloud-playground</name>
+	<description>A project helps scaffold and generate Microservice projects based on Spring Cloud</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.2.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<azure.version>2.0.1</azure.version>
+		<java.version>1.8</java.version>
+		<maven.build.timestamp.format>yyyy_MM_dd-HH_mm</maven.build.timestamp.format>
+
+		<!-- Docker Images -->
+		<docker.image.prefix>${your-docker-image-prefix}</docker.image.prefix>
+		<docker.image.name>azure-spring-cloud</docker.image.name>
+		<docker.image>${docker.image.prefix}/${docker.image.name}</docker.image>
+		<docker.image.tag>${maven.build.timestamp}</docker.image.tag>
+		<docker.jar.file>spring-cloud-playground-${project.version}.jar</docker.jar.file>
+
+		<!-- Azure Resource -->
+		<azure.authentication.server>${your-azure-authentication-server}</azure.authentication.server>
+		<azure.resource.group>${your-azure-resource-group}</azure.resource.group>
+		<azure.cr.server>${your-azure-acr-server}</azure.cr.server>
+		<azure.applicationinsights.version>2.0.1</azure.applicationinsights.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.samskivert</groupId>
+			<artifactId>jmustache</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-active-directory-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-keyvault-secrets-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-spring-boot</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-storage-spring-boot-starter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.10.2</version>
+        </dependency>
+
+		<!-- Application Insights -->
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-core</artifactId>
+			<version>${azure.applicationinsights.version}</version>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-spring-boot-bom</artifactId>
+				<version>${azure.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>ApplicationInsights.xml</include>
+					<include>application.yml</include>
+					<include>project/**</include>
+					<include>static/**</include>
+					<include>templates/**</include>
+				</includes>
+			</resource>
+
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>META-INF/project.properties</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Git Commit Id -->
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+					<dateFormat>yyyy-MM-dd^HH:mm:ssZ</dateFormat>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>
+						${project.build.outputDirectory}/git.properties
+					</generateGitPropertiesFilename>
+				</configuration>
+			</plugin>
+
+			<!-- Build Docker Image -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<id>image-tag-timestamp</id>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<repository>${docker.image}</repository>
+							<tag>${docker.image.tag}</tag>
+							<buildArgs>
+								<JAR_FILE>${docker.jar.file}</JAR_FILE>
+							</buildArgs>
+						</configuration>
+					</execution>
+					<execution>
+						<id>image-tag-latest</id>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+						<configuration>
+							<repository>${docker.image}</repository>
+							<tag>latest</tag>
+							<buildArgs>
+								<JAR_FILE>${docker.jar.file}</JAR_FILE>
+							</buildArgs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Azure Web App Deploy: mvn azure-webapp:deploy -->
+			<plugin>
+				<groupId>com.microsoft.azure</groupId>
+				<artifactId>azure-webapp-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<authentication>
+						<serverId>${azure.authentication.server}</serverId>
+					</authentication>
+					<resourceGroup>${azure.resource.group}</resourceGroup>
+					<appName>${docker.image.name}</appName>
+					<region>japaneast</region>
+					<containerSettings>
+						<imageName>${docker.image}:latest</imageName>
+						<serverId>${azure.cr.server}</serverId>
+						<registryUrl>https://${docker.image.prefix}</registryUrl>
+					</containerSettings>
+					<appSettings>
+						<property>
+							<name>PORT</name>
+							<value>8080</value>
+						</property>
+					</appSettings>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

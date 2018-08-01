@@ -1,0 +1,8 @@
+eureka:
+  instance:
+    prefer-ip-address: true
+    lease-expiration-duration-in-seconds: 20
+    lease-renewal-interval-in-seconds: 20
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

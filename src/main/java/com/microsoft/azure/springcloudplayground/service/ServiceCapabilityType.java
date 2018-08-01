@@ -1,0 +1,34 @@
+package com.microsoft.azure.springcloudplayground.service;
+
+import lombok.Getter;
+
+public enum ServiceCapabilityType {
+
+    /**
+     * A special type that defines the action to use.
+     */
+    ACTION("action"),
+
+    /**
+     * A simple text value with no option.
+     */
+    TEXT("text"),
+
+    /**
+     * A simple value to be chosen amongst the specified options.
+     */
+    SINGLE_SELECT("single-select"),
+
+    /**
+     * A hierarchical set of values (values in values) with the ability to select multiple
+     * values.
+     */
+    HIERARCHICAL_MULTI_SELECT("hierarchical-multi-select");
+
+    @Getter
+    private final String name;
+
+    ServiceCapabilityType(String name) {
+        this.name = name;
+    }
+}

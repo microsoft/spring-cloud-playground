@@ -1,0 +1,45 @@
+{{#services}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name}}
+  labels:
+    run: {{name}}
+spec:
+  ports:
+  - port: {{port}}
+    protocol: TCP
+  selector:
+    run: {{name}}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{name}}
+spec:
+  selector:
+    matchLabels:
+      run: {{name}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: {{name}}
+    spec:
+      containers:
+      - name: {{name}}
+        image: "{{image}}"
+        ports:
+        - containerPort: {{port}}
+        livenessProbe:
+          httpGet:
+            path: {{healthCheckPath}}
+            port: {{port}}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+
+{{/services}}

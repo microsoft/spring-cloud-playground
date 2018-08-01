@@ -1,0 +1,68 @@
+version: '2.1'
+services:
+{{#cloud-config-server}}
+  config-server:
+    image: "demo/cloud-config-server"
+    ports:
+      - "{{cloud-config-server-port}}:{{cloud-config-server-port}}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://config-server:{{cloud-config-server-port}}/gateway-server.yml"]
+      interval: 5s
+      retries: 20
+{{/cloud-config-server}}
+{{#cloud-eureka-server}}
+  eureka-server:
+    image: "demo/cloud-eureka-server"
+    ports:
+      - "{{cloud-eureka-server-port}}:{{cloud-eureka-server-port}}"
+    links:
+      - config-server
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://eureka-server:{{cloud-eureka-server-port}}"]
+      interval: 5s
+      retries: 20
+{{/cloud-eureka-server}}
+{{#azure-service-bus}}
+  service-bus-server:
+    image: "demo/azure-service-bus"
+    ports:
+      - "{{azure-service-bus-port}}:{{azure-service-bus-port}}"
+    links:
+      - eureka-server
+      - config-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://service-bus-server:{{azure-service-bus-port}}/azure-service-bus/actuator/health"]
+      interval: 5s
+      retries: 20
+{{/azure-service-bus}}
+{{#cloud-hystrix-dashboard}}
+  hystrix-server:
+    image: "demo/cloud-hystrix-dashboard"
+    ports:
+      - "{{cloud-hystrix-dashboard-port}}:{{cloud-hystrix-dashboard-port}}"
+    links:
+      - eureka-server
+      - config-server
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+{{/cloud-hystrix-dashboard}}
+{{#cloud-gateway}}
+  gateway-server:
+    image: "demo/cloud-gateway"
+    links:
+      - eureka-server
+      - config-server
+    ports:
+      - "{{cloud-gateway-port}}:{{cloud-gateway-port}}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://gateway-server:{{cloud-gateway-port}}/actuator/health"]
+      interval: 5s
+      retries: 20
+{{/cloud-gateway}}
