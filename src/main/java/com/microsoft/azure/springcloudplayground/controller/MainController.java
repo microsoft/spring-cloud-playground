@@ -137,9 +137,6 @@ public class MainController extends AbstractPlaygroundController {
 
         this.triggerGenerateEvent(request.getMicroServices());
 
-//        String wrapperScript = request.getBaseDir() + "/" + "mvnw";
-//        new File(dir, wrapperScript).setExecutable(true);
-
         Zip zip = new Zip();
         zip.setProject(new Project());
         zip.setDefaultexcludes(false);
@@ -147,15 +144,6 @@ public class MainController extends AbstractPlaygroundController {
         ZipFileSet set = new ZipFileSet();
         set.setDir(dir);
         set.setFileMode("755");
-//        set.setIncludes(wrapperScript);
-        set.setDefaultexcludes(false);
-
-        zip.addFileset(set);
-
-        set = new ZipFileSet();
-        set.setDir(dir);
-        set.setIncludes("**,");
-//        set.setExcludes(wrapperScript);
         set.setDefaultexcludes(false);
 
         zip.addFileset(set);
@@ -164,80 +152,6 @@ public class MainController extends AbstractPlaygroundController {
 
         return upload(download, dir, generateFileName(request, "zip"), "application/zip");
     }
-
-//    @RequestMapping("/microservice.zip")
-//    @ResponseBody
-//    public ResponseEntity<byte[]> springZip(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
-//            throws IOException {
-//        ProjectRequest request = (ProjectRequest) basicRequest;
-//        File dir = this.projectGenerator.generateProjectStructure(request);
-//        File download = this.projectGenerator.createDistributionFile(dir, ".zip");
-//        String wrapperScript = getWrapperScript(request);
-//
-//        this.triggerGenerateEvent(request.getServices());
-//        new File(dir, wrapperScript).setExecutable(true);
-//
-//        Zip zip = new Zip();
-//        zip.setProject(new Project());
-//        zip.setDefaultexcludes(false);
-//
-//        ZipFileSet set = new ZipFileSet();
-//        set.setDir(dir);
-//        set.setFileMode("755");
-//        set.setIncludes(wrapperScript);
-//        set.setDefaultexcludes(false);
-//
-//        zip.addFileset(set);
-//
-//        set = new ZipFileSet();
-//        set.setDir(dir);
-//        set.setIncludes("**,");
-//        set.setExcludes(wrapperScript);
-//        set.setDefaultexcludes(false);
-//
-//        zip.addFileset(set);
-//        zip.setDestFile(download.getCanonicalFile());
-//        zip.execute();
-//
-//        return upload(download, dir, generateFileName(request, "zip"), "application/zip");
-//    }
-
-//    @RequestMapping(path = "/microservice.tgz", produces = "application/x-compress")
-//    @ResponseBody
-//    public ResponseEntity<byte[]> springTgz(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
-//            throws IOException {
-//        ProjectRequest request = (ProjectRequest) basicRequest;
-//        File dir = this.projectGenerator.generateProjectStructure(request);
-//        File download = this.projectGenerator.createDistributionFile(dir, ".tar.gz");
-//        String wrapperScript = getWrapperScript(request);
-//
-//        this.triggerGenerateEvent(request.getServices());
-//        new File(dir, wrapperScript).setExecutable(true);
-//
-//        Tar zip = new Tar();
-//        zip.setProject(new Project());
-//        zip.setDefaultexcludes(false);
-//
-//        Tar.TarFileSet set = zip.createTarFileSet();
-//        set.setDir(dir);
-//        set.setFileMode("755");
-//        set.setIncludes(wrapperScript);
-//        set.setDefaultexcludes(false);
-//
-//        set = zip.createTarFileSet();
-//        set.setDir(dir);
-//        set.setIncludes("**,");
-//        set.setExcludes(wrapperScript);
-//        set.setDefaultexcludes(false);
-//
-//        zip.setDestFile(download.getCanonicalFile());
-//        Tar.TarCompressionMethod method = new Tar.TarCompressionMethod();
-//        method.setValue("gzip");
-//        zip.setCompression(method);
-//        zip.execute();
-//
-//        return upload(download, dir, generateFileName(request, "tar.gz"), "application/x-compress");
-//    }
 
     private static String generateFileName(ProjectRequest request, String extension) {
         String tmp = request.getArtifactId().replaceAll(" ", "_");
