@@ -13,25 +13,25 @@ public class SimpleProjectRequest {
 
     private String name;
 
-    private String type;
+    private String type = "maven-project";
 
     private String groupId;
 
     private String artifactId;
 
-    private String version;
+    private String version = "0.0.1-SNAPSHOT";
 
-    private String bootVersion;
+    private String bootVersion = "2.0.3.RELEASE";
 
     private String packageName;
 
-    private String javaVersion;
+    private String javaVersion = "1.8";
 
     private String baseDir;
 
-    private String packaging;
+    private String packaging = "pom";
 
-    private String description;
+    private String description = "Project for spring cloud on azure";
 
     private List<MicroService> microServices;
 }

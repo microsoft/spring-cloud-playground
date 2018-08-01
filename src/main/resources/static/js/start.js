@@ -173,20 +173,35 @@ $(function () {
             microServices: allServiceList.serviceList
         };
 
-        $.ajax({
-            type: "POST",
-            url: "/project.zip",
-            data: JSON.stringify(data),
-            beforeSend: function(request) {
-                request.setRequestHeader(csrfTokenHeader, csrfToken);
-            },
-            success: console.log("post success"),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json"
-        });
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            var a;
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhttp.response);
+                a.download = getAttachmentName(xhttp);
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        };
+
+        xhttp.open("POST", '/project.zip');
+        xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+        // Set responseType as blob for binary responses
+        xhttp.responseType = 'blob';
+        xhttp.send(JSON.stringify(data));
 
         event.preventDefault();
     });
+
+    function getAttachmentName(xhttprequest) {
+        var disposition = xhttprequest.getResponseHeader('content-disposition');
+        var matches = /"([^"]*)"/.exec(disposition);
+        return (matches != null && matches[1] ? matches[1] : 'demo.zip');
+    }
 
     function showInfraModules() {
         infraModulesSelector.removeClass("hidden");
