@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 @RestController
-public class Controller {
+public class StorageController {
 
     @Value("blob://{containerName}/{blobName}")
     private Resource blobFile;

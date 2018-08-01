@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class Controller {
+public class CacheController {
 
     @GetMapping("/{name}")
     @Cacheable("azureCache")

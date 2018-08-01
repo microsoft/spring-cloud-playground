@@ -1,5 +1,6 @@
 package {{packageName}};
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,13 +10,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-public class Controller {
+public class SqlController {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public Controller(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @GetMapping("/users")
     public List getUsers() {
