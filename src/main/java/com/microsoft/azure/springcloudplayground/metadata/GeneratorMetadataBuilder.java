@@ -102,7 +102,7 @@ public final class GeneratorMetadataBuilder {
         }
 
         if (!StringUtils.hasText(metadata.getDescription().getContent())) {
-            metadata.getDescription().setContent("Demo project for Spring Boot");
+            metadata.getDescription().setContent("Demo project for Spring Cloud Azure");
         }
 
         if (!StringUtils.hasText(metadata.getGroupId().getContent())) {

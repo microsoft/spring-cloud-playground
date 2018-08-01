@@ -97,7 +97,7 @@ public class GeneratorProperties extends GeneratorConfiguration {
     @Getter
     @JsonIgnore
     private final SimpleElement description = new SimpleElement(
-            "Demo project for Spring Boot");
+            "Demo project for Spring Cloud Azure");
 
     /**
      * Package name metadata.
