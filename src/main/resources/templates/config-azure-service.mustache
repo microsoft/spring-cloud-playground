@@ -1,4 +1,17 @@
 <div id="azure-selection" class="hidden">
+    <div class="columns">
+        <div class="column is-half">
+            <label for="azure-service-name" class="label mandatory-label">Service Name</label>
+            <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Service name with [0-9][a-zA-Z][-] only" alt="Name of the service will be generated">
+            <p id="service-name-hint"> </p>
+        </div>
+        <div class="column is-one-fifth">
+            <label for="azure-service-port" class="label mandatory-label">Port</label>
+            <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="port" alt="Runtime port for this service" min="1025" max="65535">
+            <p id="service-port-hint"> </p>
+        </div>
+    </div>
+
     {{#services.content.1}}
         <div id="services">
             <div class="columns is-multiline">
@@ -15,11 +28,9 @@
         </div>
     {{/services.content.1}}
     <div id="service-info-input">
-            <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Service name with [0-9][a-zA-Z][-] only" alt="Name of the service will be generated">
-            <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="port" alt="Runtime port for this service" min="1025" max="65535">
-            <input type="button" class="button" id="create-azure-service" value="+ Add service" disabled/>
+        <input type="button" class="button" id="create-azure-service" value="+ Add service" disabled/>
     </div>
-    <hr class="medium-top-margin"/>
+    <hr class="small-top-margin"/>
     <div class="medium-top-margin">
         <h3 class="title is-6">Configured services</h3>
         <ul id="selected-modules-list">
