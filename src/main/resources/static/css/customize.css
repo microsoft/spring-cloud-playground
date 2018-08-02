@@ -34,8 +34,8 @@
     margin-top: 4rem;
 }
 
-.large-bottom-margin {
-    margin-bottom: 4rem;
+.large-bottom-padding {
+    padding-bottom: 4rem;
 }
 
 .module-checkbox {
