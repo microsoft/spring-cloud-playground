@@ -4,6 +4,7 @@ import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.service.ServiceMetadata;
+import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -66,6 +68,10 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
+    @Autowired
+    ResourceLoader resourceLoader;
+
+    //private void writeKubernetesFile(File dir, ProjectRequest request){
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
 
@@ -149,7 +155,7 @@ public class ProjectGenerator {
         return serviceModel;
     }
 
-    private void generateBaseDirectory(@NonNull File rootDir, @NonNull SimpleProjectRequest request,
+    private void generateBaseDirectory(@NonNull File rootDir, @NonNull ProjectRequest request,
                                        @NonNull Map<String, Object> model) {
         Assert.hasText(request.getBaseDir(), "Basedir should have text.");
 
@@ -163,7 +169,7 @@ public class ProjectGenerator {
         write(new File(dir, ".gitignore"), "gitignore.tmpl", model);
     }
 
-    private File generateRootProject(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+    private File generateRootProject(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         File rootDir;
 
         try {
@@ -193,8 +199,7 @@ public class ProjectGenerator {
         writeText(new File(serviceDir, "pom.xml"), pom);
     }
 
-    private void generateCloudConfigSourceCode(@NonNull File serviceDir, @NonNull File src,
-                                               @NonNull Map<String, Object> serviceModel,
+    private void generateCloudConfigSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
                                                @NonNull Map<String, Object> model) {
         File resources = new File(serviceDir, "src/main/resources/");
         File shared = new File(resources, "shared");
@@ -214,8 +219,8 @@ public class ProjectGenerator {
         });
     }
 
-    private void generateCloudGatewaySourceCode(File serviceDir, File src, Map<String,Object> serviceModel,
-                                                Map<String,Object> model) {
+    private void generateCloudGatewaySourceCode(File serviceDir, File src, Map<String, Object> serviceModel,
+                                                Map<String, Object> model) {
         write(new File(src, "CustomWebFilter.java"), "CustomWebFilter.java", serviceModel);
         File staticResources = new File(serviceDir, "src/main/resources/static");
 
@@ -238,7 +243,7 @@ public class ProjectGenerator {
         src.mkdirs();
         resources.mkdirs();
 
-        if (serviceName.equalsIgnoreCase("cloud-hystrix-dashboard")) {
+        if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_HYSTRIX_DASHBOARD)) {
             write(new File(src, applicationName + ".java"), "HystrixDashboardApplication.java", serviceModel);
             write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", serviceModel);
             writeTextResource(resources, "hystrix.stream", "hystrix.stream");
@@ -252,9 +257,9 @@ public class ProjectGenerator {
             write(new File(src, "Controller.java"), "Controller.java", serviceModel);
         }
 
-        if (serviceName.equalsIgnoreCase("cloud-config-server")) {
-            this.generateCloudConfigSourceCode(serviceDir, src, serviceModel, model);
-        } else if (serviceName.equalsIgnoreCase("cloud-gateway")) {
+        if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_CONFIG_SERVER)) {
+            this.generateCloudConfigSourceCode(serviceDir, serviceModel, model);
+        } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
             this.generateCloudGatewaySourceCode(serviceDir, src, serviceModel, model);
         }
 
@@ -312,7 +317,7 @@ public class ProjectGenerator {
         writeText(new File(dockerDir, kubernetes), templateRenderer.process(docker + "/" + kubernetes, model));
     }
 
-    public File generate(@NonNull SimpleProjectRequest request) {
+    public File generate(@NonNull ProjectRequest request) {
         Map<String, Object> model = this.resolveModel(request);
         File rootDir = this.generateRootProject(request, model);
         File projectDir = new File(rootDir, request.getBaseDir());
@@ -397,7 +402,7 @@ public class ProjectGenerator {
         return boms;
     }
 
-    private void resolveBomsModel(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+    private void resolveBomsModel(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         Map<String, BillOfMaterials> boms = getBoms(request.getBootVersion());
 
         model.put("hasBoms", true);
@@ -405,7 +410,7 @@ public class ProjectGenerator {
                 .map(this::getBomModel).collect(Collectors.toList()));
     }
 
-    private void resolveBuildPropertiesModel(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+    private void resolveBuildPropertiesModel(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         Map<String, String> versions = new HashMap<>();
         Map<String, String> maven = new HashMap<>();
 
@@ -430,7 +435,7 @@ public class ProjectGenerator {
         return name.contains("azure");
     }
 
-    private void resolveRequestMicroServicesModel(@NonNull SimpleProjectRequest request,
+    private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request,
                                                   @NonNull Map<String, Object> model) {
         List<String> microServiceNames = new ArrayList<>();
         List<Map<String, Object>> microServices = new ArrayList<>();
@@ -462,7 +467,7 @@ public class ProjectGenerator {
         model.put("azureServices", azureServices);
     }
 
-    private void resolveRequestModel(@NonNull SimpleProjectRequest request, @NonNull Map<String, Object> model) {
+    private void resolveRequestModel(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         model.put("name", request.getName());
         model.put("type", request.getType());
         model.put("groupId", request.getGroupId());
@@ -491,7 +496,7 @@ public class ProjectGenerator {
         model.put("isRelease", true);
     }
 
-    private Map<String, Object> resolveModel(@NonNull SimpleProjectRequest request) {
+    private Map<String, Object> resolveModel(@NonNull ProjectRequest request) {
         Map<String, Object> model = new LinkedHashMap<>();
 
         model.put("mavenBuild", true);
@@ -545,6 +550,11 @@ public class ProjectGenerator {
         return target;
     }
 
+    /**
+     * Write a template with model to a target file
+     *
+     * @param target target file
+     */
     public void write(File target, String templateName, Map<String, Object> model) {
         String body = this.templateRenderer.process(templateName, model);
         writeText(target, body);

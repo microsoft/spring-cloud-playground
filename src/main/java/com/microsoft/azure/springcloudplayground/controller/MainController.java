@@ -2,7 +2,7 @@ package com.microsoft.azure.springcloudplayground.controller;
 
 import com.microsoft.azure.springcloudplayground.generator.MicroService;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
-import com.microsoft.azure.springcloudplayground.generator.SimpleProjectRequest;
+import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
@@ -121,7 +121,7 @@ public class MainController extends AbstractPlaygroundController {
 
     @ResponseBody
     @PostMapping("/project.zip")
-    public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull SimpleProjectRequest request) throws IOException {
+    public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull ProjectRequest request) throws IOException {
         File dir = this.projectGenerator.generate(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
 
@@ -143,7 +143,7 @@ public class MainController extends AbstractPlaygroundController {
         return upload(download, dir, generateFileName(request, "zip"), "application/zip");
     }
 
-    private static String generateFileName(SimpleProjectRequest request, String extension) {
+    private static String generateFileName(ProjectRequest request, String extension) {
         String tmp = request.getArtifactId().replaceAll(" ", "_");
 
         try {
