@@ -1,14 +1,12 @@
 package com.microsoft.azure.springcloudplayground.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.springcloudplayground.dependency.DependencyMetadataProvider;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
-import com.microsoft.azure.springcloudplayground.generator.ProjectRequestPostProcessor;
-import com.microsoft.azure.springcloudplayground.generator.ProjectRequestResolver;
 import com.microsoft.azure.springcloudplayground.generator.ProjectResourceLocator;
-import com.microsoft.azure.springcloudplayground.metadata.*;
+import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadata;
+import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataBuilder;
+import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
+import com.microsoft.azure.springcloudplayground.metadata.GeneratorProperties;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
@@ -18,7 +16,6 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -26,22 +23,11 @@ import org.springframework.core.env.Environment;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.expiry.CreatedExpiryPolicy;
 import javax.cache.expiry.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(GeneratorProperties.class)
-@AutoConfigureAfter({ CacheAutoConfiguration.class, JacksonAutoConfiguration.class,
-        RestTemplateAutoConfiguration.class })
+@AutoConfigureAfter({CacheAutoConfiguration.class, JacksonAutoConfiguration.class, RestTemplateAutoConfiguration.class})
 public class PlaygroundAutoConfiguration {
-
-    private final List<ProjectRequestPostProcessor> postProcessors;
-
-    public PlaygroundAutoConfiguration(
-            ObjectProvider<List<ProjectRequestPostProcessor>> postProcessors) {
-        List<ProjectRequestPostProcessor> list = postProcessors.getIfAvailable();
-        this.postProcessors = list != null ? list : new ArrayList<>();
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -60,61 +46,17 @@ public class PlaygroundAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public ProjectRequestResolver projectRequestResolver() {
-        return new ProjectRequestResolver(this.postProcessors);
-    }
-
-    @Bean
     public ProjectResourceLocator projectResourceLocator() {
         return new ProjectResourceLocator();
     }
 
     @Bean
     @ConditionalOnMissingBean(GeneratorMetadataProvider.class)
-    public GeneratorMetadataProvider generatorMetadataProvider(
-            GeneratorProperties properties, ObjectMapper objectMapper,
-            RestTemplateBuilder restTemplateBuilder) {
+    public GeneratorMetadataProvider generatorMetadataProvider(GeneratorProperties properties) {
         GeneratorMetadata metadata = GeneratorMetadataBuilder.fromGeneratorProperties(properties).build();
-        return new DefaultGeneratorMetadataProvider(metadata, objectMapper, restTemplateBuilder.build());
+        return new DefaultGeneratorMetadataProvider(metadata);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DependencyMetadataProvider dependencyMetadataProvider() {
-        return new DefaultDependencyMetadataProvider();
-    }
-
-    /**
-     * Playground web configuration.
-     */
-    /**
-    @Configuration
-    @ConditionalOnWebApplication
-    static class PlaygroundWebConfiguration {
-
-        @Bean
-        public PlaygroundWebConfiguration playgroundWebConfig() {
-            return new PlaygroundWebConfiguration();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public MainController playgroundMainController(
-                GeneratorMetadataProvider metadataProvider,
-                TemplateRenderer templateRenderer,
-                ResourceUrlProvider resourceUrlProvider,
-                ProjectGenerator projectGenerator,
-                DependencyMetadataProvider dependencyMetadataProvider) {
-            return new MainController(metadataProvider, templateRenderer,
-                    resourceUrlProvider, projectGenerator, dependencyMetadataProvider);
-        }
-    }
-    */
-
-    /**
-     * Cache configuration.
-     */
     @Configuration
     @ConditionalOnClass(javax.cache.CacheManager.class)
     static class CacheConfiguration {

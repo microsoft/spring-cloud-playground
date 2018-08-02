@@ -6,7 +6,7 @@ import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetad
 import com.microsoft.azure.springcloudplayground.metadata.Describable;
 import com.microsoft.azure.springcloudplayground.metadata.Link;
 import com.microsoft.azure.springcloudplayground.metadata.MetadataElement;
-import com.microsoft.azure.springcloudplayground.util.InvalidVersionException;
+import com.microsoft.azure.springcloudplayground.exception.InvalidVersionException;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionParser;
 import com.microsoft.azure.springcloudplayground.util.VersionRange;
