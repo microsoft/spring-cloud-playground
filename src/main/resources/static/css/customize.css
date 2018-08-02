@@ -34,8 +34,8 @@
     margin-top: 4rem;
 }
 
-.large-bottom-margin {
-    margin-bottom: 4rem;
+.large-bottom-padding {
+    padding-bottom: 4rem;
 }
 
 .module-checkbox {
@@ -182,4 +182,13 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .footer-links a, .footer-links a:visited {
     color: hsla(0, 0%, 9%, .998);
     color: var(--grey-to-blue);
+}
+
+.playground-footer {
+    background-color: #fafafa;
+    padding: 1.5rem;
+}
+
+.playground-footer .content ul {
+    margin-top: 0;
 }

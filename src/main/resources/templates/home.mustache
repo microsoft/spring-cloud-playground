@@ -79,7 +79,7 @@
 <form id="form" method="post" role="form">
     <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     <input type="hidden" name="_csrf_header" value="{{_csrf.headerName}}"/>
-    <div class="small-container container large-bottom-margin">
+    <div class="small-container container large-bottom-padding">
         <p class="help is-danger app-error"></p>
         <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
         <div class="row metadata-row">
@@ -91,7 +91,7 @@
         {{> config-azure-service}}
     </div>
 </form>
-<footer class="footer">
+<footer class="playground-footer">
     <div class="content has-text-centered">
         <ul class="footer-links">
             <li><a href="https://github.com/Microsoft/spring-cloud-azure" target="_blank"><i class="fab fa-github"></i></a></li>
