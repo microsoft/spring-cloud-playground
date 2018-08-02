@@ -78,16 +78,20 @@ $(function () {
 
     // Checkbox
     var infraCheckbox = $(".infra-checkbox");
+    var azureCheckbox = $(".azure-checkbox");
+
+    var azureServiceNameInput = $("#azure-service-name");
+    var azureServicePortInput = $("#azure-service-port");
 
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
             port.removeClass("hidden");
-            configPort.text("reset to default configuration ?")
+            configPort.text("hide service configuration?")
         } else {
             port.removeClass("is-active");
             port.addClass("hidden");
-            configPort.text("configure your services ?")
+            configPort.text("configure your services?")
         }
     });
 
@@ -138,8 +142,8 @@ $(function () {
     });
 
     createAzureServiceBtn.on("click", function() {
-        var serviceName = $("#azure-service-name").val();
-        var servicePort = $("#azure-service-port").val();
+        var serviceName = azureServiceNameInput.val().trim();
+        var servicePort = azureServicePortInput.val().trim();
 
         var azureModuleCheckboxs = $("input[name='azure-modules']");
         var moduleList = [];
@@ -152,8 +156,8 @@ $(function () {
         var azureMicroService = new microservice(serviceName, moduleList, servicePort);
         if(addServiceOnPage(azureMicroService)) {
             // Clear input values
-            $("#azure-service-name").val("");
-            $("#azure-service-port").val("");
+            azureServiceNameInput.val("");
+            azureServicePortInput.val("");
             azureModuleCheckboxs.each(function() {
                 $(this).prop('checked', false);
             });
@@ -202,6 +206,10 @@ $(function () {
         event.preventDefault();
     });
 
+    azureCheckbox.on("change", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
+
     function getAttachmentName(xhttprequest) {
         var disposition = xhttprequest.getResponseHeader('content-disposition');
         var matches = /"([^"]*)"/.exec(disposition);
@@ -215,6 +223,8 @@ $(function () {
         activateStep(metaDataStep);
         disActivateStep(infraStep);
         disActivateStep(azureStep);
+
+        showCompleteForm();
     }
 
     function showInfraModulesConfig() {
@@ -224,6 +234,8 @@ $(function () {
         completeStep(metaDataStep);
         activateStep(infraStep);
         disActivateStep(azureStep);
+
+        showCompleteForm();
     }
 
     function showAzureModulesConfig() {
@@ -233,6 +245,12 @@ $(function () {
         completeStep(metaDataStep);
         completeStep(infraStep);
         activateStep(azureStep);
+
+        showCompleteForm();
+    }
+
+    function showCompleteForm() {
+        $("#form div")[0].scrollIntoView(false);
     }
 
     function showElements(elements) {
@@ -269,6 +287,8 @@ $(function () {
         allServiceList.addService(service);
         // Append selected services into the list on the page
         selectedModules.append(serviceItemDom(service));
+        createAzureServiceBtn.prop('disabled', true);
+
         $("#" + service.getName() + " a").on("click", function(){
             deleteServiceOnPage(service.getName());
             $("input[value='" + service.getName() + "']").prop('checked', false);
@@ -285,5 +305,21 @@ $(function () {
         return '<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><strong>' + service.getName() +
             '</strong>, modules: ' + service.getModuleList().toString() +
             ', port: ' + service.getPort() + '</li>';
+    }
+
+    function addServiceBtnChecker() {
+        var azureModuleSelected = false;
+        azureCheckbox.each(function() {
+            azureModuleSelected = azureModuleSelected || $(this)[0].checked;
+        });
+
+        var serviceName = azureServiceNameInput.val().trim();
+        var servicePort = azureServicePortInput.val().trim();
+
+        if(azureModuleSelected && serviceName && servicePort && !isNaN(servicePort)) {
+            createAzureServiceBtn.prop('disabled', false);
+        } else {
+            createAzureServiceBtn.prop('disabled', true);
+        }
     }
 });

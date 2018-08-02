@@ -33,13 +33,13 @@
                     Azure Spring Cloud Playground
                 </h1>
             </div>
-            <div class="navbar-end" id="free_link">
-                <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" >Free account</a>
+            <div class="navbar-end azure-navbar-link" id="free_link">
+                <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" class="azure-green-color">Free account</a>
             </div>
-            <div class="navbar-end" id="login_link">
+            <div class="navbar-end azure-navbar-link" id="login_link">
                 <a>Login</a>
             </div>
-            <div class="navbar-end" id="user_dropdown">
+            <div class="navbar-end azure-navbar-link" id="user_dropdown">
                 <div class="navbar-item has-dropdown is-hoverable">
                     <a class="truncate" id="logged_user">
                     </a>
@@ -50,7 +50,7 @@
                     </div>
                 </div>
             </div>
-            <div class="navbar-end" id="about_link">
+            <div class="navbar-end azure-navbar-link" id="about_link">
                 <a title="{{build.information}}">About</a>
             </div>
         </div>
@@ -79,7 +79,7 @@
 <form id="form" method="post" role="form">
     <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     <input type="hidden" name="_csrf_header" value="{{_csrf.headerName}}"/>
-    <div class="small-container container large-bottom-margin">
+    <div class="small-container container large-bottom-padding">
         <p class="help is-danger app-error"></p>
         <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
         <div class="row metadata-row">
@@ -91,6 +91,15 @@
         {{> config-azure-service}}
     </div>
 </form>
+<footer class="playground-footer">
+    <div class="content has-text-centered">
+        <ul class="footer-links">
+            <li><a href="https://github.com/Microsoft/spring-cloud-azure" target="_blank"><i class="fab fa-github"></i></a></li>
+            <li><a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT License</a></li>
+            <li>© Microsoft 2018</li>
+        </ul>
+    </div>
+</footer>
 <script src="{{#linkTo}}/js/jquery-3.1.1.min.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/typeahead.bundle.min.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/mousetrap.min.js{{/linkTo}}"></script>

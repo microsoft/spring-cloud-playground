@@ -34,8 +34,8 @@
     margin-top: 4rem;
 }
 
-.large-bottom-margin {
-    margin-bottom: 4rem;
+.large-bottom-padding {
+    padding-bottom: 4rem;
 }
 
 .module-checkbox {
@@ -63,7 +63,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     font-family: 'Segoe UI',SegoeUI,'Segoe WP',Tahoma,Arial,sans-serif;
 }
 
-#login_link, #user_dropdown, #free_link, #about_link {
+.azure-navbar-link {
     align-items: center;
     margin-left: 2rem;
 }
@@ -82,12 +82,12 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     border-radius: 0px;
 }
 
-#free_link a{
+.azure-green-color {
     background-color: transparent;
     color: #89c402;
 }
 
-#login_link a, #user_dropdown a, #free_link a, #about_link {
+.azure-navbar-link, .azure-navbar-link a  {
     font-weight: 600;
 }
 
@@ -158,4 +158,37 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .mandatory-label:before{
     content:"*" ;
     color:red
+}
+
+.footer-links li {
+    display: inline-block;
+}
+
+.footer-links li:after {
+    margin-left: 8px;
+    content: "•";
+    color: hsla(0, 0%, 46%, 1);
+    color: var(--grey);
+}
+
+.footer-links li:last-child:after {
+    content: "";
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-links a, .footer-links a:visited {
+    color: hsla(0, 0%, 9%, .998);
+    color: var(--grey-to-blue);
+}
+
+.playground-footer {
+    background-color: #fafafa;
+    padding: 1.5rem;
+}
+
+.playground-footer .content ul {
+    margin-top: 0;
 }

@@ -1,4 +1,4 @@
-package com.microsoft.azure.springcloudplayground.util;
+package com.microsoft.azure.springcloudplayground.exception;
 
 @SuppressWarnings("serial")
 public class InvalidVersionException extends RuntimeException {

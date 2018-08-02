@@ -1,7 +1,8 @@
 package com.microsoft.azure.springcloudplayground.controller;
 
-import com.microsoft.azure.springcloudplayground.dependency.DependencyMetadataProvider;
-import com.microsoft.azure.springcloudplayground.generator.*;
+import com.microsoft.azure.springcloudplayground.generator.MicroService;
+import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
+import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
@@ -32,8 +33,9 @@ import java.util.Map;
 @Slf4j
 public class MainController extends AbstractPlaygroundController {
 
-    private final ProjectGenerator projectGenerator;
     private final TelemetryProxy telemetryProxy;
+    private final ProjectGenerator projectGenerator;
+
     private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
     private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
     private static final String TELEMETRY_EVENT_LOGIN = "SpringCloudPlaygroundLogin";
@@ -43,24 +45,12 @@ public class MainController extends AbstractPlaygroundController {
 
     public MainController(GeneratorMetadataProvider metadataProvider,
                           TemplateRenderer templateRenderer, ResourceUrlProvider resourceUrlProvider,
-                          ProjectGenerator projectGenerator,
-                          DependencyMetadataProvider dependencyMetadataProvider) {
+                          ProjectGenerator projectGenerator) {
         super(metadataProvider, resourceUrlProvider);
         this.projectGenerator = projectGenerator;
         this.telemetryProxy = new TelemetryProxy();
     }
 
-    @ModelAttribute
-    public BasicProjectRequest projectRequest(@RequestHeader Map<String, String> headers) {
-        ProjectRequest request = new ProjectRequest();
-
-        request.getParameters().putAll(headers);
-        request.initialize(this.metadataProvider.get());
-
-        return request;
-    }
-
-    // test method
     @GetMapping("/greeting")
     public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
         model.addAttribute("name", name);
@@ -131,7 +121,7 @@ public class MainController extends AbstractPlaygroundController {
 
     @ResponseBody
     @PostMapping("/project.zip")
-    public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull SimpleProjectRequest request) throws IOException {
+    public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull ProjectRequest request) throws IOException {
         File dir = this.projectGenerator.generate(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
 
@@ -155,16 +145,6 @@ public class MainController extends AbstractPlaygroundController {
 
     private static String generateFileName(ProjectRequest request, String extension) {
         String tmp = request.getArtifactId().replaceAll(" ", "_");
-        try {
-            return URLEncoder.encode(tmp, "UTF-8") + "." + extension;
-        }
-        catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("Cannot encode URL", e);
-        }
-    }
-
-    private static String generateFileName(SimpleProjectRequest request, String extension) {
-        String tmp = request.getArtifactId().replaceAll(" ", "_");
 
         try {
             return URLEncoder.encode(tmp, "UTF-8") + "." + extension;
@@ -173,19 +153,13 @@ public class MainController extends AbstractPlaygroundController {
         }
     }
 
-    private static String getWrapperScript(ProjectRequest request) {
-        String script = "gradle".equals(request.getBuild()) ? "gradlew" : "mvnw";
-        return request.getBaseDir() != null ? request.getBaseDir() + "/" + script : script;
-    }
-
-    private ResponseEntity<byte[]> upload(File download, File dir, String fileName,
-                                          String contentType) throws IOException {
+    private ResponseEntity<byte[]> upload(File download, File dir, String fileName, String type) throws IOException {
         byte[] bytes = StreamUtils.copyToByteArray(new FileInputStream(download));
         log.info("Uploading: {} ({} bytes)", download, bytes.length);
 
         this.projectGenerator.cleanTempFiles(dir);
 
-        return createResponseEntity(bytes, contentType, fileName);
+        return createResponseEntity(bytes, type, fileName);
     }
 
     private ResponseEntity<byte[]> createResponseEntity(byte[] content, String contentType, String fileName) {
