@@ -1,163 +1,46 @@
-(function () {
-
-    Versions = function () {
-    };
-
-    var strict_range = /\[(.*),(.*)\]/;
-    var halfopen_right_range = /\[(.*),(.*)\)/;
-    var halfopen_left_range = /\((.*),(.*)\]/;
-    var qualifiers = ['M', 'RC', 'BUILD-SNAPSHOT', 'RELEASE'];
-
-    Versions.prototype.matchRange = function (range) {
-        var strict_match = range.match(strict_range);
-        if (strict_match) {
-            return function (version) {
-                return compareVersions(strict_match[1], version) <= 0
-                    && compareVersions(strict_match[2], version) >= 0;
-            }
-        }
-        var hor_match = range.match(halfopen_right_range);
-        if (hor_match) {
-            return function (version) {
-                return compareVersions(hor_match[1], version) <= 0
-                    && compareVersions(hor_match[2], version) > 0;
-            }
-        }
-        var hol_match = range.match(halfopen_left_range);
-        if (hol_match) {
-            return function (version) {
-                return compareVersions(hol_match[1], version) < 0
-                    && compareVersions(hol_match[2], version) >= 0;
-            }
-        }
-
-        return function (version) {
-            return compareVersions(range, version) <= 0;
-        }
-    };
-
-    function parseQualifier(version) {
-        var qual = version.replace(/\d+/g, "");
-        return qualifiers.indexOf(qual) != -1 ? qual : "RELEASE";
-    }
-
-    function compareVersions(a, b) {
-        var result;
-
-        var versionA = a.split(".");
-        var versionB = b.split(".");
-        for (var i = 0; i < 3; i++) {
-            result = parseInt(versionA[i], 10) - parseInt(versionB[i], 10);
-            if (result != 0) {
-                return result;
-            }
-        }
-        var aqual = parseQualifier(versionA[3]);
-        var bqual = parseQualifier(versionB[3]);
-        result = qualifiers.indexOf(aqual) - qualifiers.indexOf(bqual);
-        if (result != 0) {
-            return result;
-        }
-        return versionA[3].localeCompare(versionB[3]);
-    }
-
-    /**
-     * Parse hash bang parameters from a URL as key value object.
-     * For repeated parameters the last parameter is effective.
-     * If = syntax is not used the value is set to null.
-     * #!x&y=3 -> { x:null, y:3 }
-     * @param url URL to parse or null if window.location is used
-     * @return Object of key -> value mappings.
-     * @source https://gist.github.com/zaus/5201739
-     */
-    hashbang = function (url, i, hash) {
-        url = url || window.location.href;
-
-        var pos = url.indexOf('#!');
-        if( pos < 0 ) return [];
-        var vars = [], hashes = url.slice(pos + 2).split('&');
-
-        for(i = hashes.length; i--;) {
-            hash = hashes[i].split('=');
-
-            vars.push({ name: hash[0], value: hash.length > 1 ? hash[1] : null});
-        }
-
-        return vars;
-    }
-
-    applyParams = function() {
-        var params = hashbang();
-        $.each(params, function( index, param ) {
-            var value = decodeURIComponent(param.value);
-            switch(param.name)  {
-                case 'type':
-                case 'packaging':
-                case 'javaVersion':
-                case 'language':
-                    $('.' + param.name.toLowerCase() + '-form-group').removeClass("hidden");
-                    $('#' + param.name+ ' option[value="' + value + '"]').prop('selected', true);
-                    $('#' + param.name).change();
-                    break;
-                case 'groupId':
-                case 'artifactId':
-                case 'name':
-                case 'description':
-                case 'packageName':
-                    $('.' + param.name.toLowerCase() + '-form-group').removeClass("hidden");
-                    $('#' + param.name).val(value);
-                    $('#' + param.name).change();
-                    break;
-            }
-        });
-    }
-
-}());
-
 $(function () {
+    function microservices(serviceList) {
+        this.serviceList = serviceList;
+    }
+
+    microservices.prototype.addService = function(microservice) {
+        this.serviceList.push(microservice);
+    }
+
+    microservices.prototype.deleteServiceByName = function(serviceName) {
+        this.serviceList = this.serviceList.filter(function(service) {
+            return service.name != serviceName;
+        });
+
+        return this.serviceList;
+    }
+
+    function microservice(serviceName, moduleList, port) {
+        this.name = serviceName;
+        this.modules = moduleList;
+        this.port = port;
+    }
+
+    microservice.prototype.getName = function() {
+        return this.name;
+    }
+
+    microservice.prototype.getModuleList = function() {
+        return this.modules;
+    }
+
+    microservice.prototype.getPort = function() {
+        return this.port;
+    }
+
+    var allServiceList = new microservices([]);
+
     if (navigator.appVersion.indexOf("Mac") != -1) {
         $(".btn-primary").append("<kbd>&#8984; + &#9166;</kbd>");
     }
     else {
         $(".btn-primary").append("<kbd>alt + &#9166;</kbd>");
     }
-
-    var refreshDependencies = function (versionRange) {
-        var versions = new Versions();
-        $("#dependencies div.checkbox").each(function (idx, item) {
-            if (!$(item).attr('data-range') || versions.matchRange($(item).attr('data-range'))(versionRange)) {
-                $("input", item).removeAttr("disabled");
-                $(item).removeClass("disabled has-error");
-            } else {
-                $("input", item).prop('checked', false);
-                $(item).addClass("disabled has-error");
-                $("input", item).attr("disabled", true);
-                removeTag($("input", item).val());
-            }
-        });
-    };
-    var addTag = function (id, name) {
-        if ($("#starters div[data-id='" + id + "']").length == 0) {
-            $("#starters").append("<div class='tag' data-id='" + id + "'>" + name +
-                "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>");
-        }
-    };
-    var removeTag = function (id) {
-        $("#starters div[data-id='" + id + "']").remove();
-    };
-    /*
-    var initializeSearchEngine = function (engine) {
-        $.getJSON("/ui/services", function (data) {
-            engine.clear();
-            $.each(data.services, function(idx, item) {
-                if(item.weight === undefined) {
-                    item.weight = 0;
-                }
-            });
-            engine.add(data.services);
-        });
-    };
-    */
 
     $("#free_link").on("click", function() {
         $.get("/free-account");
@@ -167,39 +50,9 @@ $(function () {
         $.get("/login-account");
     });
 
-    var generatePackageName = function() {
-        var groupId = $("#groupId").val();
-        var artifactId = $("#artifactId").val();
-        var package = groupId.concat(".").concat(artifactId)
-            .replace(/-/g, '');
-        $("#packageName").val(package);
-    };
-    refreshDependencies($("#bootVersion").val());
+
     $("#type").on('change', function () {
         $("#form").attr('action', $(this.options[this.selectedIndex]).attr('data-action'))
-    });
-    $("#groupId").on("change", function() {
-        generatePackageName();
-    });
-    $("#artifactId").on('change', function () {
-        $("#name").val($(this).val());
-        $("#baseDir").attr('value', this.value)
-        generatePackageName();
-    });
-    $(".tofullversion a").on("click", function() {
-        $(".full").removeClass("hidden");
-        $(".tofullversion").addClass("hidden");
-        $(".tosimpleversion").removeClass("hidden");
-        $("body").scrollTop(0);
-        return false;
-    });
-    $(".tosimpleversion a").on("click", function() {
-        $(".full").addClass("hidden");
-        $(".tofullversion").removeClass("hidden");
-        $(".tosimpleversion").addClass("hidden");
-        applyParams();
-        $("body").scrollTop(0);
-        return false;
     });
 
     // Switch between get started video tabs
@@ -211,6 +64,20 @@ $(function () {
     // Switch between configuration and default
     var configPort = $("#config-port");
     var port = $(".port-input");
+
+    // Configurable steps
+    var metaDataConfig = $("#meta-data-config");
+    var infraModulesSelector = $("#infra-selection");
+    var azureModulesSelector = $("#azure-selection");
+    var metaDataStep = $("#meta-data-step")[0];
+    var infraStep = $("#infra-step")[0];
+    var azureStep = $("#azure-step")[0];
+
+    var selectedModules = $("#selected-modules-list");
+    var createAzureServiceBtn = $("#create-azure-service");
+
+    // Checkbox
+    var infraCheckbox = $(".infra-checkbox");
 
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
@@ -232,6 +99,7 @@ $(function () {
         buildRunVideo.addClass("hidden");
 
     });
+
     buildRunTab.on("click", function() {
         buildRunTab.addClass("is-active");
         generateTab.removeClass("is-active");
@@ -240,91 +108,182 @@ $(function () {
         buildRunVideo.removeClass("hidden");
     });
 
-    var maxSuggestions = 5;
-    var starters = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'description', 'keywords', 'group'),
-        queryTokenizer: Bloodhound.tokenizers.nonword,
-        identify: function (obj) {
-            return obj.id;
-        },
-        sorter: function(a,b) {
-            return b.weight - a.weight;
-        },
-        limit: maxSuggestions,
-        cache: false
+    $("#next-goto-infra-step").on("click", function() {
+        showInfraModulesConfig();
     });
-    //initializeSearchEngine(starters);
-    $('#autocomplete').typeahead(
-        {
-            minLength: 2,
-            autoSelect: true
-        }, {
-            name: 'starters',
-            display: 'name',
-            source: starters,
-            templates: {
-                suggestion: function (data) {
-                    return "<div><strong>" + data.name + "</strong><br/><small>" + data.description + "</small></div>";
-                },
-                footer: function(search) {
-                    if (search.suggestions && search.suggestions.length == maxSuggestions) {
-                        return "<div class=\"tt-footer\">More matches, please refine your search</div>";
-                    }
-                    else {
-                        return "";
-                    }
-                }
+
+    $("#next-goto-azure-step").on("click", function() {
+       showAzureModulesConfig();
+    });
+
+    $("#prev-goto-meta-step").on("click", function() {
+        showMetaDataConfig();
+    });
+
+    $("#prev-goto-infra-step").on("click", function() {
+       showInfraModulesConfig();
+    });
+
+    infraCheckbox.on("change", function() {
+        var serviceName = $(this).val();
+        var moduleList = [serviceName];
+        var port = $(this).next("input").val();
+
+        var service = new microservice(serviceName, moduleList, port);
+        if($(this)[0].checked) {
+            addServiceOnPage(service);
+        } else {
+            deleteServiceOnPage(serviceName);
+        }
+    });
+
+    createAzureServiceBtn.on("click", function() {
+        var serviceName = $("#azure-service-name").val();
+        var servicePort = $("#azure-service-port").val();
+
+        var azureModuleCheckboxs = $("input[name='azure-modules']");
+        var moduleList = [];
+        azureModuleCheckboxs.each(function() {
+            if($(this)[0].checked) {
+                moduleList.push($(this).val());
             }
+        })
+
+        var azureMicroService = new microservice(serviceName, moduleList, servicePort);
+        if(addServiceOnPage(azureMicroService)) {
+            // Clear input values
+            $("#azure-service-name").val("");
+            $("#azure-service-port").val("");
+            azureModuleCheckboxs.each(function() {
+                $(this).prop('checked', false);
+            });
+        }
+    });
+
+    $("#form").submit(function(event) {
+        var csrfToken = $("input[name='_csrf']").val();
+        var csrfTokenHeader = $("input[name='_csrf_header']").val();
+        var groupId = $("#groupId").val();
+        var artifactId = $("#artifactId").val();
+        var projectName = $("#project-name").val();
+        var description = $("#description").val();
+
+        var data = {
+            name: projectName,
+            groupId: groupId,
+            artifactId: artifactId,
+            baseDir: artifactId,
+            description: description,
+            packageName: groupId + "." + artifactId,
+            microServices: allServiceList.serviceList
+        };
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            var a;
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhttp.response);
+                a.download = getAttachmentName(xhttp);
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        };
+
+        xhttp.open("POST", '/project.zip');
+        xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+        // Set responseType as blob for binary responses
+        xhttp.responseType = 'blob';
+        xhttp.send(JSON.stringify(data));
+
+        event.preventDefault();
+    });
+
+    function getAttachmentName(xhttprequest) {
+        var disposition = xhttprequest.getResponseHeader('content-disposition');
+        var matches = /"([^"]*)"/.exec(disposition);
+        return (matches != null && matches[1] ? matches[1] : 'demo.zip');
+    }
+
+    function showMetaDataConfig() {
+        showElements([metaDataConfig]);
+        hideElements([infraModulesSelector, azureModulesSelector]);
+
+        activateStep(metaDataStep);
+        disActivateStep(infraStep);
+        disActivateStep(azureStep);
+    }
+
+    function showInfraModulesConfig() {
+        hideElements([metaDataConfig, azureModulesSelector]);
+        showElements([infraModulesSelector]);
+
+        completeStep(metaDataStep);
+        activateStep(infraStep);
+        disActivateStep(azureStep);
+    }
+
+    function showAzureModulesConfig() {
+        hideElements([metaDataConfig, infraModulesSelector]);
+        showElements([azureModulesSelector]);
+
+        completeStep(metaDataStep);
+        completeStep(infraStep);
+        activateStep(azureStep);
+    }
+
+    function showElements(elements) {
+        elements.forEach(function(element) {
+            element.removeClass("hidden");
+        })
+    }
+
+    function hideElements(elements) {
+        elements.forEach(function(element) {
+            element.addClass("hidden");
+        })
+    }
+
+    function activateStep(stepElement) {
+        stepElement.className = "step-item is-active";
+    }
+
+    function disActivateStep(stepElement) {
+        stepElement.className = "step-item";
+    }
+
+    function completeStep(stepElement) {
+        stepElement.className = "step-item is-completed is-success";
+    }
+
+    function addServiceOnPage(service) {
+        if(!service.getName() || !service.getPort() || isNaN(service.getPort())
+            || typeof service.getModuleList() === 'undefined' || service.getModuleList().length === 0) {
+            console.warn("Some service property is empty or format illegal, " + JSON.stringify(service));
+            return false;
+        }
+
+        allServiceList.addService(service);
+        // Append selected services into the list on the page
+        selectedModules.append(serviceItemDom(service));
+        $("#" + service.getName() + " a").on("click", function(){
+            deleteServiceOnPage(service.getName());
+            $("input[value='" + service.getName() + "']").prop('checked', false);
         });
-    $('#autocomplete').bind('typeahead:select', function (ev, suggestion) {
-        var alreadySelected = $("#services input[value='" + suggestion.id + "']").prop('checked');
-        if(alreadySelected) {
-            removeTag(suggestion.id);
-            $("#services input[value='" + suggestion.id + "']").prop('checked', false);
-        }
-        else {
-            addTag(suggestion.id, suggestion.name);
-            $("#services input[value='" + suggestion.id + "']").prop('checked', true);
-        }
-        $('#autocomplete').typeahead('val', '');
-    });
-    $("#starters").on("click", "button", function () {
-        var id = $(this).parent().attr("data-id");
-        $("#services input[value='" + id + "']").prop('checked', false);
-        removeTag(id);
-    });
-    $("#services input").bind("change", function () {
-        var value = $(this).val()
-        if ($(this).prop('checked')) {
-            var results = starters.get(value);
-            addTag(results[0].id, results[0].name);
-        } else {
-            removeTag(value);
-        }
-    });
-    Mousetrap.bind(['command+enter', 'alt+enter'], function (e) {
-        $("#form").submit();
-        return false;
-    });
-    var autocompleteTrap = new Mousetrap($("#autocomplete").get(0));
-    autocompleteTrap.bind(['command+enter', 'alt+enter'], function (e) {
-        $("#form").submit();
-        return false;
-    });
-    autocompleteTrap.bind("enter", function(e) {
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-    });
-    applyParams();
-    if ("onhashchange" in window) {
-        window.onhashchange = function() {
-            $(".full").addClass("hidden");
-            $(".tofullversion").removeClass("hidden");
-            $(".tosimpleversion").addClass("hidden");
-            applyParams();
-        }
+        return true;
+    }
+
+    function deleteServiceOnPage(serviceName) {
+        allServiceList.deleteServiceByName(serviceName);
+        $("#selected-modules-list #" + serviceName).remove();
+    }
+
+    function serviceItemDom(service) {
+        return '<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><strong>' + service.getName() +
+            '</strong>, modules: ' + service.getModuleList().toString() +
+            ', port: ' + service.getPort() + '</li>';
     }
 });

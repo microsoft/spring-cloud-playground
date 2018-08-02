@@ -18,16 +18,24 @@
     margin: 3rem 0 1rem;
 }
 
-.large-vertical-margin {
-    margin: 4rem 0;
+.button-group {
+    margin: 4rem 2rem 0;
 }
 
 .small-top-margin {
-    margin: 1rem 0 0;
+    margin-top: 1rem;
 }
 
 .medium-top-margin {
-    margin: 2rem 0 0;
+    margin-top: 2rem;
+}
+
+.large-top-margin {
+    margin-top: 4rem;
+}
+
+.large-bottom-margin {
+    margin-bottom: 4rem;
 }
 
 .module-checkbox {
@@ -55,7 +63,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     font-family: 'Segoe UI',SegoeUI,'Segoe WP',Tahoma,Arial,sans-serif;
 }
 
-#login_link, #user_dropdown, #free_link, #about_link {
+.azure-navbar-link {
     align-items: center;
     margin-left: 2rem;
 }
@@ -74,12 +82,12 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     border-radius: 0px;
 }
 
-#free_link a{
+.azure-green-color {
     background-color: transparent;
     color: #89c402;
 }
 
-#login_link a, #user_dropdown a, #free_link a, #about_link {
+.azure-navbar-link, .azure-navbar-link a  {
     font-weight: 600;
 }
 
@@ -114,4 +122,64 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .start-video {
     display: block;
     margin: 0 auto;
+}
+
+.module-input {
+    padding: 0.75rem 0 0 0.75rem;
+}
+
+#azure-service-name {
+    width: 20em;
+}
+
+#azure-service-port {
+    width: 5em;
+}
+
+#service-info-input {
+    margin-top: 4rem;
+    display: flex;
+    justify-content: center;
+    padding: 0.25em;
+}
+#service-info-input input {
+    margin: auto 0.25em;
+}
+
+#selected-modules-list li {
+    display: flex;
+    align-items: center;
+}
+
+.steps {
+    margin: 2rem 0;
+}
+
+.mandatory-label:before{
+    content:"*" ;
+    color:red
+}
+
+.footer-links li {
+    display: inline-block;
+}
+
+.footer-links li:after {
+    margin-left: 8px;
+    content: "•";
+    color: hsla(0, 0%, 46%, 1);
+    color: var(--grey);
+}
+
+.footer-links li:last-child:after {
+    content: "";
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-links a, .footer-links a:visited {
+    color: hsla(0, 0%, 9%, .998);
+    color: var(--grey-to-blue);
 }

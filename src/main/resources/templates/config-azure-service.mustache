@@ -1,0 +1,40 @@
+<div id="azure-selection" class="hidden">
+    {{#services.content.1}}
+        <div id="services">
+            <div class="columns is-multiline">
+                {{#content}}
+                    <div class="column is-half module-input">
+                        <label class="checkbox module-checkbox">
+                            <input tabindex="13" type="checkbox" name="azure-modules" value="{{id}}">
+                            {{name}}
+                            <p class="help-block">{{#description}}{{.}}{{/description}}</p>
+                        </label>
+                    </div>
+                {{/content}}
+            </div>
+        </div>
+    {{/services.content.1}}
+    <div id="service-info-input">
+            <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Your service name" alt="Name of the service will be generated">
+            <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="port" alt="Runtime port for this service" min="1025" max="65535">
+            <input type="button" class="button" id="create-azure-service" value="+ Add service"/>
+    </div>
+    <hr class="medium-top-margin"/>
+    <div class="medium-top-margin">
+        <h3 class="title is-6">Configured services</h3>
+        <ul id="selected-modules-list">
+        </ul>
+    </div>
+    <div class="button-group">
+        <p class="has-text-centered">
+            <button onclick="gtag('event', 'click', { event_category: 'Go to infra config', event_action: 'click'});"
+                    tabindex="13" id="prev-goto-infra-step" type="button" class="button" role="button">
+                Previous
+            </button>
+            <button onclick="gtag('event', 'click', { event_category: 'Project Generation', event_action: 'click'});"
+                    tabindex="14" id="generate-project" type="submit" class="button" role="button">
+                Generate Project
+            </button>
+        </p>
+    </div>
+</div>
