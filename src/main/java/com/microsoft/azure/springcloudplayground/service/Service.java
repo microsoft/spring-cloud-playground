@@ -1,7 +1,6 @@
 package com.microsoft.azure.springcloudplayground.service;
 
 import com.microsoft.azure.springcloudplayground.generator.MicroService;
-import com.microsoft.azure.springcloudplayground.generator.ServiceLink;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;

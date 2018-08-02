@@ -1,11 +1,9 @@
 package com.microsoft.azure.springcloudplayground.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.springcloudplayground.metadata.DefaultMetadataElement;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadata;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,15 +20,8 @@ public class DefaultGeneratorMetadataProvider implements GeneratorMetadataProvid
 
     private final GeneratorMetadata metadata;
 
-    private final ObjectMapper objectMapper;
-
-    private final RestTemplate restTemplate;
-
-    public DefaultGeneratorMetadataProvider(GeneratorMetadata metadata,
-                                            ObjectMapper objectMapper, RestTemplate restTemplate) {
+    public DefaultGeneratorMetadataProvider(GeneratorMetadata metadata) {
         this.metadata = metadata;
-        this.objectMapper = objectMapper;
-        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -48,19 +39,4 @@ public class DefaultGeneratorMetadataProvider implements GeneratorMetadataProvid
 
         metadata.updateSpringBootVersions(bootVersions);
     }
-
-// Keep following method in case the data changes.
-//    protected List<DefaultMetadataElement> fetchBootVersions() {
-//        String url = this.metadata.getConfiguration().getEnv().getSpringBootMetadataUrl();
-//        if (StringUtils.hasText(url)) {
-//            try {
-//                log.info("Fetching boot metadata from {}", url);
-//                return new SpringBootMetadataReader(this.objectMapper, this.restTemplate, url).getBootVersions();
-//            }
-//            catch (Exception e) {
-//                log.warn("Failed to fetch spring boot metadata", e);
-//            }
-//        }
-//        return null;
-//    }
 }
