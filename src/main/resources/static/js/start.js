@@ -83,6 +83,9 @@ $(function () {
     var azureServiceNameInput = $("#azure-service-name");
     var azureServicePortInput = $("#azure-service-port");
 
+    var serviceNameHelp = $("#service-name-help");
+    var servicePortHelp = $("#port-help");
+
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
@@ -207,8 +210,16 @@ $(function () {
     });
 
     azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("input", addServiceBtnChecker);
-    azureServicePortInput.on("input", addServiceBtnChecker);
+    azureServiceNameInput.on("blur", addServiceBtnChecker);
+    azureServicePortInput.on("blur", addServiceBtnChecker);
+
+    function isValidServiceName(serviceName) {
+        return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
+    }
+
+    function isValidPort(port) {
+        return port && !isNaN(port) && port >= 1025 && port <= 65535;
+    }
 
     function getAttachmentName(xhttprequest) {
         var disposition = xhttprequest.getResponseHeader('content-disposition');
@@ -316,10 +327,25 @@ $(function () {
         var serviceName = azureServiceNameInput.val().trim();
         var servicePort = azureServicePortInput.val().trim();
 
-        if(azureModuleSelected && serviceName && servicePort && !isNaN(servicePort)) {
+        checkAndShowHelpMsg('name', serviceName, isValidServiceName, serviceNameHelp);
+        checkAndShowHelpMsg('port', servicePort, isValidPort, servicePortHelp);
+
+        if(azureModuleSelected && serviceNameHelp.is(":hidden") && servicePortHelp.is(":hidden")) {
             createAzureServiceBtn.prop('disabled', false);
         } else {
             createAzureServiceBtn.prop('disabled', true);
+        }
+    }
+
+    function checkAndShowHelpMsg(prop, value, checkRule, helpElement) {
+        var matchedServices = allServiceList.serviceList.filter(function(service) {
+            return service[prop] === value;
+        });
+
+        if(!$.isEmptyObject(matchedServices) || !checkRule(value)) {
+            showElements([helpElement]);
+        } else {
+            hideElements([helpElement]);
         }
     }
 });
