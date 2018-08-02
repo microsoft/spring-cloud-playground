@@ -128,10 +128,6 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     padding: 0.75rem 0 0 0.75rem;
 }
 
-#azure-service-port {
-    width: 5em;
-}
-
 #service-info-input {
     margin-top: 4rem;
     display: flex;

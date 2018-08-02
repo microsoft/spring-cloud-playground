@@ -1,14 +1,18 @@
 <div id="azure-selection" class="hidden">
     <div class="columns">
-        <div class="column is-half">
+        <div class="field column is-half">
             <label for="azure-service-name" class="label mandatory-label">Service Name</label>
-            <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Service name with [0-9][a-zA-Z][-] only" alt="Name of the service will be generated">
-            <p id="service-name-hint"> </p>
+            <div class="control">
+                <input class="input" type="text" id="azure-service-name" name="azure-service-name" placeholder="Unique service name with [0-9][a-zA-Z][-] only" alt="Name of the service will be generated">
+            </div>
+            <p id="service-name-help" class="help is-danger hidden">Service name invalid or already exists</p>
         </div>
-        <div class="column is-one-fifth">
+        <div class="field column is-one-fifth">
             <label for="azure-service-port" class="label mandatory-label">Port</label>
-            <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="port" alt="Runtime port for this service" min="1025" max="65535">
-            <p id="service-port-hint"> </p>
+            <div class="control">
+                <input class="input" type="number" id="azure-service-port" name="azure-service-port" placeholder="between 1025 ~ 65535" alt="Runtime port for this service" min="1025" max="65535">
+            </div>
+            <p id="port-help" class="help is-danger hidden">Port invalid or already exists</p>
         </div>
     </div>
 
