@@ -80,6 +80,9 @@ $(function () {
     var infraCheckbox = $(".infra-checkbox");
     var azureCheckbox = $(".azure-checkbox");
 
+    var azureServiceNameInput = $("#azure-service-name");
+    var azureServicePortInput = $("#azure-service-port");
+
     configPort.on("click", function () {
         if (port.hasClass("hidden")) {
             port.addClass("is-active");
@@ -139,8 +142,8 @@ $(function () {
     });
 
     createAzureServiceBtn.on("click", function() {
-        var serviceName = $("#azure-service-name").val().trim();
-        var servicePort = $("#azure-service-port").val().trim();
+        var serviceName = azureServiceNameInput.val().trim();
+        var servicePort = azureServicePortInput.val().trim();
 
         var azureModuleCheckboxs = $("input[name='azure-modules']");
         var moduleList = [];
@@ -153,8 +156,8 @@ $(function () {
         var azureMicroService = new microservice(serviceName, moduleList, servicePort);
         if(addServiceOnPage(azureMicroService)) {
             // Clear input values
-            $("#azure-service-name").val("");
-            $("#azure-service-port").val("");
+            azureServiceNameInput.val("");
+            azureServicePortInput.val("");
             azureModuleCheckboxs.each(function() {
                 $(this).prop('checked', false);
             });
@@ -204,8 +207,8 @@ $(function () {
     });
 
     azureCheckbox.on("change", addServiceBtnChecker);
-    $("#azure-service-name").on("input", addServiceBtnChecker);
-    $("#azure-service-port").on("input", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
 
     function getAttachmentName(xhttprequest) {
         var disposition = xhttprequest.getResponseHeader('content-disposition');
@@ -310,8 +313,8 @@ $(function () {
             azureModuleSelected = azureModuleSelected || $(this)[0].checked;
         });
 
-        var serviceName = $("#azure-service-name").val().trim();
-        var servicePort = $("#azure-service-port").val().trim();
+        var serviceName = azureServiceNameInput.val().trim();
+        var servicePort = azureServicePortInput.val().trim();
 
         if(azureModuleSelected && serviceName && servicePort && !isNaN(servicePort)) {
             createAzureServiceBtn.prop('disabled', false);
