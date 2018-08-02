@@ -3,10 +3,7 @@ package com.microsoft.azure.springcloudplayground.generator;
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.exception.GeneratorException;
 import com.microsoft.azure.springcloudplayground.metadata.*;
-import com.microsoft.azure.springcloudplayground.service.ConfigurableService;
-import com.microsoft.azure.springcloudplayground.service.Modules;
-import com.microsoft.azure.springcloudplayground.service.Service;
-import com.microsoft.azure.springcloudplayground.service.ServiceMetadata;
+import com.microsoft.azure.springcloudplayground.service.*;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
@@ -18,12 +15,14 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import retrofit2.http.HEAD;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -102,6 +101,10 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
+    @Autowired
+    ResourceLoader resourceLoader;
+
+    //private void writeKubernetesFile(File dir, ProjectRequest request){
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
 
@@ -557,15 +560,19 @@ public class ProjectGenerator {
         File src = new File(new File(dir, "src/main/" + language),
                 request.getPackageName().replace(".", "/"));
         src.mkdirs();
-        if (request.getName().equalsIgnoreCase("cloud-hystrix-dashboard")) {
-            write(new File(src, applicationName + "." + language), "HystrixDashboardApplication." + language, model);
-            write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", model);
+
+        if(request.getName().startsWith(Modules.AZURE)) {
+            writeAllToDirectory(src, request.getName(), model);
+        }
+
+        if(request.getName().equalsIgnoreCase(Modules.CLOUD_HYSTRIX_DASHBOARD)){
+            writeAllToDirectory(src, request.getName(), model);
         } else {
             write(new File(src, applicationName + "." + language), "Application." + language, model);
         }
 
-        if (request.getDependencies().contains("web")) {
-            write(new File(src, "Controller." + language), "Controller.java", model);
+        if (request.getDependencies().contains(Dependencies.WEB)) {
+            writeToDirectory(src, "Controller." + language , model);
         }
 
         // Write index page if is gateway module
@@ -891,7 +898,7 @@ public class ProjectGenerator {
         List<Dependency> dependencies = request.getResolvedDependencies();
         List<String> dependencyIds = dependencies.stream().map(Dependency::getId)
                 .collect(Collectors.toList());
-        log.info("Processing request{type=" + request.getType() + ", dependencies="
+        log.info("Processing request{name=" + request.getName() + ", dependencies="
                 + dependencyIds);
         if (isMavenBuild(request)) {
             model.put("mavenBuild", true);
@@ -1164,9 +1171,47 @@ public class ProjectGenerator {
         }
     }
 
+    /**
+     * Write a template with model to a target file
+     *
+     * @param target target file
+     */
     public void write(File target, String templateName, Map<String, Object> model) {
         String body = this.templateRenderer.process(templateName, model);
         writeText(target, body);
+    }
+
+    /**
+     * Write a template with model to target directory
+     *
+     * @param targetDir target directory
+     */
+    public void writeToDirectory(File targetDir, String templateName, Map<String, Object> model) {
+        String body = this.templateRenderer.process(templateName, model);
+        writeText(new File(targetDir, templateName), body);
+    }
+
+    /**
+     * Write all templates under template directory with model to target directory
+     *
+     * @param targetDir target directory
+     * @param templateDirectory template directory
+     */
+    public void writeAllToDirectory(File targetDir, String templateDirectory, Map<String, Object> model){
+        String pattern = "classpath:templates/" + templateDirectory + "/*.java";
+
+        try {
+            Resource[] templates = loadResources(pattern);
+            Arrays.stream(templates).forEach(t -> write(new File(targetDir, t.getFilename()), templateDirectory + "/"
+                    + t
+                    .getFilename(), model));
+        } catch (IOException e) {
+            log.warn(String.format("Failed to find resources match pattern '%s'", pattern), e);
+        }
+    }
+
+    private Resource[] loadResources(String pattern) throws IOException {
+        return ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(pattern);
     }
 
     private void writeText(File target, String body) {
