@@ -1,0 +1,23 @@
+version: '2.1'
+services:
+{{#microServices}}
+  {{name}}:
+    image: {{dockerComposeImage}}
+    ports:
+      - "{{port}}:{{port}}"
+    links:
+    {{#links}}
+      - {{this}}
+    {{/links}}
+    depends_on:
+    {{#depends_on}}
+      {{this}}:
+        condition: service_healthy
+    {{/depends_on}}
+    healthcheck:
+    {{#healthcheck}}
+      test: ["CMD", "curl", "-f", "{{heathcheck}}"]
+      interval: 5s
+      retries: 20
+    {{/healthcheck}}
+{{/microServices}}
