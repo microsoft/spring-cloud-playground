@@ -3,5 +3,5 @@ spring:
     name: {{name}}
   cloud:
     config:
-      uri: http://config-server:8888
+      uri: http://cloud-config-server:8888
       fail-fast: true

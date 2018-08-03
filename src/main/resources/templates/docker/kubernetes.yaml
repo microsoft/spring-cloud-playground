@@ -30,12 +30,12 @@ spec:
     spec:
       containers:
       - name: {{name}}
-        image: "{{dockerImage}}"
+        image: "{{k8sDockerImage}}"
         ports:
         - containerPort: {{port}}
         livenessProbe:
           httpGet:
-            path: {{healthCheckPath}}
+            path: {{k8sHealthCheck}}
             port: {{port}}
           initialDelaySeconds: 5
           periodSeconds: 5
