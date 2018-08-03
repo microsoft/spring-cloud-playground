@@ -1,6 +1,7 @@
 package com.microsoft.azure.springcloudplayground.service;
 
 public class Dependencies {
+
     public static final String CLOUD_GATEWAY = "cloud-gateway";
     public static final String CLOUD_CONFIG_SERVER = "cloud-config-server";
     public static final String CLOUD_CONFIG_CLIENT = "cloud-config-client";

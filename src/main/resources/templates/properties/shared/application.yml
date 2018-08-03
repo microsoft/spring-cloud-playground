@@ -5,4 +5,4 @@ eureka:
     lease-renewal-interval-in-seconds: 20
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://cloud-eureka-server:8761/eureka

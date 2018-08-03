@@ -3,7 +3,6 @@ package com.microsoft.azure.springcloudplayground.generator;
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.service.Service;
-import com.microsoft.azure.springcloudplayground.service.ServiceMetadata;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
@@ -149,9 +148,6 @@ public class ProjectGenerator {
         serviceModel.put("applicationImports", service.getImports());
         serviceModel.put("applicationAnnotations", service.getAnnotations());
 
-        serviceModel.put("healthCheckPath", service.getHealthCheckPath());
-        serviceModel.put("dockerImage", service.getDockerImage());
-
         return serviceModel;
     }
 
@@ -226,16 +222,14 @@ public class ProjectGenerator {
 
         staticResources.mkdirs();
 
-        List<String> serviceNames = getMicroServiceNames(model);
-        writeText(new File(staticResources, "index.html"),
-                templateRenderer.process("GatewayIndex.tmpl", ServiceMetadata.getLinksMap(serviceNames)));
+        writeText(new File(staticResources, "index.html"), templateRenderer.process("GatewayIndex.tmpl", model));
         writeText(new File(staticResources, "bulma.min.css"), templateRenderer.process("bulma.min.css", null));
     }
 
     private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
                                                 @NonNull Map<String, Object> model) {
         List<String> dependencies = (List<String>) serviceModel.get("dependencyIdList");
-        String applicationName = serviceModel.get("applicationName").toString();
+        String appName = serviceModel.get("applicationName").toString();
         String serviceName = serviceModel.get("name").toString();
         File resources = new File(serviceDir, "src/main/resources");
         File src = new File(new File(serviceDir, "src/main/java"),
@@ -244,11 +238,12 @@ public class ProjectGenerator {
         resources.mkdirs();
 
         if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_HYSTRIX_DASHBOARD)) {
-            write(new File(src, applicationName + ".java"), "HystrixDashboardApplication.java", serviceModel);
-            write(new File(src, "MockStreamServlet.java"), "MockStreamServlet.java", serviceModel);
+            String prefix = "cloud-hystrix-dashboard/";
+            write(new File(src, appName + ".java"), prefix + "CloudHystrixDashboardApplication.java", serviceModel);
+            write(new File(src, "MockStreamServlet.java"), prefix + "MockStreamServlet.java", serviceModel);
             writeTextResource(resources, "hystrix.stream", "hystrix.stream");
         } else {
-            write(new File(src, applicationName + ".java"), "Application.java", serviceModel);
+            write(new File(src, appName + ".java"), "Application.java", serviceModel);
         }
 
         if (dependencies.contains("web")) {
@@ -282,12 +277,13 @@ public class ProjectGenerator {
         generateMicroServiceTestCode(serviceDir, serviceModel);
     }
 
-    private void generateMicroService(@NonNull Service service, @NonNull Map<String, Object> model,
+    private void generateMicroService(@NonNull String serviceName, @NonNull Map<String, Object> model,
                                       @NonNull File projectDir) {
-        File serviceDir = new File(projectDir, service.getName());
-        serviceDir.mkdir();
+        Map<String, Service> microServicesMap = (Map<String, Service>) model.get("microServicesMap");
+        File serviceDir = new File(projectDir, serviceName);
+        Map<String, Object> serviceModel = resolveMicroServiceModel(microServicesMap.get(serviceName), model);
 
-        Map<String, Object> serviceModel = resolveMicroServiceModel(service, model);
+        serviceDir.mkdir();
 
         generateMicroServiceDockerfile(serviceDir, serviceModel);
         generateMicroServicePom(serviceDir, serviceModel);
@@ -296,7 +292,7 @@ public class ProjectGenerator {
 
     private void generateMicroServicesProject(@NonNull List<MicroService> microServices, @NonNull File projectDir,
                                               @NonNull Map<String, Object> model) {
-        microServices.forEach(s -> generateMicroService(Service.getInstanceByMicroService(s), model, projectDir));
+        microServices.forEach(s -> generateMicroService(s.getName(), model, projectDir));
     }
 
     private void generateDockerDirectory(@NonNull File projectDir, @NonNull Map<String, Object> model) {
@@ -438,32 +434,36 @@ public class ProjectGenerator {
     private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request,
                                                   @NonNull Map<String, Object> model) {
         List<String> microServiceNames = new ArrayList<>();
-        List<Map<String, Object>> microServices = new ArrayList<>();
+        List<Service> microServices = new ArrayList<>();
+        Map<String, Service> microServicesMap = new HashMap<>();
         List<Map<String, Object>> azureServices = new ArrayList<>();
 
         request.getMicroServices().forEach(s -> microServiceNames.add(s.getName()));
-        model.put("microServiceNames", microServiceNames);
 
         request.getMicroServices().forEach(s -> {
-            final Map<String, Object> service = new HashMap<>();
+            final Map<String, Object> serviceModel = new HashMap<>();
+            final Service service = ServiceNames.toService(s);
 
-            service.put("port", s.getPort());
-            service.put("name", s.getName());
-            service.put("modules", s.getModules());
-
-            model.put(s.getName(), service);
+            model.put(s.getName(), serviceModel);
             microServices.add(service);
+            microServicesMap.put(s.getName(), service);
+
+            serviceModel.put("port", s.getPort());
+            serviceModel.put("name", s.getName());
+            serviceModel.put("modules", s.getModules());
 
             if (isAzureServices(s.getName())) {
-                azureServices.add(service);
+                azureServices.add(serviceModel);
             }
 
-            if (s.getName().equalsIgnoreCase("cloud-gateway")) {
-                service.put("azureServices", azureServices);
+            if (s.getName().equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
+                serviceModel.put("azureServices", azureServices);
             }
         });
 
         model.put("microServices", microServices);
+        model.put("microServicesMap", microServicesMap);
+        model.put("microServiceNames", microServiceNames);
         model.put("azureServices", azureServices);
     }
 

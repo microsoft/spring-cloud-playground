@@ -13,7 +13,7 @@ public class ServiceModuleCapability extends ServiceCapability<List<ServiceModul
 
     public ServiceModuleCapability() {
         super("services", ServiceCapabilityType.HIERARCHICAL_MULTI_SELECT,
-                "Service Modules", "Service modules (comma-separated)");
+                "Module ModuleNames", "Module modules (comma-separated)");
     }
 
     @Override
