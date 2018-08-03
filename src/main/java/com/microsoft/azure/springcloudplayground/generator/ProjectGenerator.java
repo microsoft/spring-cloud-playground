@@ -29,21 +29,6 @@ import java.util.stream.Collectors;
 
 public class ProjectGenerator {
 
-    private static final Map<String, List<String>> serviceToDependencies = new HashMap<>();
-
-    static {
-        serviceToDependencies.put("cloud-config-server",
-                Arrays.asList("cloud-config-server"));
-        serviceToDependencies.put("cloud-gateway",
-                Arrays.asList("cloud-gateway", "cloud-eureka-client", "cloud-config-client"));
-        serviceToDependencies.put("cloud-eureka-server",
-                Arrays.asList("cloud-eureka-server", "cloud-config-client"));
-        serviceToDependencies.put("cloud-hystrix-dashboard",
-                Arrays.asList("cloud-hystrix-dashboard", "cloud-config-client", "cloud-eureka-client", "web"));
-        serviceToDependencies.put("azure-service-bus",
-                Arrays.asList("azure-service-bus", "cloud-config-client", "cloud-eureka-client", "web"));
-    }
-
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
@@ -91,15 +76,11 @@ public class ProjectGenerator {
     }
 
     @NonNull
-    private void resolveMicroServiceDependency(@NonNull Map<String, Object> serviceModel, @NonNull String bootVersion) {
+    private void resolveMicroServiceDependency(@NonNull Service service, @NonNull Map<String, Object> serviceModel,
+                                               @NonNull String bootVersion) {
         Version version = Version.parse(bootVersion);
         GeneratorMetadata metadata = this.metadataProvider.get();
-        HashSet<String> set = new HashSet<>();
-        List<String> modules = (List<String>) serviceModel.get("modules");
-
-        modules.forEach(s -> set.addAll(serviceToDependencies.get(s)));
-
-        List<String> dependencyIdList = new ArrayList<>(set);
+        List<String> dependencyIdList = new ArrayList<>(service.getDependencies());
         List<Dependency> dependencies = dependencyIdList.stream().map(
                 d -> metadata.getDependencies().get(d).resolve(version)).collect(Collectors.toList());
 
@@ -142,7 +123,7 @@ public class ProjectGenerator {
         serviceModel.put("mavenParentVersion", model.get("version"));
 
         resolveMicroServiceBuildProperties(serviceModel);
-        resolveMicroServiceDependency(serviceModel, model.get("bootVersion").toString());
+        resolveMicroServiceDependency(service, serviceModel, model.get("bootVersion").toString());
 
         serviceModel.put("applicationName", metadata.getConfiguration().generateApplicationName(service.getName()));
         serviceModel.put("applicationImports", service.getImports());
@@ -428,7 +409,15 @@ public class ProjectGenerator {
             return false;
         }
 
-        return name.contains("azure");
+        switch (name) {
+            case ServiceNames.CLOUD_CONFIG_SERVER:
+            case ServiceNames.CLOUD_GATEWAY:
+            case ServiceNames.CLOUD_EUREKA_SERVER:
+            case ServiceNames.CLOUD_HYSTRIX_DASHBOARD:
+                return false;
+            default:
+                return true;
+        }
     }
 
     private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request,
