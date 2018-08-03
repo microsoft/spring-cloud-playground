@@ -277,15 +277,13 @@ public class ProjectGenerator {
         generateMicroServiceTestCode(serviceDir, serviceModel);
     }
 
-    private void generateMicroService(@NonNull Service service, @NonNull Map<String, Object> model,
+    private void generateMicroService(@NonNull String serviceName, @NonNull Map<String, Object> model,
                                       @NonNull File projectDir) {
-        List<Service> services = (List<Service>) model.get("microServices");
-        File serviceDir = new File(projectDir, service.getName());
+        Map<String, Service> microServicesMap = (Map<String, Service>) model.get("microServicesMap");
+        File serviceDir = new File(projectDir, serviceName);
+        Map<String, Object> serviceModel = resolveMicroServiceModel(microServicesMap.get(serviceName), model);
 
         serviceDir.mkdir();
-        services.add(service);
-
-        Map<String, Object> serviceModel = resolveMicroServiceModel(service, model);
 
         generateMicroServiceDockerfile(serviceDir, serviceModel);
         generateMicroServicePom(serviceDir, serviceModel);
@@ -294,13 +292,13 @@ public class ProjectGenerator {
 
     private void generateMicroServicesProject(@NonNull List<MicroService> microServices, @NonNull File projectDir,
                                               @NonNull Map<String, Object> model) {
-        microServices.forEach(s -> generateMicroService(ServiceNames.toService(s), model, projectDir));
+        microServices.forEach(s -> generateMicroService(s.getName(), model, projectDir));
     }
 
     private void generateDockerDirectory(@NonNull File projectDir, @NonNull Map<String, Object> model) {
         String docker = "docker";
         File dockerDir = new File(projectDir, docker);
-        String dockerCompose = "docker-compose-new.yml";
+        String dockerCompose = "docker-compose.yml";
         String runBash = "run.sh";
         String runCmd = "run.cmd";
         String readMe = "README.md";
@@ -436,31 +434,36 @@ public class ProjectGenerator {
     private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request,
                                                   @NonNull Map<String, Object> model) {
         List<String> microServiceNames = new ArrayList<>();
-        List<Service> services = new ArrayList<>();
+        List<Service> microServices = new ArrayList<>();
+        Map<String, Service> microServicesMap = new HashMap<>();
         List<Map<String, Object>> azureServices = new ArrayList<>();
 
         request.getMicroServices().forEach(s -> microServiceNames.add(s.getName()));
-        model.put("microServiceNames", microServiceNames);
 
         request.getMicroServices().forEach(s -> {
-            final Map<String, Object> service = new HashMap<>();
+            final Map<String, Object> serviceModel = new HashMap<>();
+            final Service service = ServiceNames.toService(s);
 
-            service.put("port", s.getPort());
-            service.put("name", s.getName());
-            service.put("modules", s.getModules());
+            model.put(s.getName(), serviceModel);
+            microServices.add(service);
+            microServicesMap.put(s.getName(), service);
 
-            model.put(s.getName(), service);
+            serviceModel.put("port", s.getPort());
+            serviceModel.put("name", s.getName());
+            serviceModel.put("modules", s.getModules());
 
             if (isAzureServices(s.getName())) {
-                azureServices.add(service);
+                azureServices.add(serviceModel);
             }
 
-            if (s.getName().equalsIgnoreCase("cloud-gateway")) {
-                service.put("azureServices", azureServices);
+            if (s.getName().equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
+                serviceModel.put("azureServices", azureServices);
             }
         });
 
-        model.put("microServices", services);
+        model.put("microServices", microServices);
+        model.put("microServicesMap", microServicesMap);
+        model.put("microServiceNames", microServiceNames);
         model.put("azureServices", azureServices);
     }
 

@@ -23,11 +23,11 @@
           Essential Spring Cloud Services
         </p>
 				<ul style="list-style-type:circle">
-					{{#microService}}
-						{{#isBasic}}
-							<li><a href="{{homePage}}">{{name}}</a></li>
-						{{/isBasic}}
-					{{/microService}}
+					{{#microServices}}
+					    {{^isAzure}}
+						<li><a href="{{homePage}}">{{name}}</a></li>
+					    {{/isAzure}}
+					{{/microServices}}
 				</ul>
 			</div>
 			<hr>
@@ -36,11 +36,11 @@
 					Azure Spring Cloud Services
 				</p>
 				<ul style="list-style-type:circle">
-					{{#microService}}
-						{{^isBasic}}
+					{{#microServices}}
+					    {{#isAzure}}
 							<li><a href="{{homePage}}">{{name}}</a></li>
-						{{/isBasic}}
-					{{/microService}}
+					    {{/isAzure}}
+					{{/microServices}}
 				</ul>
 			</div>
 		</div>

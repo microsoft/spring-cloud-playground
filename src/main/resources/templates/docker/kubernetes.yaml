@@ -35,7 +35,7 @@ spec:
         - containerPort: {{port}}
         livenessProbe:
           httpGet:
-            path: {{healthCheck}}
+            path: {{k8sHealthCheck}}
             port: {{port}}
           initialDelaySeconds: 5
           periodSeconds: 5

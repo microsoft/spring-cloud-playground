@@ -18,7 +18,11 @@ public class Service {
 
     private int port;
 
-    private String healthCheck;
+    private boolean isAzure;
+
+    private String k8sHealthCheck;
+
+    private String dockerComposeHealthCheck;
 
     private String homePage;
 
@@ -30,15 +34,15 @@ public class Service {
 
     private List<String> dependsOn;
 
-//    @Getter
     private List<Module> modules;
 
     public static ServiceBuilder builder(@NonNull String name, int port) {
         return hiddenBuilder()
                 .name(name)
                 .port(port)
-                .healthCheck(String.format("/%s/actuator/health", name))
+                .k8sHealthCheck(String.format("/%s/actuator/health", name))
                 .k8sDockerImage(String.format("/demo/%s", name))
+                .dockerComposeHealthCheck(String.format("http://%s:%d/actuator/health", name, port))
                 .dockerComposeImage(String.format("demo/%s", name));
     }
 

@@ -29,28 +29,38 @@ public class ServiceNames {
         switch (microService.getName()) {
             case ServiceNames.CLOUD_CONFIG_SERVER:
                 return Service.builder(name, port)
+                        .isAzure(false)
+                        .homePage(String.format("http://localhost:%d/gateway-server.yml", port))
                         .modules(modules.stream().map(ModuleNames::toModule).collect(Collectors.toList()))
                         .build();
             case ServiceNames.CLOUD_EUREKA_SERVER:
                 return Service.builder(name, port)
+                        .isAzure(false)
+                        .homePage(String.format("http://localhost:%d/", port))
                         .modules(modules.stream().map(ModuleNames::toModule).collect(Collectors.toList()))
                         .links(Arrays.asList(CLOUD_CONFIG_SERVER))
                         .dependsOn(Arrays.asList(CLOUD_CONFIG_SERVER))
                         .build();
             case ServiceNames.CLOUD_GATEWAY:
                 return Service.builder(name, port)
+                        .isAzure(false)
+                        .homePage(String.format("http://localhost:%d/", port))
                         .modules(modules.stream().map(ModuleNames::toModule).collect(Collectors.toList()))
                         .links(Arrays.asList(CLOUD_EUREKA_SERVER, CLOUD_CONFIG_SERVER))
                         .dependsOn(Arrays.asList(CLOUD_EUREKA_SERVER))
                         .build();
             case ServiceNames.CLOUD_HYSTRIX_DASHBOARD:
                 return Service.builder(name, port)
+                        .isAzure(false)
+                        .homePage(String.format("http://localhost:%d/hystrix", port))
                         .modules(modules.stream().map(ModuleNames::toModule).collect(Collectors.toList()))
                         .links(Arrays.asList(CLOUD_EUREKA_SERVER, CLOUD_CONFIG_SERVER))
                         .dependsOn(Arrays.asList(CLOUD_EUREKA_SERVER))
                         .build();
             default:
                 return Service.builder(name, port)
+                        .isAzure(true)
+                        .homePage(String.format("http://localhost:%d/", port))
                         .modules(modules.stream().map(ModuleNames::toModule).collect(Collectors.toList()))
                         .links(Arrays.asList(CLOUD_EUREKA_SERVER, CLOUD_CONFIG_SERVER))
                         .dependsOn(Arrays.asList(CLOUD_EUREKA_SERVER))
