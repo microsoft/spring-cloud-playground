@@ -218,7 +218,7 @@ $(function () {
     }
 
     function isValidPort(port) {
-        return port && !isNaN(port) && port >= 1025 && port <= 65535;
+        return port && !isNaN(port) && port > 0;
     }
 
     function getAttachmentName(xhttprequest) {
@@ -289,7 +289,7 @@ $(function () {
     }
 
     function addServiceOnPage(service) {
-        if(!service.getName() || !service.getPort() || isNaN(service.getPort())
+        if(!isValidServiceName(service.getName()) || !isValidPort(service.getPort())
             || typeof service.getModuleList() === 'undefined' || service.getModuleList().length === 0) {
             console.warn("Some service property is empty or format illegal, " + JSON.stringify(service));
             return false;
