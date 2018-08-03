@@ -191,7 +191,7 @@ $(function () {
             if (xhttp.readyState === 4 && xhttp.status === 200) {
                 var fileName = getAttachmentName(xhttp);
 
-                if(window.navigator && window.navigator.msSaveOrOpenBlob) { // For IE
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) { // For IE
                     window.navigator.msSaveOrOpenBlob(xhttp.response, fileName);
                 } else { // For non-IE
                     a = document.createElement('a');
