@@ -172,8 +172,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 }
 
 .footer-links a, .footer-links a:visited {
-    color: hsla(0, 0%, 9%, .998);
-    color: var(--grey-to-blue);
+    color: #4A4A4A;
 }
 
 .playground-footer {
