@@ -3,7 +3,7 @@ package com.microsoft.azure.springcloudplayground.metadata;
 import com.microsoft.azure.springcloudplayground.dependency.DependenciesCapability;
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
-import com.microsoft.azure.springcloudplayground.service.ServiceModuleCapability;
+import com.microsoft.azure.springcloudplayground.service.ServiceMetadataCapability;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import com.microsoft.azure.springcloudplayground.util.VersionParser;
 import com.microsoft.azure.springcloudplayground.util.VersionProperty;
@@ -23,7 +23,7 @@ public class GeneratorMetadata {
     private final DependenciesCapability dependencies = new DependenciesCapability();
 
     @Getter
-    private final ServiceModuleCapability services = new ServiceModuleCapability();
+    private final ServiceMetadataCapability services = new ServiceMetadataCapability();
 
     @Getter
     private final TypeCapability types = new TypeCapability();

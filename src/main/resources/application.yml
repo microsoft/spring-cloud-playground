@@ -237,15 +237,19 @@ playground:
       content:
         - name: Spring Cloud Config Server
           id: cloud-config-server
+          defaultPort: 8888
           description: Central management for configuration via a git or svn backend
         - name: Spring Cloud Gateway
           id: cloud-gateway
+          defaultPort: 9999
           description: Intelligent and programmable routing with the reactive Spring Cloud Gateway
         - name: Spring Cloud Eureka Server
           id: cloud-eureka-server
+          defaultPort: 8761
           description: Spring Cloud Service Registry and Discovery
         - name: Spring Cloud Hystrix Dashboard
           id: cloud-hystrix-dashboard
+          defaultPort: 7979
           description: Circuit breaker dashboard with spring-cloud-netflix Hystrix
     - name: Azure Spring Cloud Modules
       content:
