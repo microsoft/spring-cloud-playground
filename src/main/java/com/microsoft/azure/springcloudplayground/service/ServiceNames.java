@@ -67,4 +67,17 @@ public class ServiceNames {
                         .build();
         }
     }
+
+    public static boolean isAzureService(@NonNull String serviceName) {
+        switch (serviceName) {
+            case CLOUD_CONFIG_SERVER:
+            case CLOUD_GATEWAY:
+            case CLOUD_EUREKA_SERVER:
+            case CLOUD_HYSTRIX_DASHBOARD:
+                return false;
+            default:
+                return true;
+        }
+
+    }
 }

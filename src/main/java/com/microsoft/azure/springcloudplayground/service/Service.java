@@ -34,6 +34,7 @@ public class Service {
 
     private List<String> dependsOn;
 
+    @Getter
     private List<Module> modules;
 
     public static ServiceBuilder builder(@NonNull String name, int port) {
