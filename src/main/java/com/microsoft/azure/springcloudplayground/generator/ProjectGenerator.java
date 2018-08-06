@@ -1,20 +1,17 @@
 package com.microsoft.azure.springcloudplayground.generator;
 
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
+import com.microsoft.azure.springcloudplayground.dependency.DependencyNames;
 import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.module.ModuleNames;
-import com.microsoft.azure.springcloudplayground.service.Dependencies;
 import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
-import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -32,17 +29,13 @@ import java.util.stream.Collectors;
 public class ProjectGenerator {
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    @Getter
     private GeneratorMetadataProvider metadataProvider;
 
     @Autowired
-    private TemplateRenderer templateRenderer = new TemplateRenderer();
+    private TemplateRenderer templateRenderer;
 
     @Autowired
-    private ProjectResourceLocator projectResourceLocator = new ProjectResourceLocator();
+    private ProjectResourceLocator projectResourceLocator;
 
     @Value("${TMPDIR:.}/playground")
     @Setter
@@ -54,10 +47,19 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
-    @Autowired
-    ResourceLoader resourceLoader;
+    private static final Map<String, List<String>> MODULE_TO_TEMPLATE;
 
-    //private void writeKubernetesFile(File dir, ProjectRequest request){
+    static {
+        Map<String, List<String>> map = new HashMap<>();
+
+        map.put(ModuleNames.AZURE_EVNET_HUB_BINDER, Arrays.asList("SinkExample.java", "SourceExample.java"));
+        map.put(ModuleNames.AZURE_CACHE, Arrays.asList("CacheController.java"));
+        map.put(ModuleNames.AZURE_SQL_SERVER, Arrays.asList("SqlController.java"));
+        map.put(ModuleNames.AZURE_STORAGE, Arrays.asList("StorageController.java"));
+
+        MODULE_TO_TEMPLATE = Collections.unmodifiableMap(map);
+    }
+
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
 
@@ -233,24 +235,11 @@ public class ProjectGenerator {
 
     private void generateAzureModuleSourceCode(@NonNull String moduleName, @NonNull File srcDir,
                                                @NonNull Map<String, Object> serviceModel) {
+        List<String> templates = MODULE_TO_TEMPLATE.get(moduleName);
 
-        switch (moduleName) {
-            case ModuleNames.AZURE_CACHE:
-                writeAzureModuleSourceCode(moduleName, "CacheController.java", srcDir, serviceModel);
-                break;
-            case ModuleNames.AZURE_SQL_SERVER:
-                writeAzureModuleSourceCode(moduleName, "SqlController.java", srcDir, serviceModel);
-                break;
-            case ModuleNames.AZURE_STORAGE:
-                writeAzureModuleSourceCode(moduleName, "StorageController.java", srcDir, serviceModel);
-                break;
-            case ModuleNames.AZURE_EVNET_HUB_BINDER:
-                writeAzureModuleSourceCode(moduleName, "SinkExample.java", srcDir, serviceModel);
-                writeAzureModuleSourceCode(moduleName, "SourceExample.java", srcDir, serviceModel);
-                break;
-            default:
-                throw new InvalidGeneratorMetadataException("unknown Azure module name: " + moduleName);
-        }
+        Assert.notNull(templates, "templates should not be null");
+
+        templates.forEach(t -> writeAzureModuleSourceCode(moduleName, t, srcDir, serviceModel));
     }
 
     private void generateAzureServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
@@ -259,8 +248,11 @@ public class ProjectGenerator {
                 serviceModel.get("packageName").toString().replace(".", "/"));
         String serviceName = serviceModel.get("name").toString();
         Service service = getServiceByName(serviceName, model);
+        String appName = serviceModel.get("applicationName").toString();
 
         service.getModules().forEach(m -> generateAzureModuleSourceCode(m.getName(), srcDir, serviceModel));
+
+        write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
     }
 
     private void generateInfrastructureServiceSourceCode(@NonNull File serviceDir,
@@ -279,11 +271,11 @@ public class ProjectGenerator {
             generateCloudConfigSourceCode(serviceDir, serviceModel, model);
         } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
             generateCloudGatewaySourceCode(serviceDir, src, serviceModel, model);
-        } else {
-            write(new File(src, appName + ".java"), "Application.java", serviceModel);
         }
 
-        if (service.getDependencies().contains(Dependencies.WEB)) {
+        write(new File(src, appName + ".java"), "Application.java", serviceModel);
+
+        if (service.getDependencies().contains(DependencyNames.WEB)) {
             new File(serviceDir, "src/main/resources/templates").mkdirs();
             new File(serviceDir, "src/main/resources/static").mkdirs();
             write(new File(src, "Controller.java"), "Controller.java", serviceModel);
@@ -480,8 +472,6 @@ public class ProjectGenerator {
         Map<String, Service> microServicesMap = new HashMap<>();
         List<Map<String, Object>> azureServices = new ArrayList<>();
 
-        request.getMicroServices().forEach(s -> microServiceNames.add(s.getName()));
-
         request.getMicroServices().forEach(s -> {
             final Map<String, Object> serviceModel = new HashMap<>();
             final Service service = ServiceNames.toService(s);
@@ -489,6 +479,7 @@ public class ProjectGenerator {
             model.put(s.getName(), serviceModel);
             microServices.add(service);
             microServicesMap.put(s.getName(), service);
+            microServiceNames.add(s.getName());
 
             serviceModel.put("port", s.getPort());
             serviceModel.put("name", s.getName());
@@ -565,10 +556,9 @@ public class ProjectGenerator {
 
         File wrapperDir = new File(dir, ".mvn/wrapper");
         wrapperDir.mkdirs();
-        writeTextResource(wrapperDir, "maven-wrapper.properties",
-                "maven/wrapper/maven-wrapper.properties");
-        writeBinaryResource(wrapperDir, "maven-wrapper.jar",
-                "maven/wrapper/maven-wrapper.jar");
+
+        writeTextResource(wrapperDir, "maven-wrapper.properties", "maven/wrapper/maven-wrapper.properties");
+        writeBinaryResource(wrapperDir, "maven-wrapper.jar", "maven/wrapper/maven-wrapper.jar");
     }
 
     private File writeBinaryResource(File dir, String name, String location) {
@@ -622,8 +612,7 @@ public class ProjectGenerator {
         this.temporaryFiles.computeIfAbsent(group, (key) -> new ArrayList<>()).add(file);
     }
 
-    private static List<Dependency> filterDependencies(List<Dependency> dependencies,
-                                                       String scope) {
+    private static List<Dependency> filterDependencies(List<Dependency> dependencies, String scope) {
         return dependencies.stream().filter((dep) -> scope.equals(dep.getScope()))
                 .sorted(DependencyComparator.INSTANCE).collect(Collectors.toList());
     }

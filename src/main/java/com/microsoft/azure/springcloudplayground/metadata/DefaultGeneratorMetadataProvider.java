@@ -1,8 +1,5 @@
-package com.microsoft.azure.springcloudplayground.autoconfigure;
+package com.microsoft.azure.springcloudplayground.metadata;
 
-import com.microsoft.azure.springcloudplayground.metadata.DefaultMetadataElement;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadata;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.util.Arrays;
@@ -22,12 +19,12 @@ public class DefaultGeneratorMetadataProvider implements GeneratorMetadataProvid
 
     public DefaultGeneratorMetadataProvider(GeneratorMetadata metadata) {
         this.metadata = metadata;
+        updateGeneratorMetadata(this.metadata);
     }
 
     @Override
     @Cacheable(value = "generator.metadata", key = "'metadata'")
     public GeneratorMetadata get() {
-        updateGeneratorMetadata(this.metadata);
         return this.metadata;
     }
 

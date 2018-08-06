@@ -4,30 +4,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.*;
 
-public class ServiceModuleCapability extends ServiceCapability<List<ServiceModuleGroup>> {
+public class ServiceMetadataCapability extends ServiceCapability<List<ServiceMetadataGroup>> {
 
-    final List<ServiceModuleGroup> content = new ArrayList<>();
+    final List<ServiceMetadataGroup> content = new ArrayList<>();
 
     @JsonIgnore
-    private final Map<String, ServiceModule> indexedServiceModules = new LinkedHashMap<>();
+    private final Map<String, ServiceMetadata> indexedServiceModules = new LinkedHashMap<>();
 
-    public ServiceModuleCapability() {
+    public ServiceMetadataCapability() {
         super("services", ServiceCapabilityType.HIERARCHICAL_MULTI_SELECT,
                 "Module ModuleNames", "Module modules (comma-separated)");
     }
 
     @Override
-    public List<ServiceModuleGroup> getContent() {
+    public List<ServiceMetadataGroup> getContent() {
         return this.content;
     }
 
     /**
-     * Return the {@link ServiceModule} with the specified id or {@code null} if no such
-     * ServiceModule exists.
-     * @param id the ID of the ServiceModule
-     * @return the ServiceModule or {@code null}
+     * Return the {@link ServiceMetadata} with the specified id or {@code null} if no such
+     * ServiceMetadata exists.
+     * @param id the ID of the ServiceMetadata
+     * @return the ServiceMetadata or {@code null}
      */
-    public ServiceModule get(String id) {
+    public ServiceMetadata get(String id) {
         return this.indexedServiceModules.get(id);
     }
 
@@ -35,7 +35,7 @@ public class ServiceModuleCapability extends ServiceCapability<List<ServiceModul
      * Return all ServiceModules as a flat collection.
      * @return all dependencies
      */
-    public Collection<ServiceModule> getAll() {
+    public Collection<ServiceMetadata> getAll() {
         return Collections.unmodifiableCollection(this.indexedServiceModules.values());
     }
 
@@ -44,7 +44,7 @@ public class ServiceModuleCapability extends ServiceCapability<List<ServiceModul
     }
 
     @Override
-    public void merge(List<ServiceModuleGroup> otherContent) {
+    public void merge(List<ServiceMetadataGroup> otherContent) {
         otherContent.stream().filter(g -> content.stream()
                 .noneMatch(c -> g.getName() != null && g.getName().equals(c.getName())))
                 .forEach(this.content::add);
@@ -57,15 +57,15 @@ public class ServiceModuleCapability extends ServiceCapability<List<ServiceModul
         this.content.forEach(group -> group.content.forEach(module -> indexServiceModules(module.getId(), module)));
     }
 
-    private void indexServiceModules(String id, ServiceModule serviceModule) {
-        ServiceModule existing = this.indexedServiceModules.get(id);
+    private void indexServiceModules(String id, ServiceMetadata serviceMetadata) {
+        ServiceMetadata existing = this.indexedServiceModules.get(id);
 
         if (existing != null) {
             throw new IllegalArgumentException(
-                    "Could not register " + serviceModule + ", another serviceModule "
+                    "Could not register " + serviceMetadata + ", another serviceMetadata "
                             + "has also the '" + id + "' id " + existing);
         }
 
-        this.indexedServiceModules.put(id, serviceModule);
+        this.indexedServiceModules.put(id, serviceMetadata);
     }
 }

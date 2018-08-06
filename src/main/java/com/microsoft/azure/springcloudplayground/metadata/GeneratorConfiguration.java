@@ -208,13 +208,6 @@ public class GeneratorConfiguration {
         private final Map<String, Repository> repositories = new LinkedHashMap<>();
 
         /**
-         * Gradle-specific settings.
-         */
-        @Getter
-        @NestedConfigurationProperty
-        private final Gradle gradle = new Gradle();
-
-        /**
          * Maven-specific settings.
          */
         @Getter
@@ -253,33 +246,9 @@ public class GeneratorConfiguration {
             this.fallbackApplicationName = other.fallbackApplicationName;
             this.invalidApplicationNames = other.invalidApplicationNames;
             this.forceSsl = other.forceSsl;
-            this.gradle.merge(other.gradle);
             this.maven.merge(other.maven);
             other.boms.forEach(this.boms::putIfAbsent);
             other.repositories.forEach(this.repositories::putIfAbsent);
-        }
-
-        /**
-         * Gradle details.
-         */
-        public static class Gradle {
-
-            /**
-             * Version of the "dependency-management-plugin" to use.
-             */
-            private String dependencyManagementPluginVersion = "1.0.0.RELEASE";
-
-            private void merge(Gradle other) {
-                this.dependencyManagementPluginVersion = other.dependencyManagementPluginVersion;
-            }
-
-            public String getDependencyManagementPluginVersion() {
-                return this.dependencyManagementPluginVersion;
-            }
-
-            public void setDependencyManagementPluginVersion(String dependencyManagementPluginVersion) {
-                this.dependencyManagementPluginVersion = dependencyManagementPluginVersion;
-            }
         }
 
         /**

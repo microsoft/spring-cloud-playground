@@ -7,9 +7,10 @@ public enum Annotation {
     SPRING_BOOT_APPLICATION("@SpringBootApplication", "org.springframework.boot.autoconfigure.SpringBootApplication"),
     ENABLE_CONFIG_SERVER("@EnableConfigServer", "org.springframework.cloud.config.server.EnableConfigServer"),
     ENABLE_EUREKA_SERVER("@EnableEurekaServer", "org.springframework.cloud.netflix.eureka.server.EnableEurekaServer"),
-    ENABLE_HYSTRIX_DASHBOARD("@EnableHystrixDashboard", "org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard"),
-    ENABLE_DISCOVERY_CLIENT("@EnableDiscoveryClient", "org.springframework.cloud.client.discovery" +
-            ".EnableDiscoveryClient"),
+    ENABLE_HYSTRIX_DASHBOARD("@EnableHystrixDashboard",
+            "org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard"),
+    ENABLE_DISCOVERY_CLIENT("@EnableDiscoveryClient",
+            "org.springframework.cloud.client.discovery.EnableDiscoveryClient"),
     ENABLE_CACHE("@EnableCaching", "org.springframework.cache.annotation.EnableCaching");
 
     private final String annotation;

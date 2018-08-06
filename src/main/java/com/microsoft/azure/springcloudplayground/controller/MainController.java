@@ -6,7 +6,6 @@ import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
-import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.samskivert.mustache.Mustache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tools.ant.Project;
@@ -43,8 +42,7 @@ public class MainController extends AbstractPlaygroundController {
     private static final String LOGIN_ACCOUNT = "LoginAccount";
     private static final String GREETING_HTML = "greeting";
 
-    public MainController(GeneratorMetadataProvider metadataProvider,
-                          TemplateRenderer templateRenderer, ResourceUrlProvider resourceUrlProvider,
+    public MainController(GeneratorMetadataProvider metadataProvider, ResourceUrlProvider resourceUrlProvider,
                           ProjectGenerator projectGenerator) {
         super(metadataProvider, resourceUrlProvider);
         this.projectGenerator = projectGenerator;
