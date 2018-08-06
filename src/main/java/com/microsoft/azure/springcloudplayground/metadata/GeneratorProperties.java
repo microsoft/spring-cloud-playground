@@ -2,7 +2,7 @@ package com.microsoft.azure.springcloudplayground.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.microsoft.azure.springcloudplayground.dependency.DependencyGroup;
-import com.microsoft.azure.springcloudplayground.service.ServiceModuleGroup;
+import com.microsoft.azure.springcloudplayground.service.ServiceMetadataGroup;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,7 +15,7 @@ import java.util.List;
 public class GeneratorProperties extends GeneratorConfiguration {
 
     /**
-     * Dependencies, organized in groups (i.e. themes).
+     * DependencyNames, organized in groups (i.e. themes).
      */
     @Getter
     @JsonIgnore
@@ -26,7 +26,7 @@ public class GeneratorProperties extends GeneratorConfiguration {
      */
     @Getter
     @JsonIgnore
-    private final List<ServiceModuleGroup> services = new ArrayList<>();
+    private final List<ServiceMetadataGroup> services = new ArrayList<>();
 
     /**
      * Available project types.

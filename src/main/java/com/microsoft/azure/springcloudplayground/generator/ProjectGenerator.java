@@ -6,12 +6,9 @@ import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
-import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -30,17 +27,13 @@ import java.util.stream.Collectors;
 public class ProjectGenerator {
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    @Getter
     private GeneratorMetadataProvider metadataProvider;
 
     @Autowired
-    private TemplateRenderer templateRenderer = new TemplateRenderer();
+    private TemplateRenderer templateRenderer;
 
     @Autowired
-    private ProjectResourceLocator projectResourceLocator = new ProjectResourceLocator();
+    private ProjectResourceLocator projectResourceLocator;
 
     @Value("${TMPDIR:.}/playground")
     @Setter
@@ -52,10 +45,6 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
-    @Autowired
-    ResourceLoader resourceLoader;
-
-    //private void writeKubernetesFile(File dir, ProjectRequest request){
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
 
@@ -512,10 +501,9 @@ public class ProjectGenerator {
 
         File wrapperDir = new File(dir, ".mvn/wrapper");
         wrapperDir.mkdirs();
-        writeTextResource(wrapperDir, "maven-wrapper.properties",
-                "maven/wrapper/maven-wrapper.properties");
-        writeBinaryResource(wrapperDir, "maven-wrapper.jar",
-                "maven/wrapper/maven-wrapper.jar");
+
+        writeTextResource(wrapperDir, "maven-wrapper.properties", "maven/wrapper/maven-wrapper.properties");
+        writeBinaryResource(wrapperDir, "maven-wrapper.jar", "maven/wrapper/maven-wrapper.jar");
     }
 
     private File writeBinaryResource(File dir, String name, String location) {
