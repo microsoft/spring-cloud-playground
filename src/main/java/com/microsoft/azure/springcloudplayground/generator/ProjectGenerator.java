@@ -2,9 +2,7 @@ package com.microsoft.azure.springcloudplayground.generator;
 
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
 import com.microsoft.azure.springcloudplayground.dependency.DependencyNames;
-import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
 import com.microsoft.azure.springcloudplayground.metadata.*;
-import com.microsoft.azure.springcloudplayground.module.ModuleNames;
 import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
@@ -46,19 +44,6 @@ public class ProjectGenerator {
 
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
-
-    private static final Map<String, List<String>> MODULE_TO_TEMPLATE;
-
-    static {
-        Map<String, List<String>> map = new HashMap<>();
-
-        map.put(ModuleNames.AZURE_EVNET_HUB_BINDER, Arrays.asList("SinkExample.java", "SourceExample.java"));
-        map.put(ModuleNames.AZURE_CACHE, Arrays.asList("CacheController.java"));
-        map.put(ModuleNames.AZURE_SQL_SERVER, Arrays.asList("SqlController.java"));
-        map.put(ModuleNames.AZURE_STORAGE, Arrays.asList("StorageController.java"));
-
-        MODULE_TO_TEMPLATE = Collections.unmodifiableMap(map);
-    }
 
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
@@ -233,9 +218,21 @@ public class ProjectGenerator {
         write(new File(srcDir, template), moduleName + "/" + template, serviceModel);
     }
 
+    private List<String> getAzureModuleTemplateFiles(@NonNull String moduleDir) { // Use moduleName as module dir name
+        List<String> templates = new ArrayList<>();
+
+        Assert.notNull(getClass().getClassLoader().getResource("templates" + "/" + moduleDir), "should ");
+
+        File templateDir = new File(getClass().getClassLoader().getResource("templates" + "/" + moduleDir).getFile());
+
+        Arrays.stream(templateDir.listFiles()).filter(File::isFile).forEach(f -> templates.add(f.getName()));
+
+        return templates;
+    }
+
     private void generateAzureModuleSourceCode(@NonNull String moduleName, @NonNull File srcDir,
                                                @NonNull Map<String, Object> serviceModel) {
-        List<String> templates = MODULE_TO_TEMPLATE.get(moduleName);
+        List<String> templates = getAzureModuleTemplateFiles(moduleName);
 
         Assert.notNull(templates, "templates should not be null");
 
