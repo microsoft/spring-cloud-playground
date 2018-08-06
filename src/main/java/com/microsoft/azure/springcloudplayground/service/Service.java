@@ -34,6 +34,7 @@ public class Service {
 
     private List<String> dependsOn;
 
+    @Getter
     private List<Module> modules;
 
     public static ServiceBuilder builder(@NonNull String name, int port) {
@@ -52,5 +53,9 @@ public class Service {
 
     public Set<String> getImports() {
         return modules.stream().map(Module::getImports).flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
+    public Set<String> getDependencies() {
+        return modules.stream().map(Module::getDependencies).flatMap(Collection::stream).collect(Collectors.toSet());
     }
 }

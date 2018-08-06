@@ -2,10 +2,7 @@ package com.microsoft.azure.springcloudplayground.autoconfigure;
 
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectResourceLocator;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadata;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataBuilder;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
-import com.microsoft.azure.springcloudplayground.metadata.GeneratorProperties;
+import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;

@@ -1,22 +1,19 @@
 package com.microsoft.azure.springcloudplayground.generator;
 
 import com.microsoft.azure.springcloudplayground.dependency.Dependency;
+import com.microsoft.azure.springcloudplayground.dependency.DependencyNames;
 import com.microsoft.azure.springcloudplayground.metadata.*;
 import com.microsoft.azure.springcloudplayground.service.Service;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
-import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,33 +26,14 @@ import java.util.stream.Collectors;
 
 public class ProjectGenerator {
 
-    private static final Map<String, List<String>> serviceToDependencies = new HashMap<>();
-
-    static {
-        serviceToDependencies.put("cloud-config-server",
-                Arrays.asList("cloud-config-server"));
-        serviceToDependencies.put("cloud-gateway",
-                Arrays.asList("cloud-gateway", "cloud-eureka-client", "cloud-config-client"));
-        serviceToDependencies.put("cloud-eureka-server",
-                Arrays.asList("cloud-eureka-server", "cloud-config-client"));
-        serviceToDependencies.put("cloud-hystrix-dashboard",
-                Arrays.asList("cloud-hystrix-dashboard", "cloud-config-client", "cloud-eureka-client", "web"));
-        serviceToDependencies.put("azure-service-bus",
-                Arrays.asList("azure-service-bus", "cloud-config-client", "cloud-eureka-client", "web"));
-    }
-
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    @Getter
     private GeneratorMetadataProvider metadataProvider;
 
     @Autowired
-    private TemplateRenderer templateRenderer = new TemplateRenderer();
+    private TemplateRenderer templateRenderer;
 
     @Autowired
-    private ProjectResourceLocator projectResourceLocator = new ProjectResourceLocator();
+    private ProjectResourceLocator projectResourceLocator;
 
     @Value("${TMPDIR:.}/playground")
     @Setter
@@ -67,10 +45,6 @@ public class ProjectGenerator {
     @Setter
     private transient Map<String, List<File>> temporaryFiles = new LinkedHashMap<>();
 
-    @Autowired
-    ResourceLoader resourceLoader;
-
-    //private void writeKubernetesFile(File dir, ProjectRequest request){
     private void resolveMicroServiceBuildProperties(@NonNull Map<String, Object> serviceModel) {
         Map<String, String> properties = new HashMap<>();
 
@@ -91,15 +65,11 @@ public class ProjectGenerator {
     }
 
     @NonNull
-    private void resolveMicroServiceDependency(@NonNull Map<String, Object> serviceModel, @NonNull String bootVersion) {
+    private void resolveMicroServiceDependency(@NonNull Service service, @NonNull Map<String, Object> serviceModel,
+                                               @NonNull String bootVersion) {
         Version version = Version.parse(bootVersion);
         GeneratorMetadata metadata = this.metadataProvider.get();
-        HashSet<String> set = new HashSet<>();
-        List<String> modules = (List<String>) serviceModel.get("modules");
-
-        modules.forEach(s -> set.addAll(serviceToDependencies.get(s)));
-
-        List<String> dependencyIdList = new ArrayList<>(set);
+        List<String> dependencyIdList = new ArrayList<>(service.getDependencies());
         List<Dependency> dependencies = dependencyIdList.stream().map(
                 d -> metadata.getDependencies().get(d).resolve(version)).collect(Collectors.toList());
 
@@ -123,6 +93,12 @@ public class ProjectGenerator {
     }
 
     @NonNull
+    private Service getServiceByName(@NonNull String serviceName, @NonNull Map<String, Object> model) {
+
+        return ((Map<String, Service>) model.get("microServicesMap")).get(serviceName);
+    }
+
+    @NonNull
     private Map<String, Object> resolveMicroServiceModel(@NonNull Service service, @NonNull Map<String, Object> model) {
         GeneratorMetadata metadata = this.metadataProvider.get();
         Map<String, Object> serviceModel = (Map<String, Object>) model.get(service.getName());
@@ -142,7 +118,7 @@ public class ProjectGenerator {
         serviceModel.put("mavenParentVersion", model.get("version"));
 
         resolveMicroServiceBuildProperties(serviceModel);
-        resolveMicroServiceDependency(serviceModel, model.get("bootVersion").toString());
+        resolveMicroServiceDependency(service, serviceModel, model.get("bootVersion").toString());
 
         serviceModel.put("applicationName", metadata.getConfiguration().generateApplicationName(service.getName()));
         serviceModel.put("applicationImports", service.getImports());
@@ -226,40 +202,105 @@ public class ProjectGenerator {
         writeText(new File(staticResources, "bulma.min.css"), templateRenderer.process("bulma.min.css", null));
     }
 
-    private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
+    private void generateHystrixDashboardSourceCode(@NonNull File srcDir, @NonNull File resourcesDir,
+                                                    @NonNull Map<String, Object> serviceModel) {
+        String prefix = "cloud-hystrix-dashboard/";
+        String applicationName = "CloudHystrixDashboardApplication.java";
+        String mockStreamName = "MockStreamServlet.java";
+
+        write(new File(srcDir, applicationName), prefix + "/" + applicationName, serviceModel);
+        write(new File(srcDir, mockStreamName), prefix + "/" + mockStreamName, serviceModel);
+        writeTextResource(resourcesDir, "hystrix.stream", "hystrix.stream");
+    }
+
+    private void writeAzureModuleSourceCode(@NonNull String moduleName, @NonNull String template, @NonNull File srcDir,
+                                            @NonNull Map<String, Object> serviceModel) {
+        write(new File(srcDir, template), moduleName + "/" + template, serviceModel);
+    }
+
+    private List<String> getAzureModuleTemplateFiles(@NonNull String moduleDir) { // Use moduleName as module dir name
+        List<String> templates = new ArrayList<>();
+
+        Assert.notNull(getClass().getClassLoader().getResource("templates" + "/" + moduleDir), "should ");
+
+        File templateDir = new File(getClass().getClassLoader().getResource("templates" + "/" + moduleDir).getFile());
+
+        Arrays.stream(templateDir.listFiles()).filter(File::isFile).forEach(f -> templates.add(f.getName()));
+
+        return templates;
+    }
+
+    private void generateAzureModuleSourceCode(@NonNull String moduleName, @NonNull File srcDir,
+                                               @NonNull Map<String, Object> serviceModel) {
+        List<String> templates = getAzureModuleTemplateFiles(moduleName);
+
+        Assert.notNull(templates, "templates should not be null");
+
+        templates.forEach(t -> writeAzureModuleSourceCode(moduleName, t, srcDir, serviceModel));
+    }
+
+    private void generateAzureServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
                                                 @NonNull Map<String, Object> model) {
-        List<String> dependencies = (List<String>) serviceModel.get("dependencyIdList");
-        String appName = serviceModel.get("applicationName").toString();
+        File srcDir = new File(new File(serviceDir, "src/main/java"),
+                serviceModel.get("packageName").toString().replace(".", "/"));
         String serviceName = serviceModel.get("name").toString();
-        File resources = new File(serviceDir, "src/main/resources");
+        Service service = getServiceByName(serviceName, model);
+        String appName = serviceModel.get("applicationName").toString();
+
+        service.getModules().forEach(m -> generateAzureModuleSourceCode(m.getName(), srcDir, serviceModel));
+
+        write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
+    }
+
+    private void generateInfrastructureServiceSourceCode(@NonNull File serviceDir,
+                                                         @NonNull Map<String, Object> serviceModel,
+                                                         @NonNull Map<String, Object> model) {
+        String serviceName = serviceModel.get("name").toString();
+        String appName = serviceModel.get("applicationName").toString();
+        File resourcesDir = new File(serviceDir, "src/main/resources/");
+        Service service = getServiceByName(serviceName, model);
         File src = new File(new File(serviceDir, "src/main/java"),
                 serviceModel.get("packageName").toString().replace(".", "/"));
-        src.mkdirs();
-        resources.mkdirs();
 
         if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_HYSTRIX_DASHBOARD)) {
-            String prefix = "cloud-hystrix-dashboard/";
-            write(new File(src, appName + ".java"), prefix + "CloudHystrixDashboardApplication.java", serviceModel);
-            write(new File(src, "MockStreamServlet.java"), prefix + "MockStreamServlet.java", serviceModel);
-            writeTextResource(resources, "hystrix.stream", "hystrix.stream");
-        } else {
-            write(new File(src, appName + ".java"), "Application.java", serviceModel);
+            generateHystrixDashboardSourceCode(src, resourcesDir, serviceModel);
+        } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_CONFIG_SERVER)) {
+            generateCloudConfigSourceCode(serviceDir, serviceModel, model);
+        } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
+            generateCloudGatewaySourceCode(serviceDir, src, serviceModel, model);
         }
 
-        if (dependencies.contains("web")) {
+        write(new File(src, appName + ".java"), "Application.java", serviceModel);
+
+        if (service.getDependencies().contains(DependencyNames.WEB)) {
             new File(serviceDir, "src/main/resources/templates").mkdirs();
             new File(serviceDir, "src/main/resources/static").mkdirs();
             write(new File(src, "Controller.java"), "Controller.java", serviceModel);
         }
+    }
 
-        if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_CONFIG_SERVER)) {
-            this.generateCloudConfigSourceCode(serviceDir, serviceModel, model);
-        } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
-            this.generateCloudGatewaySourceCode(serviceDir, src, serviceModel, model);
+    private void generateMicroServiceYamlFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel) {
+        String yamlFile = ModulePropertiesResolver.getBootstrapTemplate(serviceModel.get("name").toString());
+        writeText(new File(resourcesDir, "bootstrap.yml"), templateRenderer.process(yamlFile, serviceModel));
+    }
+
+    private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
+                                                @NonNull Map<String, Object> model) {
+        String serviceName = serviceModel.get("name").toString();
+        File resourcesDir = new File(serviceDir, "src/main/resources");
+        File src = new File(new File(serviceDir, "src/main/java"),
+                serviceModel.get("packageName").toString().replace(".", "/"));
+
+        src.mkdirs();
+        resourcesDir.mkdirs();
+
+        if (ServiceNames.isAzureService(serviceName)) {
+            generateAzureServiceSourceCode(serviceDir, serviceModel, model);
+        } else {
+            generateInfrastructureServiceSourceCode(serviceDir, serviceModel, model);
         }
 
-        String yamlFile = ModulePropertiesResolver.getBootstrapTemplate(serviceModel.get("name").toString());
-        writeText(new File(resources, "bootstrap.yml"), templateRenderer.process(yamlFile, serviceModel));
+        generateMicroServiceYamlFile(resourcesDir, serviceModel);
     }
 
     private void generateMicroServiceTestCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
@@ -279,9 +320,8 @@ public class ProjectGenerator {
 
     private void generateMicroService(@NonNull String serviceName, @NonNull Map<String, Object> model,
                                       @NonNull File projectDir) {
-        Map<String, Service> microServicesMap = (Map<String, Service>) model.get("microServicesMap");
         File serviceDir = new File(projectDir, serviceName);
-        Map<String, Object> serviceModel = resolveMicroServiceModel(microServicesMap.get(serviceName), model);
+        Map<String, Object> serviceModel = resolveMicroServiceModel(getServiceByName(serviceName, model), model);
 
         serviceDir.mkdir();
 
@@ -423,22 +463,11 @@ public class ProjectGenerator {
         model.put("buildPropertiesMaven", maven.entrySet());
     }
 
-    private boolean isAzureServices(@NonNull String name) {
-        if (!StringUtils.hasText(name)) {
-            return false;
-        }
-
-        return name.contains("azure");
-    }
-
-    private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request,
-                                                  @NonNull Map<String, Object> model) {
+    private void resolveRequestMicroServicesModel(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         List<String> microServiceNames = new ArrayList<>();
         List<Service> microServices = new ArrayList<>();
         Map<String, Service> microServicesMap = new HashMap<>();
         List<Map<String, Object>> azureServices = new ArrayList<>();
-
-        request.getMicroServices().forEach(s -> microServiceNames.add(s.getName()));
 
         request.getMicroServices().forEach(s -> {
             final Map<String, Object> serviceModel = new HashMap<>();
@@ -447,12 +476,13 @@ public class ProjectGenerator {
             model.put(s.getName(), serviceModel);
             microServices.add(service);
             microServicesMap.put(s.getName(), service);
+            microServiceNames.add(s.getName());
 
             serviceModel.put("port", s.getPort());
             serviceModel.put("name", s.getName());
             serviceModel.put("modules", s.getModules());
 
-            if (isAzureServices(s.getName())) {
+            if (ServiceNames.isAzureService(s.getName())) {
                 azureServices.add(serviceModel);
             }
 
@@ -523,10 +553,9 @@ public class ProjectGenerator {
 
         File wrapperDir = new File(dir, ".mvn/wrapper");
         wrapperDir.mkdirs();
-        writeTextResource(wrapperDir, "maven-wrapper.properties",
-                "maven/wrapper/maven-wrapper.properties");
-        writeBinaryResource(wrapperDir, "maven-wrapper.jar",
-                "maven/wrapper/maven-wrapper.jar");
+
+        writeTextResource(wrapperDir, "maven-wrapper.properties", "maven/wrapper/maven-wrapper.properties");
+        writeBinaryResource(wrapperDir, "maven-wrapper.jar", "maven/wrapper/maven-wrapper.jar");
     }
 
     private File writeBinaryResource(File dir, String name, String location) {
@@ -580,8 +609,7 @@ public class ProjectGenerator {
         this.temporaryFiles.computeIfAbsent(group, (key) -> new ArrayList<>()).add(file);
     }
 
-    private static List<Dependency> filterDependencies(List<Dependency> dependencies,
-                                                       String scope) {
+    private static List<Dependency> filterDependencies(List<Dependency> dependencies, String scope) {
         return dependencies.stream().filter((dep) -> scope.equals(dep.getScope()))
                 .sorted(DependencyComparator.INSTANCE).collect(Collectors.toList());
     }

@@ -189,13 +189,19 @@ $(function () {
         xhttp.onreadystatechange = function() {
             var a;
             if (xhttp.readyState === 4 && xhttp.status === 200) {
-                a = document.createElement('a');
-                a.href = window.URL.createObjectURL(xhttp.response);
-                a.download = getAttachmentName(xhttp);
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                var fileName = getAttachmentName(xhttp);
+
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) { // For IE
+                    window.navigator.msSaveOrOpenBlob(xhttp.response, fileName);
+                } else { // For non-IE
+                    a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(xhttp.response);
+                    a.download = fileName;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                }
             }
         };
 
