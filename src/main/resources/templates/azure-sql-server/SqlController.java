@@ -15,7 +15,7 @@ public class SqlController {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @GetMapping("/users")
+    @GetMapping("/sql-users")
     public List getUsers() {
         return this.jdbcTemplate.queryForList("SELECT * FROM users").stream().map(Map::values)
                                 .collect(Collectors.toList());

@@ -15,7 +15,7 @@ public class SourceExample {
     @Autowired
     private Source source;
 
-    @PostMapping("/messages")
+    @PostMapping("/eventhub-messages")
     public String postMessage(@RequestBody String message) {
         this.source.output().send(new GenericMessage<>(message));
         return message;
