@@ -486,13 +486,11 @@ public class ProjectGenerator {
             serviceModel.put("name", s.getName());
             serviceModel.put("modules", s.getModules());
 
-            if(ServiceNames.isAzureService(service.getName())) {
+            if (ServiceNames.isAzureService(s.getName())) {
                 // serviceIndex is used to generate spring.cloud.gateway.routes index for spring cloud gateway properties
                 serviceModel.put("serviceIndex", atomicInteger.intValue());
                 atomicInteger.incrementAndGet();
-            }
 
-            if (ServiceNames.isAzureService(s.getName())) {
                 azureServices.add(serviceModel);
             }
 
