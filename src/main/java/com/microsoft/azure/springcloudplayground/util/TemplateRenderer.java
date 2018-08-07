@@ -11,8 +11,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -45,6 +44,11 @@ public class TemplateRenderer {
             log.error("Cannot render: " + name, e);
             throw new IllegalStateException("Cannot render template", e);
         }
+    }
+
+    public String processFromString(String tempStr, Map<String, ?> model) {
+        Template template = this.mustache.compile(tempStr);
+        return template.execute(model);
     }
 
     public Template getTemplate(String name) {

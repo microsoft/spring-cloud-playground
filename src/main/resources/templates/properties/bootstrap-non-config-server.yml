@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: {{name}}
-  cloud:
-    config:
-      uri: http://cloud-config-server:8888
-      fail-fast: true
