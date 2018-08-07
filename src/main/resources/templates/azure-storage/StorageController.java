@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 @RestController
+@RequestMapping("/storage")
 public class StorageController {
 
     @Value("blob://{containerName}/{blobName}")
@@ -26,7 +27,7 @@ public class StorageController {
                 Charset.defaultCharset()) + "\n";
     }
 
-    @RequestMapping(value = "/storage", method = RequestMethod.POST)
+    @RequestMapping(value = "/", method = RequestMethod.POST)
     public String writeBlobFile(@RequestBody String data) throws IOException {
         try (OutputStream os = ((WritableResource) this.blobFile).getOutputStream()) {
             os.write(data.getBytes());
