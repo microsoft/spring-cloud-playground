@@ -19,7 +19,7 @@ public class ServicePropsResolver {
                 .map(module -> module.getBootstapPropsTemplate()).collect(Collectors.toList());
 
         try{
-            return combineAndRemoveDuplicate(bootstrapPropsFiles);
+            return mergeAndRemoveDuplicate(bootstrapPropsFiles);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to generate application properties file.", e);
         }
@@ -30,13 +30,13 @@ public class ServicePropsResolver {
                 .map(module -> module.getApplicationPropsTemplate()).collect(Collectors.toList());
 
         try {
-            return combineAndRemoveDuplicate(applicationPropsFiles);
+            return mergeAndRemoveDuplicate(applicationPropsFiles);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to generate application properties file.", e);
         }
     }
 
-    private static String combineAndRemoveDuplicate(List<String> resourceFiles) throws IOException{
+    private static String mergeAndRemoveDuplicate(List<String> resourceFiles) throws IOException{
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         List<String> propLines = new ArrayList<>();
         for (String propFile : resourceFiles) {
