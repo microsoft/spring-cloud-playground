@@ -1,7 +1,6 @@
 package com.microsoft.azure.springcloudplayground.module;
 
 import com.microsoft.azure.springcloudplayground.service.Annotation;
-import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import lombok.Getter;
 
 import java.io.File;
