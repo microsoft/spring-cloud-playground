@@ -16,7 +16,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.*;
@@ -260,7 +263,6 @@ public class ProjectGenerator {
         String serviceName = serviceModel.get("name").toString();
         String appName = serviceModel.get("applicationName").toString();
         File resourcesDir = new File(serviceDir, "src/main/resources/");
-        Service service = getServiceByName(serviceName, model);
         File src = new File(new File(serviceDir, "src/main/java"),
                 serviceModel.get("packageName").toString().replace(".", "/"));
 
@@ -273,12 +275,6 @@ public class ProjectGenerator {
         }
 
         write(new File(src, appName + ".java"), "Application.java", serviceModel);
-
-        if (service.getDependencies().contains(DependencyNames.WEB)) {
-            new File(serviceDir, "src/main/resources/templates").mkdirs();
-            new File(serviceDir, "src/main/resources/static").mkdirs();
-            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
-        }
     }
 
     private void generateBoostrapPropsFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel,
@@ -301,6 +297,14 @@ public class ProjectGenerator {
             generateAzureServiceSourceCode(serviceDir, serviceModel, model);
         } else {
             generateInfrastructureServiceSourceCode(serviceDir, serviceModel, model);
+        }
+
+        Service service = getServiceByName(serviceName, model);
+
+        if (service.getDependencies().contains(DependencyNames.WEB)) {
+            new File(serviceDir, "src/main/resources/templates").mkdirs();
+            new File(serviceDir, "src/main/resources/static").mkdirs();
+            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
         }
 
         generateBoostrapPropsFile(resourcesDir, serviceModel, model);
