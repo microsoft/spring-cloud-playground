@@ -178,7 +178,7 @@ public class ProjectGenerator {
 
         shared.mkdir();
 
-        String template = ServicePropsResolver.generateApplicationPropsFile(getServiceByName(ServiceNames.CLOUD_CONFIG_SERVER, model));
+        String template = ServicePropsResolver.generateApplicationProps(getServiceByName(ServiceNames.CLOUD_CONFIG_SERVER, model));
         writeText(new File(shared, "application.properties"), templateRenderer.processFromString(template, null));
 
         List<String> serviceNames = getMicroServiceNames(model);
@@ -186,7 +186,7 @@ public class ProjectGenerator {
 
         serviceNames.stream().filter(s -> !s.equalsIgnoreCase(configServer)).forEach(s -> {
             final Map<String, Object> microService = getMicroServiceByName(s, model);
-            final String propTemplate = ServicePropsResolver.generateApplicationPropsFile(getServiceByName(s, model));
+            final String propTemplate = ServicePropsResolver.generateApplicationProps(getServiceByName(s, model));
             writeText(new File(shared, s + ".properties"), templateRenderer.processFromString(propTemplate, microService));
         });
     }
@@ -283,7 +283,7 @@ public class ProjectGenerator {
 
     private void generateBoostrapPropsFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel,
                                            @NonNull Map<String, Object> model) {
-        String template = ServicePropsResolver.generateBootstrapFile(getServiceByName(serviceModel.get("name").toString(), model));
+        String template = ServicePropsResolver.generateBootstrapProps(getServiceByName(serviceModel.get("name").toString(), model));
         writeText(new File(resourcesDir, "bootstrap.properties"), templateRenderer.processFromString(template, serviceModel));
     }
 

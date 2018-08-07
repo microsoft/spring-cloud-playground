@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class ServicePropsResolver {
     private static final String NEW_LINE = System.getProperty("line.separator");
 
-    public static String generateBootstrapFile(Service service) {
+    public static String generateBootstrapProps(Service service) {
         List<String> bootstrapPropsFiles = service.getModules().stream()
                 .map(module -> module.getBootstapPropsTemplate()).collect(Collectors.toList());
 
@@ -25,7 +25,7 @@ public class ServicePropsResolver {
         }
     }
 
-    public static String generateApplicationPropsFile(Service service) {
+    public static String generateApplicationProps(Service service) {
         List<String> applicationPropsFiles = service.getModules().stream()
                 .map(module -> module.getApplicationPropsTemplate()).collect(Collectors.toList());
 
