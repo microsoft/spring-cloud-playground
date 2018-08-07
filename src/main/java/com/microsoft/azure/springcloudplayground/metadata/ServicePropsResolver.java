@@ -39,10 +39,10 @@ public class ServicePropsResolver {
     private static String combineAndRemoveDuplicate(List<String> resourceFiles) throws IOException{
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         List<String> propLines = new ArrayList<>();
-        for(String propFile : resourceFiles) {
+        for (String propFile : resourceFiles) {
             List<String> lines = IOUtils.readLines(resourceLoader.getResource(propFile).getInputStream(), Charset.forName("UTF-8"));
             lines.forEach(line -> {
-                if( line.isEmpty() || !propLines.contains(line)) {
+                if (line.isEmpty() || !propLines.contains(line)) {
                     propLines.add(line);
                 }
             });
