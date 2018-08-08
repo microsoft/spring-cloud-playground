@@ -8,6 +8,7 @@ import com.microsoft.azure.springcloudplayground.service.ServiceNames;
 import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class ProjectGenerator {
     private static final String JAVA_FILE_SUFFIX = "java";
 
@@ -106,6 +108,8 @@ public class ProjectGenerator {
         GeneratorMetadata metadata = this.metadataProvider.get();
         Map<String, Object> serviceModel = (Map<String, Object>) model.get(service.getName());
 
+        log.info("Resolving micro service {} model.", service.getName());
+
         model.put(service.getName(), serviceModel);
 
         serviceModel.put("groupId", model.get("groupId"));
@@ -146,6 +150,8 @@ public class ProjectGenerator {
 
     private File generateRootProject(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         File rootDir;
+
+        log.info("Generate root directory {}.", request.getBaseDir());
 
         try {
             rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
@@ -330,6 +336,8 @@ public class ProjectGenerator {
         File serviceDir = new File(projectDir, serviceName);
         Map<String, Object> serviceModel = resolveMicroServiceModel(getServiceByName(serviceName, model), model);
 
+        log.info("Generate micro service {} project.", serviceName);
+
         serviceDir.mkdir();
 
         generateMicroServiceDockerfile(serviceDir, serviceModel);
@@ -350,6 +358,8 @@ public class ProjectGenerator {
         String runCmd = "run.cmd";
         String readMe = "README.md";
         String kubernetes = "kubernetes.yaml";
+
+        log.info("Generate docker directory {}.", docker);
 
         dockerDir.mkdirs();
 
@@ -539,6 +549,8 @@ public class ProjectGenerator {
 
     private Map<String, Object> resolveModel(@NonNull ProjectRequest request) {
         Map<String, Object> model = new LinkedHashMap<>();
+
+        log.info("Resolving project {}.", request.getName());
 
         model.put("mavenBuild", true);
         model.put("build", "maven");
