@@ -47,8 +47,11 @@ playground:
           - versionRange: "[2.0.0.RC2,2.0.0.RC2]"
             version: Finchley.M7
             repositories: spring-milestones
-          - versionRange: "[2.0.0.RELEASE,2.0.x.RELEASE]"
+          - versionRange: "[2.0.0.RELEASE,2.0.2.RELEASE]"
             version: Finchley.M9
+            repositories: spring-milestones
+          - versionRange: "[2.0.3.RELEASE,2.0.3.RELEASE]"
+            version: Finchley.RELEASE
             repositories: spring-milestones
           - versionRange: "2.0.x.BUILD-SNAPSHOT"
             version: Finchley.BUILD-SNAPSHOT

@@ -9,6 +9,7 @@ import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
@@ -23,10 +24,12 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class ProjectGenerator {
+    private static final String JAVA_FILE_SUFFIX = "java";
 
     @Autowired
     private GeneratorMetadataProvider metadataProvider;
@@ -184,16 +187,16 @@ public class ProjectGenerator {
 
         shared.mkdir();
 
-        String yamlFile = ModulePropertiesResolver.getSharedCommonPropTemplate();
-        writeText(new File(shared, "application.yml"), templateRenderer.process(yamlFile, null));
+        String template = ServicePropsResolver.generateApplicationProps(getServiceByName(ServiceNames.CLOUD_CONFIG_SERVER, model));
+        writeText(new File(shared, "application.properties"), templateRenderer.processFromString(template, null));
 
         List<String> serviceNames = getMicroServiceNames(model);
         String configServer = serviceModel.get("name").toString();
 
         serviceNames.stream().filter(s -> !s.equalsIgnoreCase(configServer)).forEach(s -> {
             final Map<String, Object> microService = getMicroServiceByName(s, model);
-            final String yamlTemplate = ModulePropertiesResolver.getSharedPropTemplate(s);
-            writeText(new File(shared, s + ".yml"), templateRenderer.process(yamlTemplate, microService));
+            final String propTemplate = ServicePropsResolver.generateApplicationProps(getServiceByName(s, model));
+            writeText(new File(shared, s + ".properties"), templateRenderer.processFromString(propTemplate, microService));
         });
     }
 
@@ -231,7 +234,9 @@ public class ProjectGenerator {
 
         File templateDir = new File(getClass().getClassLoader().getResource("templates" + "/" + moduleDir).getFile());
 
-        Arrays.stream(templateDir.listFiles()).filter(File::isFile).forEach(f -> templates.add(f.getName()));
+        Arrays.stream(templateDir.listFiles()).filter(File::isFile)
+                .filter(file -> FilenameUtils.getExtension(file.getName()).equals(JAVA_FILE_SUFFIX))
+                .forEach(f -> templates.add(f.getName()));
 
         return templates;
     }
@@ -264,7 +269,6 @@ public class ProjectGenerator {
         String serviceName = serviceModel.get("name").toString();
         String appName = serviceModel.get("applicationName").toString();
         File resourcesDir = new File(serviceDir, "src/main/resources/");
-        Service service = getServiceByName(serviceName, model);
         File src = new File(new File(serviceDir, "src/main/java"),
                 serviceModel.get("packageName").toString().replace(".", "/"));
 
@@ -277,17 +281,12 @@ public class ProjectGenerator {
         }
 
         write(new File(src, appName + ".java"), "Application.java", serviceModel);
-
-        if (service.getDependencies().contains(DependencyNames.WEB)) {
-            new File(serviceDir, "src/main/resources/templates").mkdirs();
-            new File(serviceDir, "src/main/resources/static").mkdirs();
-            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
-        }
     }
 
-    private void generateMicroServiceYamlFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel) {
-        String yamlFile = ModulePropertiesResolver.getBootstrapTemplate(serviceModel.get("name").toString());
-        writeText(new File(resourcesDir, "bootstrap.yml"), templateRenderer.process(yamlFile, serviceModel));
+    private void generateBoostrapPropsFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel,
+                                           @NonNull Map<String, Object> model) {
+        String template = ServicePropsResolver.generateBootstrapProps(getServiceByName(serviceModel.get("name").toString(), model));
+        writeText(new File(resourcesDir, "bootstrap.properties"), templateRenderer.processFromString(template, serviceModel));
     }
 
     private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
@@ -306,7 +305,15 @@ public class ProjectGenerator {
             generateInfrastructureServiceSourceCode(serviceDir, serviceModel, model);
         }
 
-        generateMicroServiceYamlFile(resourcesDir, serviceModel);
+        Service service = getServiceByName(serviceName, model);
+
+        if (service.getDependencies().contains(DependencyNames.WEB)) {
+            new File(serviceDir, "src/main/resources/templates").mkdirs();
+            new File(serviceDir, "src/main/resources/static").mkdirs();
+            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
+        }
+
+        generateBoostrapPropsFile(resourcesDir, serviceModel, model);
     }
 
     private void generateMicroServiceTestCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
@@ -479,6 +486,7 @@ public class ProjectGenerator {
         Map<String, Service> microServicesMap = new HashMap<>();
         List<Map<String, Object>> azureServices = new ArrayList<>();
 
+        AtomicInteger atomicInteger = new AtomicInteger(0);
         request.getMicroServices().forEach(s -> {
             final Map<String, Object> serviceModel = new HashMap<>();
             final Service service = ServiceNames.toService(s);
@@ -493,6 +501,9 @@ public class ProjectGenerator {
             serviceModel.put("modules", s.getModules());
 
             if (ServiceNames.isAzureService(s.getName())) {
+                // serviceIndex is used to generate spring.cloud.gateway.routes index for spring cloud gateway properties
+                serviceModel.put("serviceIndex", atomicInteger.getAndIncrement());
+
                 azureServices.add(serviceModel);
             }
 
