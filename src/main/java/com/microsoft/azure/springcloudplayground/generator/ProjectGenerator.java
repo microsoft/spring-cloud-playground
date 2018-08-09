@@ -195,9 +195,10 @@ public class ProjectGenerator {
         Assert.notNull(models, "models should not be null");
         Assert.isTrue(!models.contains(serviceModel), "should not contain config model");
 
-        models.forEach(s -> {
-            final String propTemplate = ServicePropsResolver.generateApplicationProps(getService(s));
-            writeText(new File(shared, s + ".properties"), templateRenderer.processFromString(propTemplate, s));
+        models.forEach(m -> {
+            final Service service = getService(m);
+            final String propTemplate = ServicePropsResolver.generateApplicationProps(service);
+            writeText(new File(shared, service.getName() + ".properties"), templateRenderer.processFromString(propTemplate, m));
         });
     }
 
