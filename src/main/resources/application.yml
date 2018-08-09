@@ -1,15 +1,17 @@
+spring:
+  mustache:
+    expose-request-attributes: true
+
 playground:
   env:
     boms:
-      azure:
+      spring-cloud-azure:
         groupId: com.microsoft.azure
-        artifactId: azure-spring-boot-bom
-        versionProperty: azure.version
+        artifactId: spring-cloud-azure-dependencies
+        versionProperty: spring-cloud-azure.version
         mappings:
-          - versionRange: "[1.5.4.RELEASE,2.0.0.RELEASE)"
-            version: 0.2.3
           - versionRange: "2.0.0.RELEASE"
-            version: 2.0.1
+            version: 1.0.0.M1
       spring-cloud:
         groupId: org.springframework.cloud
         artifactId: spring-cloud-dependencies
@@ -45,8 +47,11 @@ playground:
           - versionRange: "[2.0.0.RC2,2.0.0.RC2]"
             version: Finchley.M7
             repositories: spring-milestones
-          - versionRange: "[2.0.0.RELEASE,2.0.x.RELEASE]"
+          - versionRange: "[2.0.0.RELEASE,2.0.2.RELEASE]"
             version: Finchley.M9
+            repositories: spring-milestones
+          - versionRange: "[2.0.3.RELEASE,2.0.3.RELEASE]"
+            version: Finchley.RELEASE
             repositories: spring-milestones
           - versionRange: "2.0.x.BUILD-SNAPSHOT"
             version: Finchley.BUILD-SNAPSHOT
@@ -166,103 +171,103 @@ playground:
             - versionRange: "[1.2.3.RELEASE,1.5.x.RELEASE]"
               artifactId: spring-cloud-starter-hystrix-dashboard
             - versionRange: "1.5.0.BUILD-SNAPSHOT"
-    - name: Azure
-      bom: azure
+    - name: Spring Cloud Azure
+      bom: spring-cloud-azure
       versionRange: "1.5.4.RELEASE"
       content:
-        - name: Azure Support
-          id: azure-support
+        - name: Azure Redis Cache
+          id: azure-redis-cache
           groupId: com.microsoft.azure
-          artifactId: azure-spring-boot
-          description: Auto-configuration for Azure Services (service bus, storage, active directory, cosmos DB, key vault and more)
+          artifactId: spring-cloud-azure-starter-cache
+          description: Azure Redis Cache Integration
           links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-cache-sample
+              description: Spring Cloud Azure redis cache sample
             - rel: reference
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-cache
               description: Reference doc
-        - name: Azure Active Directory
-          id: azure-active-directory
+        - name: Azure Sql Server Database
+          id: azure-sql-server
           groupId: com.microsoft.azure
-          artifactId: azure-active-directory-spring-boot-starter
-          description: Spring Security integration with Azure Active Directory for authentication
+          artifactId: spring-cloud-azure-starter-sql-sqlserver
+          description: Azure Sql Server Database Integration
           links:
-            - rel: guide
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-active-directory-spring-boot-sample
-              description: Using Active Directory
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-sql-sample
+              description: Spring Cloud Azure redis cache sample
             - rel: reference
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-active-directory-spring-boot-starter
-              description: Reference doc
-        - name: Azure Key Vault
-          id: azure-keyvault-secrets
-          groupId: com.microsoft.azure
-          artifactId: azure-keyvault-secrets-spring-boot-starter
-          description: Spring value annotation integration with Azure Key Vault Secrets
-          links:
-            - rel: guide
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-keyvault-secrets-spring-boot-sample
-              description: Using Key Vault
-            - rel: reference
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-keyvault-secrets-spring-boot-starter
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-sql-sqlserver
               description: Reference doc
         - name: Azure Storage
           id: azure-storage
           groupId: com.microsoft.azure
-          artifactId: azure-storage-spring-boot-starter
-          description: Azure Storage service integration
+          artifactId: spring-cloud-azure-starter-storage
+          description: Azure Storage Integration
           links:
-            - rel: guide
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-storage-spring-boot-sample
-              description: Using Azure Storage
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-storage-sample
+              description: Spring Cloud Azure storage sample
             - rel: reference
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-storage-spring-boot-starter
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-storage
               description: Reference doc
-        - name: Azure Service Bus
-          id: azure-service-bus
+        - name: Azure Event Hub Stream Binder
+          id: azure-eventhub-binder
           groupId: com.microsoft.azure
-          artifactId: azure-servicebus-spring-boot-starter
-          description: Azure Service Bus integration
+          artifactId: spring-cloud-azure-eventhub-stream-binder
+          description: Spring Cloud Stream Event Hub Binder
           links:
-            - rel: guide
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-servicebus-spring-boot-sample
-              description: Using Azure Storage
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
+              description: Spring Cloud Stream with Event Hub Binder sample
             - rel: reference
-              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-starters/azure-servicebus-spring-boot-starter
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-eventhub-stream-binder
+              description: Reference doc
+        - name: Azure Event Hub
+          id: azure-eventhub-starter
+          groupId: com.microsoft.azure
+          artifactId: spring-cloud-azure-starter-eventhub
+          description: Azure Event Hub Integration
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
+              description: Spring Cloud Stream with Event Hub Binder sample
+            - rel: reference
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-eventhub
               description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
         - name: Spring Cloud Config Server
           id: cloud-config-server
+          defaultPort: 8888
           description: Central management for configuration via a git or svn backend
         - name: Spring Cloud Gateway
           id: cloud-gateway
+          defaultPort: 9999
           description: Intelligent and programmable routing with the reactive Spring Cloud Gateway
         - name: Spring Cloud Eureka Server
           id: cloud-eureka-server
+          defaultPort: 8761
           description: Spring Cloud Service Registry and Discovery
         - name: Spring Cloud Hystrix Dashboard
           id: cloud-hystrix-dashboard
+          defaultPort: 7979
           description: Circuit breaker dashboard with spring-cloud-netflix Hystrix
     - name: Azure Spring Cloud Modules
       content:
-        - name: Security (Azure Active Directory)
-          id: azure-active-directory
-          description: Spring Cloud Security with Azure AD and Azure AD B2C backend
-        - name: Messaging (Azure Service Bus)
-          id: azure-service-bus
-          description: Spring Cloud Messaging API implementation for Azure Service Bus
-        - name: Messaging (Azure Queue Storage)
-          id: azure-queue-storage
-          description: Spring Cloud Messaging API implementation for Azure Queue Storage
         - name: Stream (Azure Event Hub)
-          id: azure-event-hub
+          id: azure-eventhub-binder
           description: Spring Cloud Stream Binder for Azure Event Hub
-        - name: Stream (Azure SignalR Service)
-          id: azure-signalr-service
-          description: Spring Cloud Stream Binder for Azure SignalR Service
-        - name: Vault (Azure Key Vault)
-          id: azure-key-vault
-          description: Spring Cloud Vault with Azure Key Vault backend
-
+        - name: Cache (Azure Redis Cache)
+          id: azure-redis-cache
+          description: Spring Cache Integration with Azure Redis Cache
+        - name: Resource (Azure Storage)
+          id: azure-storage
+          description: Spring Resource with Azure Storage
+        - name: Sql (Azure Sql Server Database)
+          id: azure-sql-server
+          description: Spring Data JPA with Azure Sql Server Database
   types:
     - name: Maven Project
       id: maven-project

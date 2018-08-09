@@ -1,17 +1,14 @@
 package com.microsoft.azure.springcloudplayground.controller;
 
-import com.microsoft.azure.springcloudplayground.dependency.DependencyMetadataProvider;
-import com.microsoft.azure.springcloudplayground.generator.BasicProjectRequest;
+import com.microsoft.azure.springcloudplayground.generator.MicroService;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
-import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.samskivert.mustache.Mustache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Tar;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +19,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,8 +32,9 @@ import java.util.Map;
 @Slf4j
 public class MainController extends AbstractPlaygroundController {
 
-    private final ProjectGenerator projectGenerator;
     private final TelemetryProxy telemetryProxy;
+    private final ProjectGenerator projectGenerator;
+
     private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
     private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
     private static final String TELEMETRY_EVENT_LOGIN = "SpringCloudPlaygroundLogin";
@@ -45,26 +42,13 @@ public class MainController extends AbstractPlaygroundController {
     private static final String LOGIN_ACCOUNT = "LoginAccount";
     private static final String GREETING_HTML = "greeting";
 
-    public MainController(GeneratorMetadataProvider metadataProvider,
-                          TemplateRenderer templateRenderer, ResourceUrlProvider resourceUrlProvider,
-                          ProjectGenerator projectGenerator,
-                          DependencyMetadataProvider dependencyMetadataProvider) {
+    public MainController(GeneratorMetadataProvider metadataProvider, ResourceUrlProvider resourceUrlProvider,
+                          ProjectGenerator projectGenerator) {
         super(metadataProvider, resourceUrlProvider);
         this.projectGenerator = projectGenerator;
         this.telemetryProxy = new TelemetryProxy();
     }
 
-    @ModelAttribute
-    public BasicProjectRequest projectRequest(@RequestHeader Map<String, String> headers) {
-        ProjectRequest request = new ProjectRequest();
-
-        request.getParameters().putAll(headers);
-        request.initialize(this.metadataProvider.get());
-
-        return request;
-    }
-
-    // test method
     @GetMapping("/greeting")
     public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
         model.addAttribute("name", name);
@@ -101,10 +85,10 @@ public class MainController extends AbstractPlaygroundController {
         model.put("build.information", buildInfo);
     }
 
-    private void triggerGenerateEvent(@NonNull List<String> services) {
+    private void triggerGenerateEvent(@NonNull List<MicroService> services) {
         final Map<String, String> properties = new HashMap<>();
 
-        services.forEach(s -> properties.put(s, "selected"));
+        services.forEach(s -> properties.put(s.getName(), "selected"));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
@@ -133,17 +117,13 @@ public class MainController extends AbstractPlaygroundController {
         return "home";
     }
 
-    @RequestMapping("/microservice.zip")
     @ResponseBody
-    public ResponseEntity<byte[]> springZip(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
-            throws IOException {
-        ProjectRequest request = (ProjectRequest) basicRequest;
-        File dir = this.projectGenerator.generateProjectStructure(request);
+    @PostMapping("/project.zip")
+    public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull ProjectRequest request) throws IOException {
+        File dir = this.projectGenerator.generate(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
-        String wrapperScript = getWrapperScript(request);
 
-        this.triggerGenerateEvent(request.getServices());
-        new File(dir, wrapperScript).setExecutable(true);
+        this.triggerGenerateEvent(request.getMicroServices());
 
         Zip zip = new Zip();
         zip.setProject(new Project());
@@ -152,15 +132,6 @@ public class MainController extends AbstractPlaygroundController {
         ZipFileSet set = new ZipFileSet();
         set.setDir(dir);
         set.setFileMode("755");
-        set.setIncludes(wrapperScript);
-        set.setDefaultexcludes(false);
-
-        zip.addFileset(set);
-
-        set = new ZipFileSet();
-        set.setDir(dir);
-        set.setIncludes("**,");
-        set.setExcludes(wrapperScript);
         set.setDefaultexcludes(false);
 
         zip.addFileset(set);
@@ -170,66 +141,23 @@ public class MainController extends AbstractPlaygroundController {
         return upload(download, dir, generateFileName(request, "zip"), "application/zip");
     }
 
-    @RequestMapping(path = "/microservice.tgz", produces = "application/x-compress")
-    @ResponseBody
-    public ResponseEntity<byte[]> springTgz(BasicProjectRequest basicRequest, HttpServletRequest httpRequest)
-            throws IOException {
-        ProjectRequest request = (ProjectRequest) basicRequest;
-        File dir = this.projectGenerator.generateProjectStructure(request);
-        File download = this.projectGenerator.createDistributionFile(dir, ".tar.gz");
-        String wrapperScript = getWrapperScript(request);
-
-        this.triggerGenerateEvent(request.getServices());
-        new File(dir, wrapperScript).setExecutable(true);
-
-        Tar zip = new Tar();
-        zip.setProject(new Project());
-        zip.setDefaultexcludes(false);
-
-        Tar.TarFileSet set = zip.createTarFileSet();
-        set.setDir(dir);
-        set.setFileMode("755");
-        set.setIncludes(wrapperScript);
-        set.setDefaultexcludes(false);
-
-        set = zip.createTarFileSet();
-        set.setDir(dir);
-        set.setIncludes("**,");
-        set.setExcludes(wrapperScript);
-        set.setDefaultexcludes(false);
-
-        zip.setDestFile(download.getCanonicalFile());
-        Tar.TarCompressionMethod method = new Tar.TarCompressionMethod();
-        method.setValue("gzip");
-        zip.setCompression(method);
-        zip.execute();
-
-        return upload(download, dir, generateFileName(request, "tar.gz"), "application/x-compress");
-    }
-
     private static String generateFileName(ProjectRequest request, String extension) {
         String tmp = request.getArtifactId().replaceAll(" ", "_");
+
         try {
             return URLEncoder.encode(tmp, "UTF-8") + "." + extension;
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("Cannot encode URL", e);
         }
     }
 
-    private static String getWrapperScript(ProjectRequest request) {
-        String script = "gradle".equals(request.getBuild()) ? "gradlew" : "mvnw";
-        return request.getBaseDir() != null ? request.getBaseDir() + "/" + script : script;
-    }
-
-    private ResponseEntity<byte[]> upload(File download, File dir, String fileName,
-                                          String contentType) throws IOException {
+    private ResponseEntity<byte[]> upload(File download, File dir, String fileName, String type) throws IOException {
         byte[] bytes = StreamUtils.copyToByteArray(new FileInputStream(download));
         log.info("Uploading: {} ({} bytes)", download, bytes.length);
 
         this.projectGenerator.cleanTempFiles(dir);
 
-        return createResponseEntity(bytes, contentType, fileName);
+        return createResponseEntity(bytes, type, fileName);
     }
 
     private ResponseEntity<byte[]> createResponseEntity(byte[] content, String contentType, String fileName) {

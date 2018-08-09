@@ -1,5 +1,6 @@
 package com.microsoft.azure.springcloudplayground.util;
 
+import com.microsoft.azure.springcloudplayground.exception.InvalidVersionException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.util.StringUtils;

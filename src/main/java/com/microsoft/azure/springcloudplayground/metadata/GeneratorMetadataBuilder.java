@@ -1,12 +1,7 @@
 package com.microsoft.azure.springcloudplayground.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,15 +38,6 @@ public final class GeneratorMetadataBuilder {
         }
 
         return withCustomizer(new InitializerPropertiesCustomizer(properties));
-    }
-
-    /**
-     * Add a {@link GeneratorMetadata} to be merged with other content.
-     * @param resource a resource to a json document describing the metadata to include
-     * @return this instance
-     */
-    public GeneratorMetadataBuilder withGeneratorMetadata(Resource resource) {
-        return withCustomizer(new ResourceGeneratorMetadataCustomizer(resource));
     }
 
     /**
@@ -102,7 +88,7 @@ public final class GeneratorMetadataBuilder {
         }
 
         if (!StringUtils.hasText(metadata.getDescription().getContent())) {
-            metadata.getDescription().setContent("Demo project for Spring Boot");
+            metadata.getDescription().setContent("Demo project for Spring Cloud Azure");
         }
 
         if (!StringUtils.hasText(metadata.getGroupId().getContent())) {
@@ -159,34 +145,5 @@ public final class GeneratorMetadataBuilder {
             this.properties.getPackageName().apply(metadata.getPackageName());
         }
 
-    }
-
-    @Slf4j
-    private static class ResourceGeneratorMetadataCustomizer implements GeneratorMetadataCustomizer {
-
-        private static final Charset UTF_8 = Charset.forName("UTF-8");
-
-        private final Resource resource;
-
-        ResourceGeneratorMetadataCustomizer(Resource resource) {
-            this.resource = resource;
-        }
-
-        @Override
-        public void customize(GeneratorMetadata metadata) {
-            log.info("Loading project generator  metadata from " + this.resource);
-
-            try {
-                String content = StreamUtils.copyToString(this.resource.getInputStream(),
-                        UTF_8);
-                ObjectMapper objectMapper = new ObjectMapper();
-                GeneratorMetadata anotherMetadata = objectMapper.readValue(content,
-                        GeneratorMetadata.class);
-                metadata.merge(anotherMetadata);
-            }
-            catch (Exception e) {
-                throw new IllegalStateException("Cannot merge", e);
-            }
-        }
     }
 }

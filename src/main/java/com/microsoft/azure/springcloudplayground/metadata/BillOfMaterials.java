@@ -3,6 +3,7 @@ package com.microsoft.azure.springcloudplayground.metadata;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.microsoft.azure.springcloudplayground.exception.InvalidGeneratorMetadataException;
+import com.microsoft.azure.springcloudplayground.exception.InvalidVersionException;
 import com.microsoft.azure.springcloudplayground.util.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

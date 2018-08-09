@@ -1,4 +1,0 @@
-server:
-  servlet:
-    context-path:  /{{applicationName}}
-  port: {{port}}
