@@ -9,9 +9,11 @@ import com.microsoft.azure.springcloudplayground.util.TemplateRenderer;
 import com.microsoft.azure.springcloudplayground.util.Version;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -29,13 +31,15 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class ProjectGenerator {
-    private static final String JAVA_FILE_SUFFIX = "java";
 
     @Autowired
     private GeneratorMetadataProvider metadataProvider;
 
     @Autowired
     private TemplateRenderer templateRenderer;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @Autowired
     private ProjectResourceLocator projectResourceLocator;
@@ -213,41 +217,13 @@ public class ProjectGenerator {
 
     private void generateHystrixDashboardSourceCode(@NonNull File srcDir, @NonNull File resourcesDir,
                                                     @NonNull Map<String, Object> serviceModel) {
-        String prefix = "cloud-hystrix-dashboard/";
+        String prefix = "cloud-hystrix-dashboard";
         String applicationName = "CloudHystrixDashboardApplication.java";
         String mockStreamName = "MockStreamServlet.java";
 
         write(new File(srcDir, applicationName), prefix + "/" + applicationName, serviceModel);
         write(new File(srcDir, mockStreamName), prefix + "/" + mockStreamName, serviceModel);
         writeTextResource(resourcesDir, "hystrix.stream", "hystrix.stream");
-    }
-
-    private void writeAzureModuleSourceCode(@NonNull String moduleName, @NonNull String template, @NonNull File srcDir,
-                                            @NonNull Map<String, Object> serviceModel) {
-        write(new File(srcDir, template), moduleName + "/" + template, serviceModel);
-    }
-
-    private List<String> getAzureModuleTemplateFiles(@NonNull String moduleDir) { // Use moduleName as module dir name
-        List<String> templates = new ArrayList<>();
-
-        Assert.notNull(getClass().getClassLoader().getResource("templates" + "/" + moduleDir), "should ");
-
-        File templateDir = new File(getClass().getClassLoader().getResource("templates" + "/" + moduleDir).getFile());
-
-        Arrays.stream(templateDir.listFiles()).filter(File::isFile)
-                .filter(file -> FilenameUtils.getExtension(file.getName()).equals(JAVA_FILE_SUFFIX))
-                .forEach(f -> templates.add(f.getName()));
-
-        return templates;
-    }
-
-    private void generateAzureModuleSourceCode(@NonNull String moduleName, @NonNull File srcDir,
-                                               @NonNull Map<String, Object> serviceModel) {
-        List<String> templates = getAzureModuleTemplateFiles(moduleName);
-
-        Assert.notNull(templates, "templates should not be null");
-
-        templates.forEach(t -> writeAzureModuleSourceCode(moduleName, t, srcDir, serviceModel));
     }
 
     private void generateAzureServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
@@ -258,7 +234,7 @@ public class ProjectGenerator {
         Service service = getServiceByName(serviceName, model);
         String appName = serviceModel.get("applicationName").toString();
 
-        service.getModules().forEach(m -> generateAzureModuleSourceCode(m.getName(), srcDir, serviceModel));
+        service.getModules().forEach(m -> writeAllToDirectory(srcDir, m.getName(), serviceModel));
 
         write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
     }
@@ -503,7 +479,6 @@ public class ProjectGenerator {
             if (ServiceNames.isAzureService(s.getName())) {
                 // serviceIndex is used to generate spring.cloud.gateway.routes index for spring cloud gateway properties
                 serviceModel.put("serviceIndex", atomicInteger.getAndIncrement());
-
                 azureServices.add(serviceModel);
             }
 
@@ -626,6 +601,27 @@ public class ProjectGenerator {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot write file " + target, e);
         }
+    }
+
+    /**
+     * Write all templates under template directory with model to target directory
+     *
+     * @param targetDir target directory
+     * @param templateDirectory template directory
+     */
+    public void writeAllToDirectory(File targetDir, String templateDirectory, Map<String, Object> model){
+        String pattern = "classpath:templates/" + templateDirectory + "/*.java";
+        try {
+            Resource[] templates = loadResources(pattern);
+            Arrays.stream(templates).forEach(t -> write(new File(targetDir, t.getFilename()),
+                    templateDirectory + "/" + t.getFilename(), model));
+        } catch (IOException e) {
+            log.warn(String.format("Failed to find resources match pattern '%s'", pattern), e);
+        }
+    }
+
+    private Resource[] loadResources(String pattern) throws IOException {
+        return ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(pattern);
     }
 
     private void addTempFile(String group, File file) {
