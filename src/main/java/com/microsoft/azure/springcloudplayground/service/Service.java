@@ -3,6 +3,7 @@ package com.microsoft.azure.springcloudplayground.service;
 import com.microsoft.azure.springcloudplayground.module.Module;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.lang.NonNull;
 
 import java.util.Collection;
@@ -17,6 +18,10 @@ public class Service {
     private String name;
 
     private int port;
+
+    @Setter
+    @Getter
+    private int index; // For numbering the services for properties.
 
     private boolean isAzure;
 
