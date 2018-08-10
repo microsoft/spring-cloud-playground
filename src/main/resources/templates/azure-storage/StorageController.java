@@ -20,7 +20,7 @@ public class StorageController {
     @Value("blob://{containerName}/{blobName}")
     private Resource blobFile;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String readBlobFile() throws IOException {
         return StreamUtils.copyToString(
                 this.blobFile.getInputStream(),
