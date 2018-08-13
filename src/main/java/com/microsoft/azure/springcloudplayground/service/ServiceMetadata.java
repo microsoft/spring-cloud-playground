@@ -23,6 +23,10 @@ public class ServiceMetadata extends MetadataElement implements Describable {
     @Setter
     private Integer defaultPort;
 
+    @Getter
+    @Setter
+    private boolean mandatory;
+
     public String getDescription() {
         return this.description;
     }
@@ -44,6 +48,7 @@ public class ServiceMetadata extends MetadataElement implements Describable {
     @Override
     public String toString() {
         return "ServiceMetadata{" + "id='" + getId() + '\'' + ", name='" + getName()
-                + '\'' + ", description='" + this.getDescription() + '\'' + '}';
+                + '\'' + ", description='" + this.getDescription() + '\'' + ", mandatory='" + mandatory
+                + '\'' + '}';
     }
 }

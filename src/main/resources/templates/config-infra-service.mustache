@@ -5,9 +5,10 @@
                 {{#content}}
                     <div class="column is-half module-input">
                         <label class="checkbox module-checkbox">
-                            <input tabindex="13" type="checkbox" name="services" value="{{id}}" class="infra-checkbox">
+                            <input type="checkbox" name="services" value="{{id}}" class="infra-checkbox"
+                            {{#mandatory}} checked disabled {{/mandatory}}>
                             {{name}}
-                            <input class="hidden port-input" type="number" tabindex="14" name="{{portName}}" value="{{defaultPort}}">
+                            <input class="hidden port-input" type="number" name="{{portName}}" value="{{defaultPort}}">
                             <p class="help-block">{{#description}}{{.}}{{/description}}</p>
                         </label>
                     </div>
@@ -21,11 +22,11 @@
     <div class="medium-top-margin">
         <p class="has-text-centered">
             <button onclick="gtag('event', 'click', { event_category: 'Go to meta data config', event_action: 'click'});"
-                    tabindex="13" id="prev-goto-meta-step" type="button" class="button" role="button">
+                    id="prev-goto-meta-step" type="button" class="button" role="button">
                 Previous
             </button>
             <button onclick="gtag('event', 'click', { event_category: 'Go to azure config', event_action: 'click'});"
-                    tabindex="12" id="next-goto-azure-step" type="button" class="button" role="button">
+                    id="next-goto-azure-step" type="button" class="button" role="button">
                 Next
             </button>
         </p>

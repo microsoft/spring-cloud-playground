@@ -30,9 +30,9 @@
 	</properties>
 
 	<modules>
-		{{#microServiceNames}}
-		<module>{{this}}</module>
-		{{/microServiceNames}}
+		{{#microServices}}
+		<module>{{name}}</module>
+		{{/microServices}}
 	</modules>
 
 {{#hasBoms}}
