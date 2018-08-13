@@ -33,23 +33,6 @@
                     Azure Spring Cloud Playground
                 </h1>
             </div>
-            <div class="navbar-end azure-navbar-link" id="free_link">
-                <a href="https://azure.microsoft.com/en-us/free/" title="Free account" target="_blank" class="azure-green-color">Free account</a>
-            </div>
-            <div class="navbar-end azure-navbar-link" id="login_link">
-                <a>Login</a>
-            </div>
-            <div class="navbar-end azure-navbar-link" id="user_dropdown">
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="truncate" id="logged_user">
-                    </a>
-                    <div class="navbar-dropdown" id="logout_link">
-                        <a class="navbar-item">
-                            Logout
-                        </a>
-                    </div>
-                </div>
-            </div>
             <div class="navbar-end azure-navbar-link" id="about_link">
                 <a title="{{build.information}}">About</a>
             </div>
@@ -80,7 +63,6 @@
     <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
     <input type="hidden" name="_csrf_header" value="{{_csrf.headerName}}"/>
     <div class="small-container container large-bottom-padding">
-        <p class="help is-danger app-error"></p>
         <input id="baseDir" name="baseDir" type="hidden" value="{{artifactId.content}}">
         <div class="row metadata-row">
             <h4 class="title is-5">Generate your Spring Cloud application</h4>
@@ -106,6 +88,5 @@
 <script src="{{#linkTo}}/js/adal.min.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/all.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/start.js{{/linkTo}}"></script>
-<script src="{{#linkTo}}/js/auth.js{{/linkTo}}"></script>
 </body>
 </html>

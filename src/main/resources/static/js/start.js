@@ -42,15 +42,6 @@ $(function () {
         $(".btn-primary").append("<kbd>alt + &#9166;</kbd>");
     }
 
-    $("#free_link").on("click", function() {
-        $.get("/free-account");
-    });
-
-    $("#login_link").on("click", function() {
-        $.get("/login-account");
-    });
-
-
     $("#type").on('change', function () {
         $("#form").attr('action', $(this.options[this.selectedIndex]).attr('data-action'))
     });
