@@ -198,8 +198,8 @@ $(function () {
     });
 
     azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("blur", addServiceBtnChecker);
-    azureServicePortInput.on("blur", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
 
     function isValidServiceName(serviceName) {
         return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
