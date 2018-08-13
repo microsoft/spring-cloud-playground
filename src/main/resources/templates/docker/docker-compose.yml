@@ -3,6 +3,9 @@ services:
 {{#microServices}}
   {{name}}:
     image: "{{dockerComposeImage}}"
+    environment:
+      EUREKA_SERVER_NAME: ${EUREKA_SERVER_NAME}
+      CONFIG_SERVER_NAME: ${CONFIG_SERVER_NAME}
     ports:
       - "{{port}}:{{port}}"
     {{#links}}

@@ -78,6 +78,14 @@ playground:
             - rel: guide
               href: https://spring.io/guides/tutorials/bookmarks/
               description: Building REST services with Spring
+    - name: Jpa
+      content:
+        - name: Jpa
+          id: jpa
+          description: Spring data Jpa
+          groupId: org.springframework.boot
+          artifactId: spring-boot-starter-data-jpa
+          weight: 100
     - name: Cloud Config
       bom: spring-cloud
       versionRange: 1.2.3.RELEASE
@@ -242,18 +250,22 @@ playground:
           id: cloud-config-server
           defaultPort: 8888
           description: Central management for configuration via a git or svn backend
+          mandatory: true
         - name: Spring Cloud Gateway
           id: cloud-gateway
           defaultPort: 9999
           description: Intelligent and programmable routing with the reactive Spring Cloud Gateway
+          mandatory: true
         - name: Spring Cloud Eureka Server
           id: cloud-eureka-server
           defaultPort: 8761
           description: Spring Cloud Service Registry and Discovery
+          mandatory: true
         - name: Spring Cloud Hystrix Dashboard
           id: cloud-hystrix-dashboard
           defaultPort: 7979
           description: Circuit breaker dashboard with spring-cloud-netflix Hystrix
+          mandatory: false
     - name: Azure Spring Cloud Modules
       content:
         - name: Stream (Azure Event Hub)
