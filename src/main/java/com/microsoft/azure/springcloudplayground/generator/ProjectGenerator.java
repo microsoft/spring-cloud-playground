@@ -107,6 +107,20 @@ public class ProjectGenerator {
         return (Service) serviceModel.get("service");
     }
 
+    @NonNull
+    private String getServiceName(@NonNull Map<String, Object> serviceModel) {
+        Assert.isInstanceOf(String.class, serviceModel.get("name"));
+
+        return serviceModel.get("name").toString();
+    }
+
+    @NonNull
+    private String getServiceApplicationName(@NonNull Map<String, Object> serviceModel) {
+        Assert.isInstanceOf(String.class, serviceModel.get("applicationName"));
+
+        return serviceModel.get("applicationName").toString();
+    }
+
     private void resolveMicroServiceModel(@NonNull Map<String, Object> serviceModel, @NonNull Map<String, Object> model) {
         GeneratorMetadata metadata = this.metadataProvider.get();
         Service service = getService(serviceModel);
@@ -181,9 +195,8 @@ public class ProjectGenerator {
         writeText(new File(serviceDir, "pom.xml"), pom);
     }
 
-    private void generateCloudConfigSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
-        File resources = new File(serviceDir, "src/main/resources/");
-        File shared = new File(resources, "shared");
+    private void generateCloudConfigSourceCode(@NonNull File resourceDir, @NonNull Map<String, Object> serviceModel) {
+        File shared = new File(resourceDir, "shared");
 
         shared.mkdir();
 
@@ -202,15 +215,14 @@ public class ProjectGenerator {
         });
     }
 
-    private void generateCloudGatewaySourceCode(@NonNull File serviceDir, @NonNull File src,
-                                                @NonNull Map<String, Object> serviceModel,
-                                                @NonNull Map<String, Object> model) {
+    private void generateCloudGatewaySourceCode(@NonNull File resourceDir, @NonNull File src,
+                                                @NonNull Map<String, Object> serviceModel) {
         write(new File(src, "CustomWebFilter.java"), "CustomWebFilter.java", serviceModel);
-        File staticResources = new File(serviceDir, "src/main/resources/static");
+        File staticResources = new File(resourceDir, "static");
 
         staticResources.mkdirs();
 
-        writeText(new File(staticResources, "index.html"), templateRenderer.process("GatewayIndex.tmpl", model));
+        writeText(new File(staticResources, "index.html"), templateRenderer.process("GatewayIndex.tmpl", serviceModel));
         writeText(new File(staticResources, "bulma.min.css"), templateRenderer.process("bulma.min.css", null));
     }
 
@@ -225,9 +237,7 @@ public class ProjectGenerator {
         writeTextResource(resourcesDir, "hystrix.stream", "hystrix.stream");
     }
 
-    private void generateAzureServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
-        File srcDir = new File(new File(serviceDir, "src/main/java"),
-                serviceModel.get("packageName").toString().replace(".", "/"));
+    private void generateAzureServiceSourceCode(@NonNull File srcDir, @NonNull Map<String, Object> serviceModel) {
         Service service = getService(serviceModel);
         String appName = serviceModel.get("applicationName").toString();
 
@@ -236,57 +246,60 @@ public class ProjectGenerator {
         write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
     }
 
-    private void generateInfrastructureServiceSourceCode(@NonNull File serviceDir,
-                                                         @NonNull Map<String, Object> serviceModel,
-                                                         @NonNull Map<String, Object> model) {
-        String serviceName = serviceModel.get("name").toString();
-        String appName = serviceModel.get("applicationName").toString();
-        File resourcesDir = new File(serviceDir, "src/main/resources/");
-        File src = new File(new File(serviceDir, "src/main/java"),
-                serviceModel.get("packageName").toString().replace(".", "/"));
+    private void generateInfrastructureServiceSourceCode(@NonNull File srcDir, @NonNull File resourceDir,
+                                                         @NonNull Map<String, Object> serviceModel) {
+        String serviceName = getServiceName(serviceModel);
+        String appName = getServiceApplicationName(serviceModel);
 
         if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_HYSTRIX_DASHBOARD)) {
-            generateHystrixDashboardSourceCode(src, resourcesDir, serviceModel);
+            generateHystrixDashboardSourceCode(srcDir, resourceDir, serviceModel);
         } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_CONFIG_SERVER)) {
-            generateCloudConfigSourceCode(serviceDir, serviceModel);
+            generateCloudConfigSourceCode(resourceDir, serviceModel);
         } else if (serviceName.equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
-            generateCloudGatewaySourceCode(serviceDir, src, serviceModel, model);
+            generateCloudGatewaySourceCode(resourceDir, srcDir, serviceModel);
         }
 
-        write(new File(src, appName + ".java"), "Application.java", serviceModel);
+        write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
     }
 
-    private void generateBootstrapPropsFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel,
-                                            @NonNull Map<String, Object> model) {
+    private void generateMicroServiceBootstrapPropsFile(@NonNull File resourcesDir, @NonNull Map<String, Object> serviceModel) {
         String template = ServicePropsResolver.generateBootstrapProps(getService(serviceModel));
         writeText(new File(resourcesDir, "bootstrap.properties"), templateRenderer.processFromString(template, serviceModel));
     }
 
-    private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
-                                                @NonNull Map<String, Object> model) {
-        String serviceName = serviceModel.get("name").toString();
+    private void generateMicroServiceWebResource(@NonNull File serviceDir, @NonNull File srcDir,
+                                                 @NonNull Map<String, Object> serviceModel) {
+        if (getService(serviceModel).getDependencies().contains(DependencyNames.WEB)) {
+            new File(serviceDir, "src/main/resources/templates").mkdirs();
+            new File(serviceDir, "src/main/resources/static").mkdirs();
+            write(new File(srcDir, "Controller.java"), "Controller.java", serviceModel);
+        }
+    }
+
+    private void generateMicroServiceSqlFiles(@NonNull File resourceDir, @NonNull Map<String, Object> serviceModel) {
+        Service service = getService(serviceModel);
+
+        service.getModules().forEach(m -> writeAllSqlFilesToDirectory(resourceDir, m.getName(), serviceModel));
+    }
+
+    private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
+        String serviceName = getServiceName(serviceModel);
         File resourcesDir = new File(serviceDir, "src/main/resources");
-        File src = new File(new File(serviceDir, "src/main/java"),
+        File srcDir = new File(new File(serviceDir, "src/main/java"),
                 serviceModel.get("packageName").toString().replace(".", "/"));
 
-        src.mkdirs();
+        srcDir.mkdirs();
         resourcesDir.mkdirs();
 
         if (ServiceNames.isAzureService(serviceName)) {
-            generateAzureServiceSourceCode(serviceDir, serviceModel);
+            generateAzureServiceSourceCode(srcDir, serviceModel);
         } else {
-            generateInfrastructureServiceSourceCode(serviceDir, serviceModel, model);
+            generateInfrastructureServiceSourceCode(srcDir, resourcesDir, serviceModel);
         }
 
-        Service service = getService(serviceModel);
-
-        if (service.getDependencies().contains(DependencyNames.WEB)) {
-            new File(serviceDir, "src/main/resources/templates").mkdirs();
-            new File(serviceDir, "src/main/resources/static").mkdirs();
-            write(new File(src, "Controller.java"), "Controller.java", serviceModel);
-        }
-
-        generateBootstrapPropsFile(resourcesDir, serviceModel, model);
+        generateMicroServiceWebResource(serviceDir, srcDir, serviceModel);
+        generateMicroServiceSqlFiles(resourcesDir, serviceModel);
+        generateMicroServiceBootstrapPropsFile(resourcesDir, serviceModel);
     }
 
     private void generateMicroServiceTestCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
@@ -298,9 +311,8 @@ public class ProjectGenerator {
         write(new File(test, applicationName + "Tests.java"), "ApplicationTests.java", serviceModel);
     }
 
-    private void generateMicroServiceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel,
-                                          @NonNull Map<String, Object> model) {
-        generateMicroServiceSourceCode(serviceDir, serviceModel, model);
+    private void generateMicroServiceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
+        generateMicroServiceSourceCode(serviceDir, serviceModel);
         generateMicroServiceTestCode(serviceDir, serviceModel);
     }
 
@@ -317,7 +329,7 @@ public class ProjectGenerator {
 
         generateMicroServiceDockerfile(serviceDir, serviceModel);
         generateMicroServicePom(serviceDir, serviceModel);
-        generateMicroServiceCode(serviceDir, serviceModel, model);
+        generateMicroServiceCode(serviceDir, serviceModel);
     }
 
     private void generateMicroServicesProject(@NonNull List<MicroService> microServices, @NonNull File projectDir,
@@ -480,6 +492,7 @@ public class ProjectGenerator {
 
             if (s.getName().equalsIgnoreCase(ServiceNames.CLOUD_GATEWAY)) {
                 serviceModel.put("azureServices", azureServices);
+                serviceModel.put("microServices", microServices);
             }
 
             if (s.getName().equalsIgnoreCase(ServiceNames.CLOUD_CONFIG_SERVER)) {
@@ -608,6 +621,11 @@ public class ProjectGenerator {
     private void writeAllFilesToDirectory(@NonNull File targetDir, @NonNull String templateDir,
                                           @NonNull Map<String, Object> model) {
         this.writeTemplateDirectory(targetDir, templateDir, model, "");
+    }
+
+    private void writeAllSqlFilesToDirectory(@NonNull File targetDir, @NonNull String templateDir,
+                                             @NonNull Map<String, Object> model) {
+        this.writeTemplateDirectory(targetDir, templateDir, model, ".sql");
     }
 
     /**
