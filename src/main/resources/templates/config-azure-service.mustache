@@ -22,7 +22,7 @@
                 {{#content}}
                     <div class="column is-half module-input">
                         <label class="checkbox module-checkbox">
-                            <input tabindex="13" type="checkbox" name="azure-modules" value="{{id}}" class="azure-checkbox">
+                            <input type="checkbox" name="azure-modules" value="{{id}}" class="azure-checkbox">
                             {{name}}
                             <p class="help-block">{{#description}}{{.}}{{/description}}</p>
                         </label>
@@ -43,11 +43,11 @@
     <div class="button-group">
         <p class="has-text-centered">
             <button onclick="gtag('event', 'click', { event_category: 'Go to infra config', event_action: 'click'});"
-                    tabindex="13" id="prev-goto-infra-step" type="button" class="button" role="button">
+                    id="prev-goto-infra-step" type="button" class="button" role="button">
                 Previous
             </button>
             <button onclick="gtag('event', 'click', { event_category: 'Project Generation', event_action: 'click'});"
-                    tabindex="14" id="generate-project" type="submit" class="button" role="button">
+                    id="generate-project" type="submit" class="button" role="button">
                 Generate Project
             </button>
         </p>
