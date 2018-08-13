@@ -13,7 +13,8 @@ public class SqlServerModule extends Module {
                 DependencyNames.CLOUD_EUREKA_CLIENT,
                 DependencyNames.CLOUD_CONFIG_CLIENT,
                 DependencyNames.AZURE_SQL_SERVER,
-                DependencyNames.WEB
+                DependencyNames.WEB,
+                DependencyNames.JPA
         ));
 
         this.annotations.add(Annotation.ENABLE_DISCOVERY_CLIENT);

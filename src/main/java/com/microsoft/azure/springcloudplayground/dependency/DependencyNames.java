@@ -14,4 +14,5 @@ public class DependencyNames {
     public static final String AZURE_EVNET_HUB_BINDER = "azure-eventhub-binder";
     public static final String AZURE_EVNET_HUB_STARTER = "azure-eventhub-starter";
     public static final String WEB = "web";
+    public static final String JPA = "jpa";
 }

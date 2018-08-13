@@ -276,12 +276,6 @@ public class ProjectGenerator {
         }
     }
 
-    private void generateMicroServiceSqlFiles(@NonNull File resourceDir, @NonNull Map<String, Object> serviceModel) {
-        Service service = getService(serviceModel);
-
-        service.getModules().forEach(m -> writeAllSqlFilesToDirectory(resourceDir, m.getName(), serviceModel));
-    }
-
     private void generateMicroServiceSourceCode(@NonNull File serviceDir, @NonNull Map<String, Object> serviceModel) {
         String serviceName = getServiceName(serviceModel);
         File resourcesDir = new File(serviceDir, "src/main/resources");
@@ -298,7 +292,6 @@ public class ProjectGenerator {
         }
 
         generateMicroServiceWebResource(serviceDir, srcDir, serviceModel);
-        generateMicroServiceSqlFiles(resourcesDir, serviceModel);
         generateMicroServiceBootstrapPropsFile(resourcesDir, serviceModel);
     }
 
@@ -621,11 +614,6 @@ public class ProjectGenerator {
     private void writeAllFilesToDirectory(@NonNull File targetDir, @NonNull String templateDir,
                                           @NonNull Map<String, Object> model) {
         this.writeTemplateDirectory(targetDir, templateDir, model, "");
-    }
-
-    private void writeAllSqlFilesToDirectory(@NonNull File targetDir, @NonNull String templateDir,
-                                             @NonNull Map<String, Object> model) {
-        this.writeTemplateDirectory(targetDir, templateDir, model, ".sql");
     }
 
     /**
