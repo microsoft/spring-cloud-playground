@@ -42,15 +42,6 @@ $(function () {
         $(".btn-primary").append("<kbd>alt + &#9166;</kbd>");
     }
 
-    $("#free_link").on("click", function() {
-        $.get("/free-account");
-    });
-
-    $("#login_link").on("click", function() {
-        $.get("/login-account");
-    });
-
-
     $("#type").on('change', function () {
         $("#form").attr('action', $(this.options[this.selectedIndex]).attr('data-action'))
     });
@@ -207,8 +198,8 @@ $(function () {
     });
 
     azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("blur", addServiceBtnChecker);
-    azureServicePortInput.on("blur", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
 
     function isValidServiceName(serviceName) {
         return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
