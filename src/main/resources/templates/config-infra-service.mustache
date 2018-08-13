@@ -5,7 +5,8 @@
                 {{#content}}
                     <div class="column is-half module-input">
                         <label class="checkbox module-checkbox">
-                            <input type="checkbox" name="services" value="{{id}}" class="infra-checkbox">
+                            <input type="checkbox" name="services" value="{{id}}" class="infra-checkbox"
+                            {{#mandatory}} checked disabled {{/mandatory}}>
                             {{name}}
                             <input class="hidden port-input" type="number" name="{{portName}}" value="{{defaultPort}}">
                             <p class="help-block">{{#description}}{{.}}{{/description}}</p>
