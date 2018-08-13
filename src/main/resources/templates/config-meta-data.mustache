@@ -2,23 +2,23 @@
     <div class="columns is-multiline">
         <div class="column is-half">
             <label for="groupId" class="label mandatory-label">{{groupId.title}}</label>
-            <input tabindex="4" id="groupId" class="input" type="text" value="{{groupId.content}}"
+            <input id="groupId" class="input" type="text" value="{{groupId.content}}"
                    name="groupId">
         </div>
         <div class="column is-half">
             <label for="artifactId" class="label mandatory-label">{{artifactId.title}}</label>
-            <input tabindex="5" id="artifactId" class="input" type="text"
+            <input id="artifactId" class="input" type="text"
                    value="{{artifactId.content}}"
                    name="artifactId">
         </div>
         <div class="column is-half">
             <label for="project-name" class="label mandatory-label">{{name.title}}</label>
-            <input tabindex="4" id="project-name" class="input" type="text" value="{{name.content}}"
+            <input id="project-name" class="input" type="text" value="{{name.content}}"
                    name="project-name">
         </div>
         <div class="column is-half">
             <label for="description" class="label">{{description.title}}</label>
-            <input tabindex="5" id="description" class="input" type="text"
+            <input id="description" class="input" type="text"
                    value="{{description.content}}"
                    name="description">
         </div>
@@ -26,7 +26,7 @@
     <div class="button-group">
         <p class="has-text-centered">
             <button onclick="gtag('event', 'click', { event_category: 'Go to infra config', event_action: 'click'});"
-                    tabindex="12" id="next-goto-infra-step" type="button" class="button" role="button">
+                    id="next-goto-infra-step" type="button" class="button" role="button">
                 Next
             </button>
         </p>
