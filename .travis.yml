@@ -8,16 +8,15 @@ services:
 
 install: true
 
-before_script:
-  - export TZ='Asia/Shanghai' && date
-  - docker login -u $AZURE_CR_USERNAME -p $AZURE_CR_PASSWORD $AZURE_CR_LOGIN_SERVER
-  - perl -pi -e 's/\$\{your-docker-image-prefix\}/$ENV{AZURE_CR_LOGIN_SERVER}/g' pom.xml
-
 jobs:
   include:
     - stage: build
       script: mvn clean package
     - stage: docker push
-      script: mvn clean install && docker images
+      script:
+          - export TZ='Asia/Shanghai' && date
+          - docker login -u $AZURE_CR_USERNAME -p $AZURE_CR_PASSWORD $AZURE_CR_LOGIN_SERVER
+          - perl -pi -e 's/\$\{your-docker-image-prefix\}/$ENV{AZURE_CR_LOGIN_SERVER}/g' pom.xml
+          - mvn clean install && docker images
       if: branch = master AND type != pull_request
 
