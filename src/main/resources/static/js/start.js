@@ -42,15 +42,6 @@ $(function () {
         $(".btn-primary").append("<kbd>alt + &#9166;</kbd>");
     }
 
-    $("#free_link").on("click", function() {
-        $.get("/free-account");
-    });
-
-    $("#login_link").on("click", function() {
-        $.get("/login-account");
-    });
-
-
     $("#type").on('change', function () {
         $("#form").attr('action', $(this.options[this.selectedIndex]).attr('data-action'))
     });
@@ -132,16 +123,7 @@ $(function () {
     });
 
     infraCheckbox.on("change", function() {
-        var serviceName = $(this).val();
-        var moduleList = [serviceName];
-        var port = $(this).next("input").val();
-
-        var service = new microservice(serviceName, moduleList, port);
-        if($(this)[0].checked) {
-            addServiceOnPage(service);
-        } else {
-            deleteServiceOnPage(serviceName);
-        }
+        updateInfraService($(this), true);
     });
 
     createAzureServiceBtn.on("click", function() {
@@ -157,7 +139,7 @@ $(function () {
         })
 
         var azureMicroService = new microservice(serviceName, moduleList, servicePort);
-        if(addServiceOnPage(azureMicroService)) {
+        if(addServiceOnPage(azureMicroService, true)) {
             // Clear input values
             azureServiceNameInput.val("");
             azureServicePortInput.val("");
@@ -216,8 +198,8 @@ $(function () {
     });
 
     azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("blur", addServiceBtnChecker);
-    azureServicePortInput.on("blur", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
 
     function isValidServiceName(serviceName) {
         return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
@@ -294,7 +276,7 @@ $(function () {
         stepElement.className = "step-item is-completed is-success";
     }
 
-    function addServiceOnPage(service) {
+    function addServiceOnPage(service, deletable) {
         if(!isValidServiceName(service.getName()) || !isValidPort(service.getPort())
             || typeof service.getModuleList() === 'undefined' || service.getModuleList().length === 0) {
             console.warn("Some service property is empty or format illegal, " + JSON.stringify(service));
@@ -303,13 +285,15 @@ $(function () {
 
         allServiceList.addService(service);
         // Append selected services into the list on the page
-        selectedModules.append(serviceItemDom(service));
+        selectedModules.append(serviceItemDom(service, deletable));
         createAzureServiceBtn.prop('disabled', true);
 
-        $("#" + service.getName() + " a").on("click", function(){
-            deleteServiceOnPage(service.getName());
-            $("input[value='" + service.getName() + "']").prop('checked', false);
-        });
+        if (deletable) {
+            $("#" + service.getName() + " span").on("click", function () {
+                deleteServiceOnPage(service.getName());
+                $("input[value='" + service.getName() + "']").prop('checked', false);
+            });
+        }
         return true;
     }
 
@@ -318,10 +302,16 @@ $(function () {
         $("#selected-modules-list #" + serviceName).remove();
     }
 
-    function serviceItemDom(service) {
-        return '<li id=\"' + service.getName() + '\"><a class=\"delete\"></a><strong>' + service.getName() +
-            '</strong>, modules: ' + service.getModuleList().toString() +
-            ', port: ' + service.getPort() + '</li>';
+    function serviceItemDom(service, deletable) {
+        var serviceElement = '<li id=\"' + service.getName() + '\">';
+        if (deletable) {
+            serviceElement += '<span class="icon"><i class="fas fa-times"></i></span>';
+        } else {
+            serviceElement += '<span class="icon" title="Cannot delete"><i class="fas fa-info-circle"></i></span>'
+        }
+
+        return serviceElement + '<strong>' + service.getName() + '</strong>, modules: '
+            + service.getModuleList().toString() + ', port: ' + service.getPort() + '</li>';
     }
 
     function addServiceBtnChecker() {
@@ -354,4 +344,22 @@ $(function () {
             hideElements([helpElement]);
         }
     }
+
+    function updateInfraService(infraCheckbox, serviceDeletable) {
+        var serviceName = infraCheckbox.val();
+        var moduleList = [serviceName];
+        var port = infraCheckbox.next("input").val();
+
+        var service = new microservice(serviceName, moduleList, port);
+        if(infraCheckbox[0].checked) {
+            addServiceOnPage(service, serviceDeletable);
+        } else {
+            deleteServiceOnPage(serviceName);
+        }
+    }
+
+    // Initialize already selected infra services
+    infraCheckbox.each(function(){
+        updateInfraService($(this), false);
+    });
 });

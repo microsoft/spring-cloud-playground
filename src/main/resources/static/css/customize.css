@@ -104,16 +104,6 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     text-overflow: ellipsis;
 }
 
-#logout_link {
-    border-radius: 0;
-}
-
-#user_dropdown div {
-    text-align: center;
-    vertical-align: middle;
-    line-height: 2.75rem;
-}
-
 #get-started {
     background-color: #f4f4f4;
     padding: 24px 0;
