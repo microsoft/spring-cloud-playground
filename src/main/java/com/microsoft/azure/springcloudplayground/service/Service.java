@@ -46,8 +46,8 @@ public class Service {
         return hiddenBuilder()
                 .name(name)
                 .port(port)
-                .k8sHealthCheck(String.format("/%s/actuator/health", name))
-                .k8sDockerImage(String.format("/demo/%s", name))
+                .k8sHealthCheck("/actuator/health")
+                .k8sDockerImage(String.format("${your-docker-hub-prefix}/%s", name))
                 .dockerComposeHealthCheck(String.format("http://%s:%d/actuator/health", name, port))
                 .dockerComposeImage(String.format("demo/%s", name));
     }

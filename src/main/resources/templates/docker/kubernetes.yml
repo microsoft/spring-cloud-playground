@@ -37,8 +37,15 @@ spec:
           httpGet:
             path: {{k8sHealthCheck}}
             port: {{port}}
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        env:
+        - name: EUREKA_SERVER_NAME
+          value: "cloud-eureka-server"
+        - name: CONFIG_SERVER_NAME
+          value: "cloud-config-server"
+      imagePullSecrets:
+        - name: ${your-k8s-registry-key}
 
 ---
 
