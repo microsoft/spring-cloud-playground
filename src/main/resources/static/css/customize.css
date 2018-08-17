@@ -2,6 +2,7 @@
     min-height: 4.25rem !important;
     background-color: black !important;
     padding: 0.25rem 0;
+    box-shadow: none;
 }
 
 .hidden {
@@ -112,6 +113,14 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 #get-started {
     background-color: #f4f4f4;
     padding: 24px 0;
+    position: relative;
+}
+
+.github-fork img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
 }
 
 .start-video {
