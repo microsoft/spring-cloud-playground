@@ -310,7 +310,7 @@ $(function () {
             serviceElement += '<span class="icon" title="Cannot delete"><i class="fas fa-info-circle"></i></span>'
         }
 
-        return serviceElement + '<strong>' + service.getName() + '</strong>, modules: '
+        return serviceElement + '<strong>' + service.getName() + '</strong>, module(s): '
             + service.getModuleList().toString() + ', port: ' + service.getPort() + '</li>';
     }
 

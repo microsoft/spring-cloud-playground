@@ -1,13 +1,8 @@
-.azure-logo {
-    color: #0078d7 !important;
-    font-size: 22px;
-    font-weight: 600;
-}
-
 .header-nav {
     min-height: 4.25rem !important;
     background-color: black !important;
     padding: 0.25rem 0;
+    box-shadow: none;
 }
 
 .hidden {
@@ -16,6 +11,17 @@
 
 .metadata-row {
     margin: 3rem 0 1rem;
+}
+
+.logo-container {
+    position: relative;
+    top: 5px;
+    align-items: center;
+}
+
+.logo-container svg {
+    height: 1.5rem;
+    width: 15rem;
 }
 
 .button-group {
@@ -68,9 +74,9 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     margin-left: 2rem;
 }
 
-.small-container {
-    max-width: 1152px !important;
-    width: 1152px !important;
+.navbar>.small-container {
+    max-width: 1152px;
+    width: 1152px;
 }
 
 .nav-title {
@@ -107,6 +113,14 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 #get-started {
     background-color: #f4f4f4;
     padding: 24px 0;
+    position: relative;
+}
+
+.github-fork img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
 }
 
 .start-video {
