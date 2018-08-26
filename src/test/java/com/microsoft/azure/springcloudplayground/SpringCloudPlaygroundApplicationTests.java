@@ -5,11 +5,9 @@ import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.module.ModuleNames;
 import com.microsoft.azure.springcloudplayground.service.ServiceNames;
-import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Zip;
-import org.apache.tools.ant.types.ZipFileSet;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,11 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -50,9 +47,17 @@ public class SpringCloudPlaygroundApplicationTests {
 
     private static final ProjectRequest PROJECT_REQUEST = new ProjectRequest();
 
+    private static final String PROJECT_BASE_DIR = "demo";
+
     private static final String REFERENCE_FILE_NAME = "demo-reference.zip";
 
-    private File zipFile;
+    private File project;
+
+    private File referenceDir;
+
+    private File referenceZip;
+
+    private File referenceProject;
 
     @Autowired
     private ProjectGenerator generator;
@@ -62,64 +67,87 @@ public class SpringCloudPlaygroundApplicationTests {
         PROJECT_REQUEST.setName("demo");
         PROJECT_REQUEST.setGroupId("com.example");
         PROJECT_REQUEST.setArtifactId("demo");
-        PROJECT_REQUEST.setPackageName("com.example");
-        PROJECT_REQUEST.setBaseDir("demo");
+        PROJECT_REQUEST.setPackageName("com.example.demo");
+        PROJECT_REQUEST.setBaseDir(PROJECT_BASE_DIR);
         PROJECT_REQUEST.setDescription("Demo project for Spring Cloud Azure");
 
         PROJECT_REQUEST.setMicroServices(Arrays.asList(CLOUD_CONFIG_SERVER, CLOUD_GATEWAY,
                 CLOUD_EUREKA_SERVER, CLOUD_HYSTRIX_DASHBOARD, AZURE_MESSAGE, AZURE_STORAGE));
 
-        zipFile = toZipFile(generator.generate(PROJECT_REQUEST));
+        project = generator.generate(PROJECT_REQUEST);
+        referenceDir = new File("reference");
+
+        FileUtils.deleteQuietly(referenceDir);
+
+        referenceZip = new File(referenceDir, "reference.zip");
+        referenceProject = new File(referenceDir, PROJECT_BASE_DIR);
+        referenceDir.mkdir();
     }
 
     @After
     public void cleanup() {
-        zipFile.delete();
+        FileUtils.deleteQuietly(referenceDir);
     }
 
-    @SneakyThrows
-    private File toZipFile(@NonNull File dir) {
-        File zipFile = this.generator.createDistributionFile(dir, ".zip");
+    private void inputStreamToFile(@NonNull File file, @NonNull InputStream inputStream) {
+        try (OutputStream outputStream = new FileOutputStream(file)) {
+            int count;
+            byte[] buffer = new byte[8192];
 
-        Zip zip = new Zip();
-        zip.setProject(new Project());
-        zip.setDefaultexcludes(false);
+            while ((count = inputStream.read(buffer, 0, 8192)) != -1) {
+                outputStream.write(buffer, 0, count);
+            }
+        } catch (IOException omit) {
+            // Ignore this exception
+        }
+    }
 
-        ZipFileSet set = new ZipFileSet();
-        set.setDir(dir);
-        set.setFileMode("755");
-        set.setDefaultexcludes(false);
+    private void initializeReferenceProject() {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(REFERENCE_FILE_NAME)) {
+            inputStreamToFile(referenceZip, inputStream);
+            ZipFile zipFile = new ZipFile(referenceZip);
 
-        zip.addFileset(set);
-        zip.setDestFile(zipFile.getCanonicalFile());
-        zip.execute();
+            zipFile.extractAll(referenceDir.getName());
+        } catch (ZipException | IOException omit) {
+            // Ignore this exception
+        }
+    }
 
-        return zipFile;
+    private void assertFileEquals(@NonNull File target, @NonNull File reference) {
+        try (BufferedReader targetReader = new BufferedReader(new FileReader(target));
+             BufferedReader referenceReader = new BufferedReader(new FileReader(reference))) {
+            String targetLine = targetReader.readLine();
+            String referenceLine = referenceReader.readLine();
+
+            while (targetLine != null && referenceLine != null) {
+                Assert.assertEquals(targetLine, referenceLine);
+
+                targetLine = targetReader.readLine();
+                referenceLine = referenceReader.readLine();
+            }
+
+            Assert.assertNull(targetLine);
+            Assert.assertNull(referenceLine);
+        } catch (IOException omit) {
+            // Ignore this exception
+        }
+    }
+
+    private void assertProjectEquals(@NonNull File target, @NonNull File reference) {
+        List<File> targetFiles = new ArrayList<>(FileUtils.listFiles(target, null, true));
+        List<File> referenceFiles = new ArrayList<>(FileUtils.listFiles(reference, null, true));
+
+        Assert.assertEquals(targetFiles.size(), referenceFiles.size());
+
+        for (int i = 0; i < targetFiles.size(); i++) {
+            assertFileEquals(targetFiles.get(i), referenceFiles.get(i));
+        }
     }
 
     @Test
     public void testProjectGeneration() {
-        String zipSha256Hex = getSha256Hex(zipFile);
-        String referenceSha256Hex = getSha256Hex(getClass().getClassLoader().getResourceAsStream(REFERENCE_FILE_NAME));
+        initializeReferenceProject();
 
-        Assert.assertEquals(zipSha256Hex, referenceSha256Hex);
-    }
-
-    private String getSha256Hex(@NonNull File file) {
-        try (InputStream zipInputStream = new FileInputStream(file)) {
-            return DigestUtils.sha256Hex(zipInputStream);
-        } catch (IOException omit) {
-            // ignore this IOException
-            return "";
-        }
-    }
-
-    private String getSha256Hex(@NonNull InputStream inputStream) {
-        try {
-            return DigestUtils.sha256Hex(inputStream);
-        } catch (IOException omit) {
-            // ignore this IOException
-            return "";
-        }
+        assertProjectEquals(this.project, referenceProject);
     }
 }
