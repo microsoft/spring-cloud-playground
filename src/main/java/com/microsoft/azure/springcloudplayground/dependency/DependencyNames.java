@@ -13,6 +13,12 @@ public class DependencyNames {
     public static final String AZURE_SQL_SERVER = "azure-sql-server";
     public static final String AZURE_EVNET_HUB_BINDER = "azure-eventhub-binder";
     public static final String AZURE_EVNET_HUB_STARTER = "azure-eventhub-starter";
+    public static final String AZURE_ACTIVE_DIRECTORY = "azure-active-directory";
+    public static final String SPRING_THYMELEAF = "spring-thymeleaf";
+    public static final String SPRING_SECURITY = "spring-security";
+    public static final String SPRING_SECURITY_OAUTH2_CLIENT = "spring-security-oauth2-client";
+    public static final String SPRING_SECURITY_OAUTH2_JOSE = "spring-security-oauth2-jose";
+    public static final String THYMELEAF_EXTRAS = "thymeleaf-extra";
     public static final String WEB = "web";
     public static final String JPA = "jpa";
 }
