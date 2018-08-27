@@ -42,4 +42,8 @@ public class Module {
     public String getApplicationPropsTemplate() {
         return TEMPLATE_DIR + name + File.separator + APPLICATION_PROPERTIES_TEMPLATE;
     }
+
+    public boolean hasFront() {
+        return false;
+    }
 }

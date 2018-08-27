@@ -10,7 +10,7 @@ public class CosmosdbModule extends Module {
         super(ModuleNames.AZURE_COSMOSDB);
         this.getDependencies().addAll(Arrays.asList(
                 DependencyNames.CLOUD_EUREKA_CLIENT,
-                DependencyNames.CLOUD_CONFIG_SERVER,
+                DependencyNames.CLOUD_CONFIG_CLIENT,
                 DependencyNames.AZURE_COSMOSDB,
                 DependencyNames.SPRING_DATA_COSMOSDB,
                 DependencyNames.WEB
