@@ -11,6 +11,8 @@ public class DependencyNames {
     public static final String AZURE_CACHE = "azure-redis-cache";
     public static final String AZURE_STORAGE = "azure-storage";
     public static final String AZURE_SQL_SERVER = "azure-sql-server";
+    public static final String AZURE_COSMOSDB = "azure-cosmosdb";
+    public static final String SPRING_DATA_COSMOSDB = "spring-data-cosmosdb";
     public static final String AZURE_EVNET_HUB_BINDER = "azure-eventhub-binder";
     public static final String AZURE_EVNET_HUB_STARTER = "azure-eventhub-starter";
     public static final String AZURE_ACTIVE_DIRECTORY = "azure-active-directory";
