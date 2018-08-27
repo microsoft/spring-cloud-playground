@@ -81,7 +81,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 
 .nav-title {
     color: #dedede !important;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
 }
 
 .button,.file-cta,.file-name,.input,.pagination-ellipsis,.pagination-link,.pagination-next,.pagination-previous,.select select,.textarea {
