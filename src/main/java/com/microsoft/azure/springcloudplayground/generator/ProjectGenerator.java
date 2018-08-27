@@ -250,7 +250,8 @@ public class ProjectGenerator {
         // Write all files under templates/${module_name}/front to generated src/main/resources
         Service service = getService(serviceModel);
 
-        service.getModules().forEach(m -> writeAllFilesToDirectory(resourceDir, m.getName() + "/front", serviceModel));
+        service.getModules().stream().filter(m -> m.hasFront()).forEach(m ->
+                writeAllFilesToDirectory(resourceDir, m.getName() + "/front", serviceModel));
     }
 
     private void generateInfrastructureServiceSourceCode(@NonNull File srcDir, @NonNull File resourceDir,

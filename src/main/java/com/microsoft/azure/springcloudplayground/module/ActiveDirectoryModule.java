@@ -22,4 +22,9 @@ public class ActiveDirectoryModule extends Module{
 
         this.annotations.add(Annotation.ENABLE_DISCOVERY_CLIENT);
     }
+
+    @Override
+    public boolean hasFront() {
+        return true;
+    }
 }
