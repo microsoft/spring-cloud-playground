@@ -141,7 +141,7 @@ playground:
           description: Cosmosdb Spring Boot Starter
           groupId: com.microsoft.azure
           artifactId: spring-data-cosmosdb
-          versionRange: 2.0.3
+          versionRange: 2.0.4
           weight: 100
     - name: Cloud Config
       bom: spring-cloud
