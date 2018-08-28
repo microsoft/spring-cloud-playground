@@ -128,6 +128,21 @@ playground:
           description: Spring Security
           groupId: org.springframework.boot
           artifactId: spring-boot-starter-security
+    - name: Azure Cosmosdb
+      content:
+        - name: Azure Cosmosdb Spring Boot Starter
+          id: azure-cosmosdb
+          description: Cosmosdb Spring Boot Starter
+          groupId: com.microsoft.azure
+          artifactId: azure-documentdb-spring-boot-starter
+          weight: 100
+        - name: Spring Date Cosmosdb
+          id: spring-data-cosmosdb
+          description: Cosmosdb Spring Boot Starter
+          groupId: com.microsoft.azure
+          artifactId: spring-data-cosmosdb
+          versionRange: 2.0.4
+          weight: 100
     - name: Cloud Config
       bom: spring-cloud
       versionRange: 1.2.3.RELEASE

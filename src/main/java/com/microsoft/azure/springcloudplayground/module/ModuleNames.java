@@ -32,6 +32,8 @@ public class ModuleNames {
 
     public static final String AZURE_ACTIVE_DIRECTORY = "azure-active-directory";
 
+    public static final String AZURE_COSMOSDB = "azure-cosmosdb";
+
     private static final Map<String, Module> NAME_TO_MODULE;
 
     static {
@@ -46,6 +48,7 @@ public class ModuleNames {
         map.put(AZURE_SQL_SERVER, new SqlServerModule());
         map.put(AZURE_EVNET_HUB_BINDER, new EventHubModule());
         map.put(AZURE_ACTIVE_DIRECTORY, new ActiveDirectoryModule());
+        map.put(AZURE_COSMOSDB, new CosmosdbModule());
 
         NAME_TO_MODULE = Collections.unmodifiableMap(map);
     }
