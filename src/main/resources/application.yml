@@ -143,6 +143,14 @@ playground:
           artifactId: spring-data-cosmosdb
           versionRange: 2.0.4
           weight: 100
+    - name: Azure Key Vault
+      content:
+      - name: Azure Key Vault Secrets Spring Boot Starter
+        id: azure-keyvault-secrets
+        description: Key Vault Secrets Spring Boot Starter
+        groupId: com.microsoft.azure
+        artifactId: azure-keyvault-secrets-spring-boot-starter
+        weight: 100
     - name: Cloud Config
       bom: spring-cloud
       versionRange: 1.2.3.RELEASE

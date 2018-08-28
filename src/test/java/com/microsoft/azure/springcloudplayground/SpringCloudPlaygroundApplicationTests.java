@@ -37,7 +37,7 @@ public class SpringCloudPlaygroundApplicationTests {
             Arrays.asList(ModuleNames.CLOUD_HYSTRIX_DASHBOARD), 7979);
 
     private static final MicroService AZURE_MESSAGE = new MicroService("azure-message",
-            Arrays.asList(ModuleNames.AZURE_EVNET_HUB_BINDER, ModuleNames.AZURE_CACHE), 8999);
+            Arrays.asList(ModuleNames.AZURE_EVENTHUB_BINDER, ModuleNames.AZURE_CACHE), 8999);
 
     private static final MicroService AZURE_STORAGE = new MicroService("azure-storage",
             Arrays.asList(ModuleNames.AZURE_CACHE, ModuleNames.AZURE_STORAGE, ModuleNames.AZURE_SQL_SERVER), 9000);

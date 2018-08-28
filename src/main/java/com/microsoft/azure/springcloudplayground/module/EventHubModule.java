@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class EventHubModule extends Module {
 
     public EventHubModule(){
-        super(ModuleNames.AZURE_EVNET_HUB_BINDER);
+        super(ModuleNames.AZURE_EVENTHUB_BINDER);
         this.getDependencies().addAll(Arrays.asList(
                 DependencyNames.CLOUD_EUREKA_CLIENT,
                 DependencyNames.CLOUD_CONFIG_CLIENT,

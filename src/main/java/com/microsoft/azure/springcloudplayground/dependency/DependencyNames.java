@@ -21,6 +21,7 @@ public class DependencyNames {
     public static final String SPRING_SECURITY_OAUTH2_CLIENT = "spring-security-oauth2-client";
     public static final String SPRING_SECURITY_OAUTH2_JOSE = "spring-security-oauth2-jose";
     public static final String THYMELEAF_EXTRAS = "thymeleaf-extra";
+    public static final String AZURE_KEY_VAULT = "azure-keyvault-secrets";
     public static final String WEB = "web";
     public static final String JPA = "jpa";
 }
