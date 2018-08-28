@@ -5,15 +5,14 @@ import com.microsoft.azure.springcloudplayground.service.Annotation;
 
 import java.util.Arrays;
 
-public class CosmosdbModule extends Module {
+public class KeyVaultModule extends Module {
 
-    public CosmosdbModule() {
-        super(ModuleNames.AZURE_COSMOSDB);
+    public KeyVaultModule() {
+        super(ModuleNames.AZURE_KEY_VAULT);
         this.getDependencies().addAll(Arrays.asList(
                 DependencyNames.CLOUD_EUREKA_CLIENT,
                 DependencyNames.CLOUD_CONFIG_CLIENT,
-                DependencyNames.AZURE_COSMOSDB,
-                DependencyNames.SPRING_DATA_COSMOSDB,
+                DependencyNames.AZURE_KEY_VAULT,
                 DependencyNames.WEB
         ));
 

@@ -28,11 +28,13 @@ public class ModuleNames {
 
     public static final String AZURE_SQL_SERVER = "azure-sql-server";
 
-    public static final String AZURE_EVNET_HUB_BINDER = "azure-eventhub-binder";
+    public static final String AZURE_EVENTHUB_BINDER = "azure-eventhub-binder";
 
     public static final String AZURE_ACTIVE_DIRECTORY = "azure-active-directory";
 
     public static final String AZURE_COSMOSDB = "azure-cosmosdb";
+
+    public static final String AZURE_KEY_VAULT = "azure-keyvault-secrets";
 
     private static final Map<String, Module> NAME_TO_MODULE;
 
@@ -46,9 +48,10 @@ public class ModuleNames {
         map.put(AZURE_CACHE, new CacheModule());
         map.put(AZURE_STORAGE, new StorageModule());
         map.put(AZURE_SQL_SERVER, new SqlServerModule());
-        map.put(AZURE_EVNET_HUB_BINDER, new EventHubModule());
+        map.put(AZURE_EVENTHUB_BINDER, new EventHubModule());
         map.put(AZURE_ACTIVE_DIRECTORY, new ActiveDirectoryModule());
         map.put(AZURE_COSMOSDB, new CosmosdbModule());
+        map.put(AZURE_KEY_VAULT, new KeyVaultModule());
 
         NAME_TO_MODULE = Collections.unmodifiableMap(map);
     }
