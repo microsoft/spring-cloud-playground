@@ -54,7 +54,7 @@ $(function () {
 
     // Switch between configuration and default
     var configPort = $("#config-port");
-    var port = $(".port-input");
+    var infraPort = $(".port-input");
 
     // Configurable steps
     var metaDataConfig = $("#meta-data-config");
@@ -78,15 +78,19 @@ $(function () {
     var servicePortHelp = $("#port-help");
 
     configPort.on("click", function () {
-        if (port.hasClass("hidden")) {
-            port.addClass("is-active");
-            port.removeClass("hidden");
+        if (infraPort.hasClass("hidden")) {
+            infraPort.addClass("is-active");
+            infraPort.removeClass("hidden");
             configPort.text("hide service configuration?")
         } else {
-            port.removeClass("is-active");
-            port.addClass("hidden");
+            infraPort.removeClass("is-active");
+            infraPort.addClass("hidden");
             configPort.text("configure your services?")
         }
+    });
+
+    infraPort.on("blur", function() {
+        updateInfraPort($(this));
     });
 
     generateTab.on("click", function() {
@@ -342,6 +346,16 @@ $(function () {
             showElements([helpElement]);
         } else {
             hideElements([helpElement]);
+        }
+    }
+
+    function updateInfraPort(portInput) {
+        var infraCheckbox = portInput.prev("input");
+        var serviceName = infraCheckbox.val();
+
+        if (infraCheckbox[0].checked) {
+            deleteServiceOnPage(serviceName);
+            updateInfraService(infraCheckbox, false);
         }
     }
 
