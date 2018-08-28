@@ -246,6 +246,14 @@ public class ProjectGenerator {
         write(new File(srcDir, appName + ".java"), "Application.java", serviceModel);
     }
 
+    private void generateFrontEndFiles(@NonNull File resourceDir, @NonNull Map<String, Object> serviceModel) {
+        // Write all files under templates/${module_name}/front to generated src/main/resources
+        Service service = getService(serviceModel);
+
+        service.getModules().stream().filter(m -> m.hasFront()).forEach(m ->
+                writeAllFilesToDirectory(resourceDir, m.getName() + "/front", serviceModel));
+    }
+
     private void generateInfrastructureServiceSourceCode(@NonNull File srcDir, @NonNull File resourceDir,
                                                          @NonNull Map<String, Object> serviceModel) {
         String serviceName = getServiceName(serviceModel);
@@ -287,6 +295,7 @@ public class ProjectGenerator {
 
         if (ServiceNames.isAzureService(serviceName)) {
             generateAzureServiceSourceCode(srcDir, serviceModel);
+            generateFrontEndFiles(resourcesDir, serviceModel);
         } else {
             generateInfrastructureServiceSourceCode(srcDir, resourcesDir, serviceModel);
         }

@@ -12,6 +12,13 @@ playground:
         mappings:
           - versionRange: "2.0.0.RELEASE"
             version: 1.0.0.M1
+      azure-spring-boot:
+        groupId: com.microsoft.azure
+        artifactId: azure-spring-boot-bom
+        versionProperty: azure-spring-boot.version
+        mappings:
+          - versionRange: "2.0.0.RELEASE"
+            version: 2.0.5
       spring-cloud:
         groupId: org.springframework.cloud
         artifactId: spring-cloud-dependencies
@@ -86,6 +93,64 @@ playground:
           groupId: org.springframework.boot
           artifactId: spring-boot-starter-data-jpa
           weight: 100
+    - name: Spring Thymeleaf
+      content:
+        - name: Spring Thymeleaf
+          id: spring-thymeleaf
+          description: Spring Thymeleaf
+          groupId: org.springframework.boot
+          artifactId: spring-boot-starter-thymeleaf
+    - name: Thymeleaf Spring Security
+      content:
+        - name: Thymeleaf Spring Security
+          id: thymeleaf-extra
+          description: Spring Thymeleaf
+          groupId: org.thymeleaf.extras
+          artifactId: thymeleaf-extras-springsecurity4
+    - name: Spring Security Oauth2 Client
+      content:
+        - name: Spring Security Oauth2 Client
+          id: spring-security-oauth2-client
+          description: Spring Security
+          groupId: org.springframework.security
+          artifactId: spring-security-oauth2-client
+    - name: Spring Security Oauth2 Jose
+      content:
+        - name: Spring Security Oauth2 Jose
+          id: spring-security-oauth2-jose
+          description: Spring Security
+          groupId: org.springframework.security
+          artifactId: spring-security-oauth2-jose
+    - name: Spring Security
+      content:
+        - name: Spring Security
+          id: spring-security
+          description: Spring Security
+          groupId: org.springframework.boot
+          artifactId: spring-boot-starter-security
+    - name: Azure Cosmosdb
+      content:
+        - name: Azure Cosmosdb Spring Boot Starter
+          id: azure-cosmosdb
+          description: Cosmosdb Spring Boot Starter
+          groupId: com.microsoft.azure
+          artifactId: azure-documentdb-spring-boot-starter
+          weight: 100
+        - name: Spring Date Cosmosdb
+          id: spring-data-cosmosdb
+          description: Cosmosdb Spring Boot Starter
+          groupId: com.microsoft.azure
+          artifactId: spring-data-cosmosdb
+          versionRange: 2.0.4
+          weight: 100
+    - name: Azure Key Vault
+      content:
+      - name: Azure Key Vault Secrets Spring Boot Starter
+        id: azure-keyvault-secrets
+        description: Key Vault Secrets Spring Boot Starter
+        groupId: com.microsoft.azure
+        artifactId: azure-keyvault-secrets-spring-boot-starter
+        weight: 100
     - name: Cloud Config
       bom: spring-cloud
       versionRange: 1.2.3.RELEASE
@@ -243,6 +308,22 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-eventhub
               description: Reference doc
+    - name: Azure Spring Boot
+      bom: azure-spring-boot
+      versionRange: "2.0.0.RELEASE"
+      content:
+        - name: Azure Active Directory
+          id: azure-active-directory
+          groupId: com.microsoft.azure
+          artifactId: azure-active-directory-spring-boot-starter
+          description: Azure Active Directory
+          links:
+            - rel: sample
+              href: https://github.com/Microsoft/azure-spring-boot/tree/master/azure-spring-boot-samples/azure-active-directory-spring-boot-backend-sample
+              description: Spring Security 5 with Azure Active Directory sample
+            - rel: reference
+              href: https://github.com/Microsoft/azure-spring-boot/blob/master/azure-spring-boot-starters/azure-active-directory-spring-boot-starter/README.md
+              description: Reference doc
   services:
     - name: Infrastructure Spring Cloud Modules
       content:
@@ -273,13 +354,19 @@ playground:
           description: Spring Cloud Stream Binder for Azure Event Hub
         - name: Cache (Azure Redis Cache)
           id: azure-redis-cache
-          description: Spring Cache Integration with Azure Redis Cache
+          description: Spring Cloud Caching Integration with Azure Redis Cache
         - name: Resource (Azure Storage)
           id: azure-storage
-          description: Spring Resource with Azure Storage
-        - name: Sql (Azure Sql Server Database)
-          id: azure-sql-server
-          description: Spring Data JPA with Azure Sql Server Database
+          description: Spring Cloud Resource with Azure Storage
+        - name: Azure Active Directory
+          id: azure-active-directory
+          description: Spring Security 5 with Azure Active Directory
+        - name: Azure CosmosDB
+          id: azure-cosmosdb
+          description: Spring Data integration with Azure CosmosDB
+        - name: Azure KeyVault Secrets
+          id: azure-keyvault-secrets
+          description: Spring Boot Starter for Azure Key Vault
   types:
     - name: Maven Project
       id: maven-project
