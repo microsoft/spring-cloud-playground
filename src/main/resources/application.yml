@@ -5,6 +5,13 @@ spring:
 playground:
   env:
     boms:
+      azure-dependencies-bom:
+        groupId: com.microsoft.azure
+        artifactId: azure-dependencies-bom
+        versionProperty: azure-dependencies-bom.version
+        mappings:
+          - versionRange: "1.0.0.M1"
+            version: 1.0.0.M1
       spring-cloud-azure:
         groupId: com.microsoft.azure
         artifactId: spring-cloud-azure-dependencies
