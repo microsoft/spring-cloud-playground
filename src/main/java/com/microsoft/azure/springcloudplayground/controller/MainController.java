@@ -11,11 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.ZipFileSet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
@@ -34,6 +41,9 @@ public class MainController extends AbstractPlaygroundController {
 
     private final TelemetryProxy telemetryProxy;
     private final ProjectGenerator projectGenerator;
+
+    @Autowired
+    private OAuth2AuthorizedClientService authorizedClientService;
 
     private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
     private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
@@ -108,7 +118,10 @@ public class MainController extends AbstractPlaygroundController {
     }
 
     @RequestMapping(path = "/", produces = "text/html")
-    public String home(Map<String, Object> model) {
+    public String home(Map<String, Object> model, OAuth2AuthenticationToken token) {
+        if (token != null && !StringUtils.isEmpty(token.getName())) {
+            model.put("loggedInUser", token.getPrincipal().getAttributes().get("login"));
+        }
 
         this.addBuildInformation(model);
         this.renderHome(model);
