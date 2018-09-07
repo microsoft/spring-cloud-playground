@@ -356,24 +356,24 @@ playground:
           mandatory: false
     - name: Azure Spring Cloud Modules
       content:
-        - name: Stream (Azure Event Hub)
+        - name: Azure Event Hub
           id: azure-eventhub-binder
           description: Spring Cloud Stream Binder for Azure Event Hub
-        - name: Cache (Azure Redis Cache)
+        - name: Azure Redis Cache
           id: azure-redis-cache
-          description: Spring Cloud Caching Integration with Azure Redis Cache
-        - name: Resource (Azure Storage)
+          description: Spring Caching with Azure Redis Cache
+        - name: Azure Storage
           id: azure-storage
           description: Spring Cloud Resource with Azure Storage
-        - name: Security (Azure Active Directory)
+        - name: Azure Active Director
           id: azure-active-directory
-          description: Spring Security 5 with Azure Active Directory
-        - name: Data (Azure CosmosDB)
+          description: Spring Security with Azure Active Directory
+        - name: Azure Cosmos DB
           id: azure-cosmosdb
-          description: Spring Data integration with Azure CosmosDB
-        - name: Vault (Azure KeyVault Secrets)
+          description: Spring Data Azure Cosmos DB (SQL API)
+        - name: Azure Key Vault
           id: azure-keyvault-secrets
-          description: Spring value annotation integration with Azure Key Vault Secrets
+          description: Spring Boot with Azure Key Vault
   types:
     - name: Maven Project
       id: maven-project
