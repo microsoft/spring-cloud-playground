@@ -1,8 +1,9 @@
-(function() {
+$(function() {
     var $signInButton = $("#login_link");
     var $signOutButton = $("#logout_link");
     var $userDropdown = $("#user_dropdown");
     var $loggedUser = $("#logged_user");
+    var _hasLoggedIn = false;
 
     $signOutButton.on("click", function() {
         logout();
@@ -29,6 +30,13 @@
     function loggedOutSuccess() {
         $signInButton.removeClass("hidden");
         $userDropdown.addClass("hidden");
-        $loggedUser.text(undefined);
+        $loggedUser.text("");
+        _hasLoggedIn = false;
     }
-}())
+
+    _hasLoggedIn = $("#logged_user").text().trim().length > 0 ? true : false;
+
+    window.hasLoggedIn = function () {
+        return _hasLoggedIn;
+    }
+});

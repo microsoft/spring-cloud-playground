@@ -77,6 +77,10 @@ $(function () {
     var serviceNameHelp = $("#service-name-help");
     var servicePortHelp = $("#port-help");
 
+    azureCheckbox.on("change", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
+
     configPort.on("click", function () {
         if (infraPort.hasClass("hidden")) {
             infraPort.addClass("is-active");
@@ -153,24 +157,14 @@ $(function () {
         }
     });
 
-    $("#form").submit(function(event) {
-        var csrfToken = $("input[name='_csrf']").val();
-        var csrfTokenHeader = $("input[name='_csrf_header']").val();
-        var groupId = $("#groupId").val();
-        var artifactId = $("#artifactId").val();
-        var projectName = $("#project-name").val();
-        var description = $("#description").val();
+    $("#generate-project").on("click", function(event) {
+       event.preventDefault();
+    });
 
-        var data = {
-            name: projectName,
-            groupId: groupId,
-            artifactId: artifactId,
-            baseDir: artifactId,
-            description: description,
-            packageName: groupId + "." + artifactId,
-            microServices: allServiceList.serviceList
-        };
 
+    $("#download-project").on("click", function(event) {
+        generateInProgress();
+        var data = getProjectData();
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             var a;
@@ -188,12 +182,16 @@ $(function () {
                     a.click();
                     a.remove();
                 }
+
+                generateSucceed();
+            } else if (xhttp.readyState === 4 && xhttp.status !== 200) {
+                generateFailed();
             }
         };
 
         xhttp.open("POST", '/project.zip');
         xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+        setCsrfHeader(xhttp);
         // Set responseType as blob for binary responses
         xhttp.responseType = 'blob';
         xhttp.send(JSON.stringify(data));
@@ -201,9 +199,54 @@ $(function () {
         event.preventDefault();
     });
 
-    azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("input", addServiceBtnChecker);
-    azureServicePortInput.on("input", addServiceBtnChecker);
+    $("#push-to-github").on("click", function() {
+        if (!hasLoggedIn()) {
+            showGithubModal();
+            event.preventDefault();
+            return;
+        }
+
+        generateInProgress();
+        var data = getProjectData();
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                generateSucceed();
+            } else {
+                generateFailed();
+            }
+        };
+
+        xhttp.open("POST", '/push-to-github');
+        xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+
+        setCsrfHeader(xhttp);
+        xhttp.send(JSON.stringify(data));
+    });
+
+    function setCsrfHeader(xhttp) {
+        var csrfToken = $("input[name='_csrf']").val();
+        var csrfTokenHeader = $("input[name='_csrf_header']").val();
+
+        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+    };
+
+    function getProjectData() {
+        var groupId = $("#groupId").val();
+        var artifactId = $("#artifactId").val();
+        var projectName = $("#project-name").val();
+        var description = $("#description").val();
+
+        return {
+            name: projectName,
+            groupId: groupId,
+            artifactId: artifactId,
+            baseDir: artifactId,
+            description: description,
+            packageName: groupId + "." + artifactId,
+            microServices: allServiceList.serviceList
+        };
+    }
 
     function isValidServiceName(serviceName) {
         return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
@@ -371,6 +414,37 @@ $(function () {
             deleteServiceOnPage(serviceName);
         }
     }
+
+    var inProgressLabel = $("#in-progress");
+    var generateSucceedLabel = $("#generate-succeed");
+    var generateFailedLabel = $("#generate-failed");
+
+    function generateInProgress() {
+        showElements([inProgressLabel]);
+        hideElements([generateSucceedLabel, generateFailedLabel]);
+    }
+
+    function generateSucceed() {
+        showElements([generateSucceedLabel]);
+        hideElements([inProgressLabel, generateFailedLabel]);
+    }
+
+    function generateFailed() {
+        showElements([generateFailedLabel]);
+        hideElements([inProgressLabel, generateSucceedLabel]);
+    }
+
+    var githubModal = $("#github-login-modal");
+    var githubModalClose = $("#github-login-modal .delete");
+
+    function showGithubModal() {
+        githubModal.addClass("is-active");
+    }
+
+    githubModalClose.on("click", function(event) {
+       event.preventDefault();
+       githubModal.removeClass("is-active");
+    });
 
     // Initialize already selected infra services
     infraCheckbox.each(function(){
