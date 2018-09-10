@@ -10,10 +10,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().permitAll().and().oauth2Login();
+        http.authorizeRequests().anyRequest().permitAll().and().oauth2Login().loginPage("/");
 
-        http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+        http.formLogin().disable()
+                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessUrl("/").deleteCookies("JSESSIONID").invalidateHttpSession(true);
 
+        http.httpBasic().disable();
     }
 }
