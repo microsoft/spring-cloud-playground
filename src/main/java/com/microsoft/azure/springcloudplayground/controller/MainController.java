@@ -3,6 +3,7 @@ package com.microsoft.azure.springcloudplayground.controller;
 import com.microsoft.azure.springcloudplayground.generator.MicroService;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
+import com.microsoft.azure.springcloudplayground.github.GithubOperator;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
@@ -122,6 +123,10 @@ public class MainController extends AbstractPlaygroundController {
     public ResponseEntity<byte[]> getZipProject(@RequestBody @NonNull ProjectRequest request) throws IOException {
         File dir = this.projectGenerator.generate(request);
         File download = this.projectGenerator.createDistributionFile(dir, ".zip");
+
+        GithubOperator operator = new GithubOperator("Incarnation-p-lee", "");
+
+        operator.createRepository(dir);
 
         this.triggerGenerateEvent(request.getMicroServices());
 
