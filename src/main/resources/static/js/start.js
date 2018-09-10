@@ -263,8 +263,7 @@ $(function () {
     }
 
     function showMetaDataConfig() {
-        showElements([metaDataConfig]);
-        hideElements([infraModulesSelector, azureModulesSelector]);
+        toggleElements([metaDataConfig], [infraModulesSelector, azureModulesSelector]);
 
         activateStep(metaDataStep);
         disActivateStep(infraStep);
@@ -274,8 +273,7 @@ $(function () {
     }
 
     function showInfraModulesConfig() {
-        hideElements([metaDataConfig, azureModulesSelector]);
-        showElements([infraModulesSelector]);
+        toggleElements([infraModulesSelector], [metaDataConfig, azureModulesSelector]);
 
         completeStep(metaDataStep);
         activateStep(infraStep);
@@ -285,8 +283,7 @@ $(function () {
     }
 
     function showAzureModulesConfig() {
-        hideElements([metaDataConfig, infraModulesSelector]);
-        showElements([azureModulesSelector]);
+        toggleElements([azureModulesSelector], [metaDataConfig, infraModulesSelector]);
 
         completeStep(metaDataStep);
         completeStep(infraStep);
@@ -309,6 +306,11 @@ $(function () {
         elements.forEach(function(element) {
             element.addClass("hidden");
         })
+    }
+
+    function toggleElements(elementsToShow, elementsToHide) {
+        showElements(elementsToShow);
+        hideElements(elementsToHide);
     }
 
     function activateStep(stepElement) {
@@ -420,18 +422,15 @@ $(function () {
     var generateFailedLabel = $("#generate-failed");
 
     function generateInProgress() {
-        showElements([inProgressLabel]);
-        hideElements([generateSucceedLabel, generateFailedLabel]);
+        toggleElements([inProgressLabel], [generateSucceedLabel, generateFailedLabel]);
     }
 
     function generateSucceed() {
-        showElements([generateSucceedLabel]);
-        hideElements([inProgressLabel, generateFailedLabel]);
+        toggleElements([generateSucceedLabel], [inProgressLabel, generateFailedLabel]);
     }
 
     function generateFailed() {
-        showElements([generateFailedLabel]);
-        hideElements([inProgressLabel, generateSucceedLabel]);
+        toggleElements([generateFailedLabel], [inProgressLabel, generateSucceedLabel]);
     }
 
     var githubModal = $("#github-login-modal");
