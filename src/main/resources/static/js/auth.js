@@ -32,6 +32,8 @@ $(function() {
         $userDropdown.addClass("hidden");
         $loggedUser.text("");
         _hasLoggedIn = false;
+        // Force reload to refresh to csrf token, or 403 error will raise up for csrf required post request
+        location.reload(true);
     }
 
     _hasLoggedIn = $("#logged_user").text().trim().length > 0 ? true : false;
