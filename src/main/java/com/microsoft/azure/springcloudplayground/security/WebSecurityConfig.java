@@ -10,8 +10,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/push-to-github").authenticated()
-                .anyRequest().permitAll()
+        http.authorizeRequests().anyRequest().permitAll()
+                .antMatchers("/push-to-github").authenticated()
                 .and().oauth2Login().loginPage("/oauth2/authorization/github");
 
         http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
