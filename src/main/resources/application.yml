@@ -1,6 +1,14 @@
 spring:
   mustache:
     expose-request-attributes: true
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: xxxxxx
+            client-secret: xxxxxxx
+            scope: user, public_repo
 
 playground:
   env:
