@@ -149,7 +149,7 @@ public class MainController extends AbstractPlaygroundController {
 
         if (isValidOAuth2Token(token)) {
             String username = token.getPrincipal().getAttributes().get("login").toString();
-            GithubOperator operator = new GithubOperator(username, "");
+            GithubOperator operator = new GithubOperator(username, getAccessToken().getTokenValue());
             File dir = this.projectGenerator.generate(request);
 
             try {
