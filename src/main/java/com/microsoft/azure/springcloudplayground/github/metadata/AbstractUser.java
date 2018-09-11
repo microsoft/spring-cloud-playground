@@ -15,12 +15,11 @@ public abstract class AbstractUser {
 
     private String email;
 
-    private String date = getCurrentDate();
+    private final String date = getCurrentDate();
 
     public AbstractUser(@NonNull String name, @NonNull String email) {
         this.name = name;
         this.email = email;
-        this.date = getCurrentDate();
     }
 
     private String getCurrentDate() {
