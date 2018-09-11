@@ -41,15 +41,70 @@
         </ul>
     </div>
     <div class="button-group">
-        <p class="has-text-centered">
+        <div class="has-text-centered container">
             <button onclick="gtag('event', 'click', { event_category: 'Go to infra config', event_action: 'click'});"
                     id="prev-goto-infra-step" type="button" class="button" role="button">
                 Previous
             </button>
-            <button onclick="gtag('event', 'click', { event_category: 'Project Generation', event_action: 'click'});"
-                    id="generate-project" type="submit" class="button" role="button">
-                Generate Project
-            </button>
-        </p>
+
+            <div class="dropdown is-hoverable">
+                <div class="dropdown-trigger">
+                    <button id="generate-project" class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                        <span>Generate Project</span>
+                        <span class="icon is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                        <a class="dropdown-item" id="download-project"
+                           onclick="gtag('event', 'click', { event_category: 'Project Download', event_action: 'click'});">
+                            <span class="icon">
+                                <i class="fa fa-download"></i>
+                            </span>
+                            <span>Download</span>
+                        </a>
+                        <a class="dropdown-item" id="push-to-github">
+                            <span class="icon">
+                              <i class="fab fa-github"></i>
+                            </span>
+                            <span>Push to Github</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="is-inline-flex loading-status">
+                <div class="hidden" id="in-progress">
+                    <span class="icon">
+                        <i class="fas fa-spinner"></i>
+                    </span>
+                    <span>In progress...</span>
+                </div>
+                <div class="hidden" id="generate-succeed">
+                    <span>Generated successfully.</span>
+                </div>
+                <div class="hidden has-text-danger" id="generate-failed">
+                    <span>Failed to generate.</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal" id="github-login-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Sign In with Github</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            You have not signed in to Github, sign in with your Github account to allow this application to push generated project to Github.
+        </section>
+        <footer class="modal-card-foot">
+            <a class="button is-text" href="/oauth2/authorization/github">Sign In with Github</a>
+        </footer>
     </div>
 </div>

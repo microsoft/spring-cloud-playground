@@ -41,7 +41,7 @@
 }
 
 .large-bottom-padding {
-    padding-bottom: 4rem;
+    padding-bottom: 6rem;
 }
 
 .module-checkbox {
@@ -187,4 +187,15 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 
 .playground-footer .content ul {
     margin-top: 0;
+}
+
+.loading-status {
+    position: absolute;
+    height: 100%;
+}
+
+.loading-status div {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
 }

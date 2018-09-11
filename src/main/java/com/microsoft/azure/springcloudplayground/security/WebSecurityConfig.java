@@ -10,10 +10,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().permitAll().and().oauth2Login().loginPage("/");
+        http.authorizeRequests().antMatchers("/push-to-github").authenticated()
+                .anyRequest().permitAll()
+                .and().oauth2Login().loginPage("/oauth2/authorization/github");
 
-        http.formLogin().disable()
-                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+        http.logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 .logoutSuccessUrl("/").deleteCookies("JSESSIONID").invalidateHttpSession(true);
 
         http.httpBasic().disable();
