@@ -19,8 +19,13 @@ import java.util.stream.Collectors;
 
 public class GithubOperator extends GithubApiWrapper {
 
+    private static final String DEFAULT_EMAIL = "noreply@github.com";
+
+    private final List<GithubEmails> userEmails;
+
     public GithubOperator(@NonNull String username, @NonNull String token) {
         super(username, token);
+        this.userEmails = getGithubEmails();
     }
 
     private String getContent(@NonNull HttpResponse response) throws GithubProcessException {
@@ -45,6 +50,19 @@ public class GithubOperator extends GithubApiWrapper {
         } catch (IOException e) {
             throw new GithubProcessException("Failed to retrieve object from json", e);
         }
+    }
+
+    private List<GithubEmails> getGithubEmails() {
+        List<GithubEmails> emails = new ArrayList<>();
+
+        try {
+            HttpResponse response = super.getUserEmails();
+            emails.addAll(Arrays.asList(readValue(getContent(response), GithubEmails[].class)));
+        } catch (GithubProcessException ignore) {
+            emails.add(new GithubEmails(DEFAULT_EMAIL, true, true, null));
+        }
+
+        return emails;
     }
 
     private GithubRepository createRepository(@NonNull String name) throws GithubProcessException {
@@ -142,7 +160,7 @@ public class GithubOperator extends GithubApiWrapper {
     }
 
     private GitDataRequestCommit getGitDateRequestCommit(@NonNull GitDataCommit parent, @NonNull GithubTree tree) {
-        Author author = new Author(getUsername(), "fake-email");
+        Author author = new Author(getUsername(), this.userEmails.get(0).getEmail());
         List<String> parents = Collections.singletonList(parent.getSha());
 
         return GitDataRequestCommit.builder()
@@ -179,28 +197,19 @@ public class GithubOperator extends GithubApiWrapper {
         return new GitDataRequestReference(commit.getSha(), true);
     }
 
-    private void updateGithubRepository(@NonNull GithubRepository repository,
-                                        @NonNull GitDataRequestReference reference) throws GithubProcessException {
-        HttpResponse response = super.updateGitDataReference(repository.getName(), reference);
-
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new GithubProcessException("Failed to update reference from repo: " + repository.getName());
-        }
-    }
-
-    public List<String> getAllFiles(@NonNull File file) {
+    private List<String> getAllFiles(@NonNull File file) {
         if (file.isDirectory()) {
-            List<String> fileNames = new ArrayList<>();
+            List<String> allFiles = new ArrayList<>();
 
             for (File f : Objects.requireNonNull(file.listFiles())) {
                 if (f.isFile()) {
-                    fileNames.add(f.getPath());
+                    allFiles.add(f.getPath());
                 } else {
-                    fileNames.addAll(getAllFiles(f));
+                    allFiles.addAll(getAllFiles(f));
                 }
             }
 
-            return fileNames;
+            return allFiles;
         }
 
         return Collections.singletonList(file.getName());
@@ -241,7 +250,16 @@ public class GithubOperator extends GithubApiWrapper {
         return createGitDataTree(repository, requestTree);
     }
 
-    public void createRepository(@NonNull File dir, @NonNull String repositoryName) throws GithubProcessException {
+    private void updateGithubRepository(@NonNull GithubRepository repository,
+                                        @NonNull GitDataRequestReference reference) throws GithubProcessException {
+        HttpResponse response = super.updateGitDataReference(repository.getName(), reference);
+
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            throw new GithubProcessException("Failed to update reference from repo: " + repository.getName());
+        }
+    }
+
+    public String createRepository(@NonNull File dir, @NonNull String repositoryName) throws GithubProcessException {
         GithubRepository repository = createRepository(repositoryName);
         GitDataCommit parentCommit = getGitDataCommit(repository, getRepositoryCommits(repository).get(0));
         GithubTree githubTree = createGithubTree(repository, parentCommit, dir);
@@ -250,5 +268,7 @@ public class GithubOperator extends GithubApiWrapper {
         GitDataRequestReference reference = getGitDataRequestReference(commit);
 
         updateGithubRepository(repository, reference);
+
+        return repository.getRepositoryUrl(getUsername());
     }
 }

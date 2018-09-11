@@ -36,6 +36,8 @@ public class GithubApiWrapper {
 
     private static final String CREATE_REPOSITORY_URL = "https://api.github.com/user/repos";
 
+    private static final String USER_EMAILS_URL = "https://api.github.com/user/emails";
+
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     static {
@@ -60,6 +62,14 @@ public class GithubApiWrapper {
 
     private void appendAuthorizationHeader(@NonNull HttpUriRequest request) {
         request.setHeader(AUTH_HEADER, String.format("token %s", this.token));
+    }
+
+    protected HttpResponse getUserEmails() throws GithubProcessException {
+        HttpGet request = new HttpGet(USER_EMAILS_URL);
+
+        appendAuthorizationHeader(request);
+
+        return executeRequest(request);
     }
 
     protected HttpResponse createRepository(@NonNull GithubRepository repository) throws GithubProcessException {
