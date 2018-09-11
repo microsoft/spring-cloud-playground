@@ -47,11 +47,9 @@ public class MainController extends AbstractPlaygroundController {
     private final ProjectGenerator projectGenerator;
     private final OAuth2AuthorizedClientService clientService;
 
-    private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
-    private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
-    private static final String TELEMETRY_EVENT_LOGIN = "SpringCloudPlaygroundLogin";
-    private static final String FREE_ACCOUNT = "FreeAccount";
-    private static final String LOGIN_ACCOUNT = "LoginAccount";
+    private static final String TELEMETRY_EVENT_ACCESS = "playground-access";
+    private static final String TELEMETRY_EVENT_GENERATE = "playground-generate";
+    private static final String TELEMETRY_EVENT_GITHUB_PUSH = "playground-github-push";
     private static final String GREETING_HTML = "greeting";
 
     public MainController(GeneratorMetadataProvider metadataProvider, ResourceUrlProvider resourceUrlProvider,
@@ -63,24 +61,10 @@ public class MainController extends AbstractPlaygroundController {
     }
 
     @GetMapping("/greeting")
-    public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
+    public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
         model.addAttribute("name", name);
 
         return GREETING_HTML;
-    }
-
-    @GetMapping("/free-account")
-    public String freeAccount(Model model) {
-        this.triggerLoginEvent(FREE_ACCOUNT);
-
-        return this.greeting(FREE_ACCOUNT, model);
-    }
-
-    @GetMapping("/login-account")
-    public String loginAccount(Model model) {
-        this.triggerLoginEvent(LOGIN_ACCOUNT);
-
-        return this.greeting(LOGIN_ACCOUNT, model);
     }
 
     @ModelAttribute("linkTo")
@@ -112,12 +96,13 @@ public class MainController extends AbstractPlaygroundController {
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
     }
 
-    private void triggerLoginEvent(@NonNull String accountType) {
-        final Map<String, String> properties = new HashMap<>();
+    private void triggerGithubPushEvent(@NonNull String username, boolean isSuccess) {
+        Map<String, String> properties = new HashMap<>();
 
-        properties.put("accountType", accountType);
+        properties.put("username", username);
+        properties.put("isSuccess", String.valueOf(isSuccess));
 
-        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
+        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GITHUB_PUSH, properties);
     }
 
     private boolean isValidOAuth2Token(OAuth2AuthenticationToken token) {
@@ -151,11 +136,16 @@ public class MainController extends AbstractPlaygroundController {
             String username = token.getPrincipal().getAttributes().get("login").toString();
             GithubOperator operator = new GithubOperator(username, getAccessToken().getTokenValue());
             File dir = this.projectGenerator.generate(request);
+            triggerGenerateEvent(request.getMicroServices());
 
             try {
                 operator.createRepository(dir, request.getRepoName());
+                triggerGithubPushEvent(username, true);
+
                 return new ResponseEntity(HttpStatus.CREATED);
             } catch (GithubProcessException e) {
+                triggerGithubPushEvent(username, false);
+
                 return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
             }
         }
@@ -217,7 +207,7 @@ public class MainController extends AbstractPlaygroundController {
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
 
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
-                oauthToken.getAuthorizedClientRegistrationId(),oauthToken.getName());
+                oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
         return client.getAccessToken();
     }
