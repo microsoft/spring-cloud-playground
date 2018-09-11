@@ -1,5 +1,6 @@
 package com.microsoft.azure.springcloudplayground.github;
 
+import com.google.common.io.Files;
 import com.microsoft.azure.springcloudplayground.exception.GithubProcessException;
 import com.microsoft.azure.springcloudplayground.github.gitdata.*;
 import com.microsoft.azure.springcloudplayground.github.metadata.Author;
@@ -118,9 +119,13 @@ public class GithubOperator extends GithubApiWrapper {
     }
 
     private GitDataRequestBlob getGitDataRequestBlob(@NonNull String filename) {
-        String content = "";
+        try {
+            String content = new String(Files.toByteArray(new File(filename)));
 
-        return new GitDataRequestBlob(content, "utf-8");
+            return new GitDataRequestBlob(content, "utf-8");
+        } catch (IOException e) {
+            throw new GithubProcessException("Failed to read file: " + filename, e);
+        }
     }
 
     private GitDataRequestTree.TreeNode getRequestTreeNode(@NonNull String name, @NonNull String sha) {
@@ -177,15 +182,15 @@ public class GithubOperator extends GithubApiWrapper {
         }
     }
 
-    public List<String> getAllFileNames(@NonNull File file) {
+    public List<String> getAllFiles(@NonNull File file) {
         if (file.isDirectory()) {
             List<String> fileNames = new ArrayList<>();
 
             for (File f : Objects.requireNonNull(file.listFiles())) {
                 if (f.isFile()) {
-                    fileNames.add(f.getName());
+                    fileNames.add(f.getPath());
                 } else {
-                    fileNames.addAll(getAllFileNames(f));
+                    fileNames.addAll(getAllFiles(f));
                 }
             }
 
@@ -195,25 +200,46 @@ public class GithubOperator extends GithubApiWrapper {
         return Collections.singletonList(file.getName());
     }
 
-    public void createRepository(@NonNull File dir) {
-        GithubRepository repository = createRepository("spring-cloud-azure-demo");
-        List<GithubCommit> commits = getRepositoryCommits(repository);
-        GitDataCommit parentCommit = getGitDataCommit(repository, commits.get(0));
+    private String truncateFileNamePrefix(@NonNull String fileName) {
+        Assert.hasText(fileName, "file name should have text.");
+
+        char separator = '=';
+        String tmp = fileName;
+
+        do {
+            fileName = tmp;
+            tmp = fileName.replace(File.separatorChar, separator);
+        } while (!tmp.equals(fileName));
+
+        List<String> paths = Arrays.asList(fileName.split(String.valueOf(separator)));
+
+        Assert.isTrue(paths.size() >= 4, "file name should contains at least 4 directory in path");
+
+        return String.join("/", paths.subList(4, paths.size())); // Github use "/" instead of File.separator.
+    }
+
+    private GithubTree createGithubTree(@NonNull GithubRepository repository, @NonNull GitDataCommit parentCommit,
+                                        @NonNull File dir) {
+        List<String> files = getAllFiles(dir);
         GitDataTree tree = getGitDataTree(repository, parentCommit);
         GitDataRequestTree requestTree = getGitDataRequestTree(tree);
+        List<GitDataRequestBlob> requestBlobs = files.stream().map(this::getGitDataRequestBlob).collect(Collectors.toList());
+        List<GitDataBlob> blobs = requestBlobs.stream().map(b -> createGitDataBlob(repository, b)).collect(Collectors.toList());
 
-        List<String> fileNames = getAllFileNames(dir);
-        List<GitDataBlob> blobs = fileNames.stream().map(this::getGitDataRequestBlob)
-                .map(b -> createGitDataBlob(repository, b)).collect(Collectors.toList());
-
-        for (int i = 0; i < fileNames.size(); i++) {
-            String filename = fileNames.get(i);
+        for (int i = 0; i < files.size(); i++) {
+            String filename = files.get(i);
             String sha = blobs.get(i).getSha();
 
-            requestTree.getTree().add(getRequestTreeNode(filename, sha));
+            requestTree.getTree().add(getRequestTreeNode(truncateFileNamePrefix(filename), sha));
         }
 
-        GithubTree githubTree = createGitDataTree(repository, requestTree);
+        return createGitDataTree(repository, requestTree);
+    }
+
+    public void createRepository(@NonNull File dir) {
+        GithubRepository repository = createRepository("spring-cloud-azure-demo");
+        GitDataCommit parentCommit = getGitDataCommit(repository, getRepositoryCommits(repository).get(0));
+        GithubTree githubTree = createGithubTree(repository, parentCommit, dir);
         GitDataRequestCommit requestCommit = getGitDateRequestCommit(parentCommit, githubTree);
         GitDataCommit commit = createGitDateCommit(repository, requestCommit);
         GitDataRequestReference reference = getGitDataRequestReference(commit);
