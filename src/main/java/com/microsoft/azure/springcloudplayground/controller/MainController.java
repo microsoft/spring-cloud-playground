@@ -9,13 +9,13 @@ import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvi
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
 import com.samskivert.mustache.Mustache;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -96,11 +96,21 @@ public class MainController extends AbstractPlaygroundController {
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_ACCESS, properties);
     }
 
-    private void triggerGithubPushEvent(@NonNull String username, boolean isSuccess) {
+    private void triggerGithubPushEventSuccess(@NonNull String username) {
         Map<String, String> properties = new HashMap<>();
 
         properties.put("username", username);
-        properties.put("isSuccess", String.valueOf(isSuccess));
+        properties.put("success", "true");
+
+        this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GITHUB_PUSH, properties);
+    }
+
+    private void triggerGithubPushEventFailure(@NonNull String username, @NonNull String reason) {
+        Map<String, String> properties = new HashMap<>();
+
+        properties.put("username", username);
+        properties.put("success", "false");
+        properties.put("reason", reason);
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GITHUB_PUSH, properties);
     }
@@ -140,11 +150,11 @@ public class MainController extends AbstractPlaygroundController {
 
             try {
                 operator.createRepository(dir, request.getRepoName());
-                triggerGithubPushEvent(username, true);
+                triggerGithubPushEventSuccess(username);
 
                 return new ResponseEntity(HttpStatus.CREATED);
             } catch (GithubProcessException e) {
-                triggerGithubPushEvent(username, false);
+                triggerGithubPushEventFailure(username, e.getMessage());
 
                 return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
             }

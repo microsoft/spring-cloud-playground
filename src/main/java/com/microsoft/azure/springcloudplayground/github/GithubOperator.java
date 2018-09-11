@@ -40,7 +40,7 @@ public class GithubOperator extends GithubApiWrapper {
 
             return builder.toString();
         } catch (IOException e) {
-            throw new GithubProcessException("Failed to obtain response content", e);
+            throw new GithubProcessException("Failed to obtain github api response content", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class GithubOperator extends GithubApiWrapper {
         try {
             return MAPPER.readValue(json, clazz);
         } catch (IOException e) {
-            throw new GithubProcessException("Failed to retrieve object from json", e);
+            throw new GithubProcessException("Failed to retrieve object from Json", e);
         }
     }
 
@@ -70,7 +70,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.createRepository(repository);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-            throw new GithubProcessException("Failed to create project: " + name);
+            throw new GithubProcessException(String.format("Failed to create github repository [%s].", name));
         }
 
         return repository;
@@ -80,7 +80,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.deleteRepository(repository.getName());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
-            throw new GithubProcessException("Failed to delete: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to delete github repository [%s].", repository.getName()));
         }
     }
 
@@ -88,7 +88,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.getAllCommits(repository.getName());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new GithubProcessException("Failed to obtain commits from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to obtain commits from repository [%s].", repository.getName()));
         }
 
         GithubCommit[] commit = readValue(getContent(response), GithubCommit[].class);
@@ -103,7 +103,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.getGitDataCommit(repository.getName(), commit.getSha());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new GithubProcessException("Failed to obtain commits from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to get commit from repository [%s].", repository.getName()));
         }
 
         return readValue(getContent(response), GitDataCommit.class);
@@ -114,7 +114,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.getGitDataTree(repository.getName(), commit.getTree().getSha());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new GithubProcessException("Failed to obtain tree from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to get tree from repository [%s].", repository.getName()));
         }
 
         return readValue(getContent(response), GitDataTree.class);
@@ -134,7 +134,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.createGitDataBlob(repository.getName(), requestBlob);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-            throw new GithubProcessException("Failed to create tree from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to create blob from repository [%s].", repository.getName()));
         }
 
         return readValue(getContent(response), GitDataBlob.class);
@@ -146,7 +146,7 @@ public class GithubOperator extends GithubApiWrapper {
 
             return new GitDataRequestBlob(content, "utf-8");
         } catch (IOException e) {
-            throw new GithubFileException("Failed to read file: " + filename, e);
+            throw new GithubFileException(String.format("Failed to read file [%s].", filename), e);
         }
     }
 
@@ -176,7 +176,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.createGitDataCommit(repository.getName(), commit);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-            throw new GithubProcessException("Failed to create commit from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to create commit from repository [%s].", repository.getName()));
         }
 
         return readValue(getContent(response), GitDataCommit.class);
@@ -187,7 +187,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.createGitDataTree(repository.getName(), tree);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-            throw new GithubProcessException("Failed to create tree from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to create tree from repository [%s].", repository.getName()));
         }
 
         return readValue(getContent(response), GithubTree.class);
@@ -255,7 +255,7 @@ public class GithubOperator extends GithubApiWrapper {
         HttpResponse response = super.updateGitDataReference(repository.getName(), reference);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new GithubProcessException("Failed to update reference from repo: " + repository.getName());
+            throw new GithubProcessException(String.format("Failed to update reference from repository [%s].", repository.getName()));
         }
     }
 

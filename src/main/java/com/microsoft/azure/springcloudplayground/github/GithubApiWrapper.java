@@ -56,7 +56,7 @@ public class GithubApiWrapper {
 
             return client.execute(request);
         } catch (IOException e) {
-            throw new GithubProcessException("Failed to execute Request to github", e);
+            throw new GithubProcessException("Failed to execute request to github api", e);
         }
     }
 
@@ -79,7 +79,7 @@ public class GithubApiWrapper {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(repository), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubFileException("Failed to process GithubRepository to Json", e);
+            throw new GithubFileException("Failed to read GithubRepository to Json", e);
         }
 
         appendAuthorizationHeader(request);
@@ -128,7 +128,7 @@ public class GithubApiWrapper {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(tree), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubProcessException("Failed to process GitDataRequestTree to Json", e);
+            throw new GithubProcessException("Failed to read GitDataRequestTree to Json", e);
         }
 
         appendAuthorizationHeader(request);
@@ -145,7 +145,7 @@ public class GithubApiWrapper {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(blob), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubProcessException("Failed to process GitDataRequestBlob to Json", e);
+            throw new GithubProcessException("Failed to read GitDataRequestBlob to Json", e);
         }
 
         appendAuthorizationHeader(request);
@@ -162,7 +162,7 @@ public class GithubApiWrapper {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(commit), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubProcessException("Failed to process GitDataRequestCommit to Json", e);
+            throw new GithubProcessException("Failed to read GitDataRequestCommit to Json", e);
         }
 
         appendAuthorizationHeader(request);
@@ -180,7 +180,7 @@ public class GithubApiWrapper {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(reference), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubProcessException("Failed to process GitDataRequestReference to Json", e);
+            throw new GithubProcessException("Failed to read GitDataRequestReference to Json", e);
         }
 
         appendAuthorizationHeader(request);
