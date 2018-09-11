@@ -1,8 +1,10 @@
 package com.microsoft.azure.springcloudplayground.controller;
 
+import com.microsoft.azure.springcloudplayground.exception.GithubProcessException;
 import com.microsoft.azure.springcloudplayground.generator.MicroService;
 import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
+import com.microsoft.azure.springcloudplayground.github.GithubOperator;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
@@ -11,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.ZipFileSet;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
@@ -117,9 +120,19 @@ public class MainController extends AbstractPlaygroundController {
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_LOGIN, properties);
     }
 
+    private boolean isValidOAuth2Token(OAuth2AuthenticationToken token) {
+        if (token == null) {
+            return false;
+        } else if (StringUtils.isEmpty(token.getName())) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     @RequestMapping(path = "/", produces = "text/html")
     public String home(Map<String, Object> model, OAuth2AuthenticationToken token) {
-        if (token != null && !StringUtils.isEmpty(token.getName())) {
+        if (isValidOAuth2Token(token)) {
             model.put("loggedInUser", token.getPrincipal().getAttributes().get("login"));
         }
 
@@ -130,11 +143,24 @@ public class MainController extends AbstractPlaygroundController {
         return "home";
     }
 
-
     @PostMapping("/push-to-github")
-    public String pushToGithub(@RequestBody @Nonnull ProjectRequest request) {
+    public ResponseEntity pushToGithub(@RequestBody @Nonnull ProjectRequest request, OAuth2AuthenticationToken token) {
         log.info("Project request received: " + request);
-        return "push to github not implemented";
+
+        if (isValidOAuth2Token(token)) {
+            String username = token.getPrincipal().getAttributes().get("login").toString();
+            GithubOperator operator = new GithubOperator(username, getAccessToken().getTokenValue());
+            File dir = this.projectGenerator.generate(request);
+
+            try {
+                operator.createRepository(dir, request.getRepoName());
+                return new ResponseEntity(HttpStatus.CREATED);
+            } catch (GithubProcessException e) {
+                return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+            }
+        }
+
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
     @ResponseBody

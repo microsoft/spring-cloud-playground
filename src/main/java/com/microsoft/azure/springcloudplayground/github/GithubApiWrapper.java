@@ -3,6 +3,7 @@ package com.microsoft.azure.springcloudplayground.github;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.springcloudplayground.exception.GithubFileException;
 import com.microsoft.azure.springcloudplayground.exception.GithubProcessException;
 import com.microsoft.azure.springcloudplayground.github.gitdata.GitDataRequestBlob;
 import com.microsoft.azure.springcloudplayground.github.gitdata.GitDataRequestCommit;
@@ -46,7 +47,7 @@ public class GithubApiWrapper {
         this.token = token;
     }
 
-    private HttpResponse executeRequest(@NonNull HttpUriRequest request) {
+    private HttpResponse executeRequest(@NonNull HttpUriRequest request) throws GithubProcessException {
         try {
             request.setHeader(ACCEPT_HEADER, ACCEPT_VALUE);
             HttpClient client = HttpClientBuilder.create().build();
@@ -61,14 +62,14 @@ public class GithubApiWrapper {
         request.setHeader(AUTH_HEADER, String.format("token %s", this.token));
     }
 
-    protected HttpResponse createRepository(@NonNull GithubRepository repository) {
+    protected HttpResponse createRepository(@NonNull GithubRepository repository) throws GithubProcessException {
         HttpPost request = new HttpPost(CREATE_REPOSITORY_URL);
 
         try {
             StringEntity body = new StringEntity(MAPPER.writeValueAsString(repository), ContentType.APPLICATION_JSON);
             request.setEntity(body);
         } catch (JsonProcessingException e) {
-            throw new GithubProcessException("Failed to process GithubRepository to Json", e);
+            throw new GithubFileException("Failed to process GithubRepository to Json", e);
         }
 
         appendAuthorizationHeader(request);
@@ -76,7 +77,7 @@ public class GithubApiWrapper {
         return executeRequest(request);
     }
 
-    protected HttpResponse deleteRepository(@NonNull String repositoryName) {
+    protected HttpResponse deleteRepository(@NonNull String repositoryName) throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s";
         HttpDelete request = new HttpDelete(String.format(url, username, repositoryName));
 
@@ -85,28 +86,31 @@ public class GithubApiWrapper {
         return executeRequest(request);
     }
 
-    protected HttpResponse getAllCommits(@NonNull String repositoryName) {
+    protected HttpResponse getAllCommits(@NonNull String repositoryName) throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/commits";
         HttpGet request = new HttpGet(String.format(url, username, repositoryName));
 
         return executeRequest(request);
     }
 
-    protected HttpResponse getGitDataCommit(@NonNull String repositoryName, @NonNull String commitSha) {
+    protected HttpResponse getGitDataCommit(@NonNull String repositoryName, @NonNull String commitSha)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/commits/%s";
         HttpGet request = new HttpGet(String.format(url, username, repositoryName, commitSha));
 
         return executeRequest(request);
     }
 
-    protected HttpResponse getGitDataTree(@NonNull String repositoryName, @NonNull String treeSha) {
+    protected HttpResponse getGitDataTree(@NonNull String repositoryName, @NonNull String treeSha)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/trees/%s";
         HttpGet request = new HttpGet(String.format(url, username, repositoryName, treeSha));
 
         return executeRequest(request);
     }
 
-    protected HttpResponse createGitDataTree(@NonNull String repositoryName, @NonNull GitDataRequestTree tree) {
+    protected HttpResponse createGitDataTree(@NonNull String repositoryName, @NonNull GitDataRequestTree tree)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/trees";
         HttpPost request = new HttpPost(String.format(url, username, repositoryName));
 
@@ -122,7 +126,8 @@ public class GithubApiWrapper {
         return executeRequest(request);
     }
 
-    protected HttpResponse createGitDataBlob(@NonNull String repositoryName, @NonNull GitDataRequestBlob blob) {
+    protected HttpResponse createGitDataBlob(@NonNull String repositoryName, @NonNull GitDataRequestBlob blob)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/blobs";
         HttpPost request = new HttpPost(String.format(url, username, repositoryName));
 
@@ -138,7 +143,8 @@ public class GithubApiWrapper {
         return executeRequest(request);
     }
 
-    protected HttpResponse createGitDataCommit(@NonNull String repositoryName, @NonNull GitDataRequestCommit commit) {
+    protected HttpResponse createGitDataCommit(@NonNull String repositoryName, @NonNull GitDataRequestCommit commit)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/commits";
         HttpPost request = new HttpPost(String.format(url, username, repositoryName));
 
@@ -155,7 +161,8 @@ public class GithubApiWrapper {
     }
 
     protected HttpResponse updateGitDataReference(@NonNull String repositoryName,
-                                                  @NonNull GitDataRequestReference reference) {
+                                                  @NonNull GitDataRequestReference reference)
+            throws GithubProcessException {
         String url = "https://api.github.com/repos/%s/%s/git/refs/heads/master";
         HttpPatch request = new HttpPatch(String.format(url, username, repositoryName));
 
