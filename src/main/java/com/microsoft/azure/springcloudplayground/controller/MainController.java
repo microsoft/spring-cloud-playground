@@ -126,6 +126,7 @@ public class MainController extends AbstractPlaygroundController {
 
     @PostMapping("/push-to-github")
     public String pushToGithub(@RequestBody @Nonnull ProjectRequest request) {
+        log.info("Project request received: " + request);
         return "push to github not implemented";
     }
 

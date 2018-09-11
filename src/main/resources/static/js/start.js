@@ -199,15 +199,17 @@ $(function () {
         event.preventDefault();
     });
 
-    $("#push-to-github").on("click", function() {
-        if (!hasLoggedIn()) {
-            showGithubModal();
-            event.preventDefault();
+    $("#push-to-github-btn").on("click", function(event) {
+        event.preventDefault();
+
+        var data = getProjectData();
+        var repoName = $("#github-config-modal input").val();
+        if (!repoName || repoName.trim().length === 0) {
             return;
         }
+        data['repoName'] = repoName.trim();
 
         generateInProgress();
-        var data = getProjectData();
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState === 4 && xhttp.status === 200) {
@@ -215,6 +217,7 @@ $(function () {
             } else {
                 generateFailed();
             }
+            closeModal(githubConfigModal);
         };
 
         xhttp.open("POST", '/push-to-github');
@@ -222,6 +225,16 @@ $(function () {
 
         setCsrfHeader(xhttp);
         xhttp.send(JSON.stringify(data));
+    });
+
+    $("#push-to-github").on("click", function() {
+        if (!hasLoggedIn()) {
+            showModal(githubModal);
+            event.preventDefault();
+            return;
+        }
+
+        showModal(githubConfigModal);
     });
 
     function setCsrfHeader(xhttp) {
@@ -419,17 +432,35 @@ $(function () {
     var githubModal = $("#github-login-modal");
     var githubModalClose = $("#github-login-modal .delete");
 
-    function showGithubModal() {
-        githubModal.addClass("is-active");
+    function showModal(modalElement) {
+        modalElement.addClass("is-active");
+    }
+
+    function closeModal(modalElement) {
+        modalElement.removeClass("is-active");
     }
 
     githubModalClose.on("click", function(event) {
        event.preventDefault();
-       githubModal.removeClass("is-active");
+       closeModal(githubModal);
     });
 
     // Initialize already selected infra services
     infraCheckbox.each(function(){
         updateInfraService($(this), false);
+    });
+
+    var githubConfigModal = $("#github-config-modal");
+    var githubConfigModalClose = $("#github-config-modal .delete");
+    var cancelGithubModal = $("#cancel-github-push");
+
+    githubConfigModalClose.on("click", function(event) {
+        event.preventDefault();
+        closeModal(githubConfigModal);
+    });
+
+    cancelGithubModal.on("click", function(event) {
+        event.preventDefault();
+        closeModal(githubConfigModal);
     });
 });
