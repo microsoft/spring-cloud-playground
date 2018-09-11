@@ -190,12 +190,5 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 }
 
 .loading-status {
-    position: absolute;
-    height: 100%;
-}
-
-.loading-status div {
-    display: flex;
-    align-items: center;
-    padding: 0 0.5rem;
+    padding-top: 0.5rem;
 }
