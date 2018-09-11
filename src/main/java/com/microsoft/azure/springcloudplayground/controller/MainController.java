@@ -13,7 +13,12 @@ import org.apache.tools.ant.taskdefs.Zip;
 import org.apache.tools.ant.types.ZipFileSet;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -37,6 +42,7 @@ public class MainController extends AbstractPlaygroundController {
 
     private final TelemetryProxy telemetryProxy;
     private final ProjectGenerator projectGenerator;
+    private final OAuth2AuthorizedClientService clientService;
 
     private static final String TELEMETRY_EVENT_ACCESS = "SpringCloudPlaygroundAccess";
     private static final String TELEMETRY_EVENT_GENERATE = "SpringCloudPlaygroundGenerate";
@@ -46,10 +52,11 @@ public class MainController extends AbstractPlaygroundController {
     private static final String GREETING_HTML = "greeting";
 
     public MainController(GeneratorMetadataProvider metadataProvider, ResourceUrlProvider resourceUrlProvider,
-                          ProjectGenerator projectGenerator) {
+                          ProjectGenerator projectGenerator, OAuth2AuthorizedClientService clientService) {
         super(metadataProvider, resourceUrlProvider);
         this.projectGenerator = projectGenerator;
         this.telemetryProxy = new TelemetryProxy();
+        this.clientService = clientService;
     }
 
     @GetMapping("/greeting")
@@ -177,5 +184,15 @@ public class MainController extends AbstractPlaygroundController {
         String contentDispositionValue = "attachment; filename=\"" + fileName + "\"";
         return ResponseEntity.ok().header("Content-Type", contentType)
                 .header("Content-Disposition", contentDispositionValue).body(content);
+    }
+
+    private OAuth2AccessToken getAccessToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
+                oauthToken.getAuthorizedClientRegistrationId(),oauthToken.getName());
+
+        return client.getAccessToken();
     }
 }
