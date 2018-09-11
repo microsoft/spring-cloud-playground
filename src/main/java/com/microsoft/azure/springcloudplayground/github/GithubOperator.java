@@ -1,6 +1,7 @@
 package com.microsoft.azure.springcloudplayground.github;
 
 import com.google.common.io.Files;
+import com.microsoft.azure.springcloudplayground.exception.GithubFileException;
 import com.microsoft.azure.springcloudplayground.exception.GithubProcessException;
 import com.microsoft.azure.springcloudplayground.github.gitdata.*;
 import com.microsoft.azure.springcloudplayground.github.metadata.Author;
@@ -22,7 +23,7 @@ public class GithubOperator extends GithubApiWrapper {
         super(username, token);
     }
 
-    private String getContent(@NonNull HttpResponse response) {
+    private String getContent(@NonNull HttpResponse response) throws GithubProcessException {
         try {
             String line;
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -38,7 +39,7 @@ public class GithubOperator extends GithubApiWrapper {
         }
     }
 
-    private <T> T readValue(@NonNull String json, Class<T> clazz) {
+    private <T> T readValue(@NonNull String json, Class<T> clazz) throws GithubProcessException {
         try {
             return MAPPER.readValue(json, clazz);
         } catch (IOException e) {
@@ -46,7 +47,7 @@ public class GithubOperator extends GithubApiWrapper {
         }
     }
 
-    private GithubRepository createRepository(@NonNull String name) {
+    private GithubRepository createRepository(@NonNull String name) throws GithubProcessException {
         GithubRepository repository = GithubRepository.builder(name).build();
         HttpResponse response = super.createRepository(repository);
 
@@ -57,7 +58,7 @@ public class GithubOperator extends GithubApiWrapper {
         return repository;
     }
 
-    public void deleteRepository(@NonNull GithubRepository repository) {
+    public void deleteRepository(@NonNull GithubRepository repository) throws GithubProcessException {
         HttpResponse response = super.deleteRepository(repository.getName());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
@@ -65,7 +66,7 @@ public class GithubOperator extends GithubApiWrapper {
         }
     }
 
-    private List<GithubCommit> getRepositoryCommits(@NonNull GithubRepository repository) {
+    private List<GithubCommit> getRepositoryCommits(@NonNull GithubRepository repository) throws GithubProcessException {
         HttpResponse response = super.getAllCommits(repository.getName());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
@@ -79,7 +80,8 @@ public class GithubOperator extends GithubApiWrapper {
         return Arrays.asList(commit);
     }
 
-    private GitDataCommit getGitDataCommit(@NonNull GithubRepository repository, @NonNull GithubCommit commit) {
+    private GitDataCommit getGitDataCommit(@NonNull GithubRepository repository, @NonNull GithubCommit commit)
+            throws GithubProcessException {
         HttpResponse response = super.getGitDataCommit(repository.getName(), commit.getSha());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
@@ -89,7 +91,8 @@ public class GithubOperator extends GithubApiWrapper {
         return readValue(getContent(response), GitDataCommit.class);
     }
 
-    private GitDataTree getGitDataTree(@NonNull GithubRepository repository, @NonNull GitDataCommit commit) {
+    private GitDataTree getGitDataTree(@NonNull GithubRepository repository, @NonNull GitDataCommit commit)
+            throws GithubProcessException {
         HttpResponse response = super.getGitDataTree(repository.getName(), commit.getTree().getSha());
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
@@ -108,7 +111,8 @@ public class GithubOperator extends GithubApiWrapper {
         return requestTree;
     }
 
-    private GitDataBlob createGitDataBlob(@NonNull GithubRepository repository, @NonNull GitDataRequestBlob requestBlob) {
+    private GitDataBlob createGitDataBlob(@NonNull GithubRepository repository, @NonNull GitDataRequestBlob requestBlob)
+            throws GithubProcessException {
         HttpResponse response = super.createGitDataBlob(repository.getName(), requestBlob);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
@@ -124,7 +128,7 @@ public class GithubOperator extends GithubApiWrapper {
 
             return new GitDataRequestBlob(content, "utf-8");
         } catch (IOException e) {
-            throw new GithubProcessException("Failed to read file: " + filename, e);
+            throw new GithubFileException("Failed to read file: " + filename, e);
         }
     }
 
@@ -149,7 +153,8 @@ public class GithubOperator extends GithubApiWrapper {
                 .build();
     }
 
-    private GitDataCommit createGitDateCommit(@NonNull GithubRepository repository, @NonNull GitDataRequestCommit commit) {
+    private GitDataCommit createGitDateCommit(@NonNull GithubRepository repository, @NonNull GitDataRequestCommit commit)
+            throws GithubProcessException {
         HttpResponse response = super.createGitDataCommit(repository.getName(), commit);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
@@ -159,7 +164,8 @@ public class GithubOperator extends GithubApiWrapper {
         return readValue(getContent(response), GitDataCommit.class);
     }
 
-    private GithubTree createGitDataTree(@NonNull GithubRepository repository, @NonNull GitDataRequestTree tree) {
+    private GithubTree createGitDataTree(@NonNull GithubRepository repository, @NonNull GitDataRequestTree tree)
+            throws GithubProcessException {
         HttpResponse response = super.createGitDataTree(repository.getName(), tree);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
@@ -174,7 +180,7 @@ public class GithubOperator extends GithubApiWrapper {
     }
 
     private void updateGithubRepository(@NonNull GithubRepository repository,
-                                        @NonNull GitDataRequestReference reference) {
+                                        @NonNull GitDataRequestReference reference) throws GithubProcessException {
         HttpResponse response = super.updateGitDataReference(repository.getName(), reference);
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
@@ -219,25 +225,24 @@ public class GithubOperator extends GithubApiWrapper {
     }
 
     private GithubTree createGithubTree(@NonNull GithubRepository repository, @NonNull GitDataCommit parentCommit,
-                                        @NonNull File dir) {
+                                        @NonNull File dir) throws GithubProcessException {
         List<String> files = getAllFiles(dir);
         GitDataTree tree = getGitDataTree(repository, parentCommit);
         GitDataRequestTree requestTree = getGitDataRequestTree(tree);
         List<GitDataRequestBlob> requestBlobs = files.stream().map(this::getGitDataRequestBlob).collect(Collectors.toList());
-        List<GitDataBlob> blobs = requestBlobs.stream().map(b -> createGitDataBlob(repository, b)).collect(Collectors.toList());
 
         for (int i = 0; i < files.size(); i++) {
             String filename = files.get(i);
-            String sha = blobs.get(i).getSha();
+            GitDataBlob blob = createGitDataBlob(repository, requestBlobs.get(i));
 
-            requestTree.getTree().add(getRequestTreeNode(truncateFileNamePrefix(filename), sha));
+            requestTree.getTree().add(getRequestTreeNode(truncateFileNamePrefix(filename), blob.getSha()));
         }
 
         return createGitDataTree(repository, requestTree);
     }
 
-    public void createRepository(@NonNull File dir) {
-        GithubRepository repository = createRepository("spring-cloud-azure-demo");
+    public void createRepository(@NonNull File dir, @NonNull String repositoryName) throws GithubProcessException {
+        GithubRepository repository = createRepository(repositoryName);
         GitDataCommit parentCommit = getGitDataCommit(repository, getRepositoryCommits(repository).get(0));
         GithubTree githubTree = createGithubTree(repository, parentCommit, dir);
         GitDataRequestCommit requestCommit = getGitDateRequestCommit(parentCommit, githubTree);
@@ -245,7 +250,5 @@ public class GithubOperator extends GithubApiWrapper {
         GitDataRequestReference reference = getGitDataRequestReference(commit);
 
         updateGithubRepository(repository, reference);
-
-        deleteRepository(repository);
     }
 }
