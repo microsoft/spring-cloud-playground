@@ -125,7 +125,7 @@ public class ProjectGenerator {
         GeneratorMetadata metadata = this.metadataProvider.get();
         Service service = getService(serviceModel);
 
-        log.info("Resolving micro service {} model.", service.getName());
+        log.info("Resolving micro service [{}] model.", service.getName());
 
         model.put(service.getName(), serviceModel);
 
@@ -166,7 +166,7 @@ public class ProjectGenerator {
     private File generateRootProject(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
         File rootDir;
 
-        log.info("Generate root directory {}.", request.getBaseDir());
+        log.info("Generate root directory [{}].", request.getBaseDir());
 
         try {
             rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
@@ -323,7 +323,7 @@ public class ProjectGenerator {
         File serviceDir = new File(projectDir, serviceName);
         Map<String, Object> serviceModel = getMicroServiceModelByName(serviceName, model);
 
-        log.info("Generate micro service {} project.", serviceName);
+        log.info("Generate micro service [{}] project.", serviceName);
 
         serviceDir.mkdir();
 
@@ -343,7 +343,7 @@ public class ProjectGenerator {
         String docker = "docker";
         File dockerDir = new File(projectDir, docker);
 
-        log.info("Generate docker directory {}.", docker);
+        log.info("Generate docker directory [{}].", docker);
 
         dockerDir.mkdirs();
 
@@ -537,7 +537,7 @@ public class ProjectGenerator {
     private Map<String, Object> resolveModel(@NonNull ProjectRequest request) {
         Map<String, Object> model = new LinkedHashMap<>();
 
-        log.info("Resolving project {}.", request.getName());
+        log.info("Resolving project [{}].", request.getName());
 
         model.put("mavenBuild", true);
         model.put("build", "maven");
@@ -640,7 +640,7 @@ public class ProjectGenerator {
             Arrays.stream(templates).forEach(t -> write(new File(targetDir, t.getFilename()),
                     templateDir + "/" + t.getFilename(), model));
         } catch (IOException e) {
-            log.warn(String.format("Failed to find resources match pattern '%s'", pattern), e);
+            log.warn(String.format("Failed to find resources match pattern [%s]", pattern), e);
         }
     }
 

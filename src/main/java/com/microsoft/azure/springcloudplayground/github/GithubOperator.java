@@ -6,6 +6,7 @@ import com.microsoft.azure.springcloudplayground.exception.GithubProcessExceptio
 import com.microsoft.azure.springcloudplayground.github.gitdata.*;
 import com.microsoft.azure.springcloudplayground.github.metadata.Author;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -17,6 +18,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class GithubOperator extends GithubApiWrapper {
 
     private static final String DEFAULT_EMAIL = "noreply@github.com";
@@ -73,6 +75,8 @@ public class GithubOperator extends GithubApiWrapper {
             throw new GithubProcessException(String.format("Failed to create github repository [%s].", name));
         }
 
+        log.info("Create github repository [{}].", name);
+
         return repository;
     }
 
@@ -105,6 +109,8 @@ public class GithubOperator extends GithubApiWrapper {
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             throw new GithubProcessException(String.format("Failed to get commit from repository [%s].", repository.getName()));
         }
+
+        log.info("Get repository parent commit sha [{}].", commit.getSha());
 
         return readValue(getContent(response), GitDataCommit.class);
     }
@@ -163,6 +169,8 @@ public class GithubOperator extends GithubApiWrapper {
         Author author = new Author(getUsername(), this.userEmails.get(0).getEmail());
         List<String> parents = Collections.singletonList(parent.getSha());
 
+        log.info("Get request commit with username [{}], email [{}].", getUsername(), this.userEmails.get(0).getEmail());
+
         return GitDataRequestCommit.builder()
                 .message("Add generated project of spring cloud azure")
                 .parents(parents)
@@ -179,7 +187,10 @@ public class GithubOperator extends GithubApiWrapper {
             throw new GithubProcessException(String.format("Failed to create commit from repository [%s].", repository.getName()));
         }
 
-        return readValue(getContent(response), GitDataCommit.class);
+        GitDataCommit gitDataCommit = readValue(getContent(response), GitDataCommit.class);
+        log.info("Create repository commit with sha [{}].", gitDataCommit.getSha());
+
+        return gitDataCommit;
     }
 
     private GithubTree createGitDataTree(@NonNull GithubRepository repository, @NonNull GitDataRequestTree tree)
@@ -194,6 +205,8 @@ public class GithubOperator extends GithubApiWrapper {
     }
 
     private GitDataRequestReference getGitDataRequestReference(@NonNull GitDataCommit commit) {
+        log.info("Create request reference with commit sha [{}].", commit.getSha());
+
         return new GitDataRequestReference(commit.getSha(), true);
     }
 
@@ -247,7 +260,10 @@ public class GithubOperator extends GithubApiWrapper {
             requestTree.getTree().add(getRequestTreeNode(truncateFileNamePrefix(filename), blob.getSha()));
         }
 
-        return createGitDataTree(repository, requestTree);
+        GithubTree githubTree = createGitDataTree(repository, requestTree);
+        log.info("Create repository tree with sha [{}].", githubTree.getSha());
+
+        return githubTree;
     }
 
     private void updateGithubRepository(@NonNull GithubRepository repository,
@@ -257,6 +273,8 @@ public class GithubOperator extends GithubApiWrapper {
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             throw new GithubProcessException(String.format("Failed to update reference from repository [%s].", repository.getName()));
         }
+
+        log.info("Update repository with reference sha [{}].", reference.getSha());
     }
 
     public String createRepository(@NonNull File dir, @NonNull String repositoryName) throws GithubProcessException {
