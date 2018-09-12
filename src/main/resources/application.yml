@@ -365,7 +365,7 @@ playground:
         - name: Azure Storage
           id: azure-storage
           description: Spring Cloud Resource with Azure Storage
-        - name: Azure Active Director
+        - name: Azure Active Directory
           id: azure-active-directory
           description: Spring Security with Azure Active Directory
         - name: Azure Cosmos DB
