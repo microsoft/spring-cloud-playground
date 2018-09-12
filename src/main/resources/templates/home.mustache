@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    <div class="navbar-end">
+    <div class="navbar-end azure-nav-end">
         <div class="navbar-item">
             <div class="field is-grouped">
             <p class="control">
@@ -47,7 +47,7 @@
                     </span>
                 </a>
             </p>
-                <p class="control">
+                <p class="control" id="login_link">
                     <a class="button is-black" href="/oauth2/authorization/github">
                     <span class="icon">
                         <i class="fab fa-github"></i>
@@ -57,6 +57,15 @@
                 </p>
             </div>
         </div>
+        <div class="navbar-item has-dropdown is-hoverable {{^loggedInUser}}hidden{{/loggedInUser}}" id="user_dropdown">
+            <a class="navbar-link navbar-user" id="logged_user">
+                {{#loggedInUser}}{{loggedInUser}}{{/loggedInUser}}
+            </a>
+            <div class="navbar-dropdown is-boxed">
+                <a class="navbar-item" id="logout_link">
+                    Logout
+                </a>
+            </div>
     </div>
     </div>
 </nav>
