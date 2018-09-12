@@ -1,7 +1,5 @@
 package com.microsoft.azure.springcloudplayground.github;
 
-import com.google.common.io.Files;
-import com.microsoft.azure.springcloudplayground.exception.GithubFileException;
 import com.microsoft.azure.springcloudplayground.exception.GithubProcessException;
 import com.microsoft.azure.springcloudplayground.github.gitdata.*;
 import com.microsoft.azure.springcloudplayground.github.metadata.Author;
@@ -11,11 +9,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.springframework.util.Assert;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,30 +24,6 @@ public class GithubOperator extends GithubApiWrapper {
     public GithubOperator(@NonNull String username, @NonNull String token) {
         super(username, token);
         this.userEmails = getGithubEmails();
-    }
-
-    private String getContent(@NonNull HttpResponse response) throws GithubProcessException {
-        try {
-            String line;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            StringBuilder builder = new StringBuilder();
-
-            while ((line = reader.readLine()) != null) {
-                builder.append(line).append(System.lineSeparator());
-            }
-
-            return builder.toString();
-        } catch (IOException e) {
-            throw new GithubProcessException("Failed to obtain github api response content", e);
-        }
-    }
-
-    private <T> T readValue(@NonNull String json, Class<T> clazz) throws GithubProcessException {
-        try {
-            return MAPPER.readValue(json, clazz);
-        } catch (IOException e) {
-            throw new GithubProcessException("Failed to retrieve object from Json", e);
-        }
     }
 
     private List<GithubEmails> getGithubEmails() {
@@ -133,27 +105,6 @@ public class GithubOperator extends GithubApiWrapper {
         requestTree.setTree(new ArrayList<>());
 
         return requestTree;
-    }
-
-    private GitDataBlob createGitDataBlob(@NonNull GithubRepository repository, @NonNull GitDataRequestBlob requestBlob)
-            throws GithubProcessException {
-        HttpResponse response = super.createGitDataBlob(repository.getName(), requestBlob);
-
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-            throw new GithubProcessException(String.format("Failed to create blob from repository [%s].", repository.getName()));
-        }
-
-        return readValue(getContent(response), GitDataBlob.class);
-    }
-
-    private GitDataRequestBlob getGitDataRequestBlob(@NonNull String filename) {
-        try {
-            String content = new String(Files.toByteArray(new File(filename)));
-
-            return new GitDataRequestBlob(content, "utf-8");
-        } catch (IOException e) {
-            throw new GithubFileException(String.format("Failed to read file [%s].", filename), e);
-        }
     }
 
     private GitDataRequestTree.TreeNode getRequestTreeNode(@NonNull String name, @NonNull String sha) {
@@ -251,13 +202,22 @@ public class GithubOperator extends GithubApiWrapper {
         List<String> files = getAllFiles(dir);
         GitDataTree tree = getGitDataTree(repository, parentCommit);
         GitDataRequestTree requestTree = getGitDataRequestTree(tree);
-        List<GitDataRequestBlob> requestBlobs = files.stream().map(this::getGitDataRequestBlob).collect(Collectors.toList());
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Callable<GitDataFileBlob>> tasks = files.parallelStream().map(
+                f -> GitDataFileBlobCreator
+                        .builder().filename(f).username(getUsername()).token(getToken()).repository(repository).build())
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < files.size(); i++) {
-            String filename = files.get(i);
-            GitDataBlob blob = createGitDataBlob(repository, requestBlobs.get(i));
+        try {
+            List<Future<GitDataFileBlob>> results = executor.invokeAll(tasks);
 
-            requestTree.getTree().add(getRequestTreeNode(truncateFileNamePrefix(filename), blob.getSha()));
+            for (Future<GitDataFileBlob> blobFuture : results) {
+                GitDataFileBlob blob = blobFuture.get();
+                String filename = truncateFileNamePrefix(blob.getFilename());
+                requestTree.getTree().add(getRequestTreeNode(filename, blob.getSha()));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new GithubProcessException(String.format("Failed to create tree from repository [%s].", repository.getName()));
         }
 
         GithubTree githubTree = createGitDataTree(repository, requestTree);
