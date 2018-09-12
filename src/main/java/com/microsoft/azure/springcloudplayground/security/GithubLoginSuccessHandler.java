@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+
 @NoArgsConstructor
 public class GithubLoginSuccessHandler implements AuthenticationSuccessHandler {
 
@@ -27,7 +29,7 @@ public class GithubLoginSuccessHandler implements AuthenticationSuccessHandler {
     private void triggerGithubLoginSuccessEvent(@NonNull String username) {
         Map<String, String> properties = new HashMap<>();
 
-        properties.put("username", username);
+        properties.put("uniqueId", sha256Hex(username));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GITHUB_LOGIN, properties);
     }
