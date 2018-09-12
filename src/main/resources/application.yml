@@ -433,3 +433,5 @@ playground:
     - name: 1.1.12
       id: 1.1.12.RELEASE
       default: false
+server:
+  use-forward-headers: true
