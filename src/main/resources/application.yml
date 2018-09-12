@@ -6,8 +6,8 @@ spring:
       client:
         registration:
           github:
-            client-id: xxxxxx
-            client-secret: xxxxxxx
+            client-id: ${SPRING_GITHUB_CLIENT_ID}
+            client-secret: ${SPRING_GITHUB_CLIENT_SECRET}
             scope: user, public_repo
 
 playground:
