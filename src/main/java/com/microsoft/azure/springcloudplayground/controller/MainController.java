@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
+
 @Controller
 @Slf4j
 public class MainController extends AbstractPlaygroundController {
@@ -100,7 +102,7 @@ public class MainController extends AbstractPlaygroundController {
     private void triggerGithubPushEventSuccess(@NonNull String username) {
         Map<String, String> properties = new HashMap<>();
 
-        properties.put("username", username);
+        properties.put("uniqueId", sha256Hex(username));
         properties.put("success", "true");
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GITHUB_PUSH, properties);
@@ -109,7 +111,7 @@ public class MainController extends AbstractPlaygroundController {
     private void triggerGithubPushEventFailure(@NonNull String username, @NonNull String reason) {
         Map<String, String> properties = new HashMap<>();
 
-        properties.put("username", username);
+        properties.put("uniqueId", sha256Hex(username));
         properties.put("success", "false");
         properties.put("reason", reason);
 
