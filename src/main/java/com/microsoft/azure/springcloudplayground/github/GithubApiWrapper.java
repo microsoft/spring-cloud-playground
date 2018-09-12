@@ -18,15 +18,13 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class GithubApiWrapper {
 
-    @Getter
-    private final String token;
-
-    @Getter
-    private final String username;
+    protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final String AUTH_HEADER = "Authorization";
 
@@ -38,11 +36,14 @@ public class GithubApiWrapper {
 
     private static final String USER_EMAILS_URL = "https://api.github.com/user/emails";
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
-
     static {
         MAPPER.configure(MapperFeature.AUTO_DETECT_FIELDS, false);
     }
+
+    @Getter
+    private final String token;
+    @Getter
+    private final String username;
 
     protected GithubApiWrapper(@NonNull String username, @NonNull String token) {
         this.username = username;
@@ -57,6 +58,30 @@ public class GithubApiWrapper {
             return client.execute(request);
         } catch (IOException e) {
             throw new GithubProcessException("Failed to execute request to github api", e);
+        }
+    }
+
+    protected String getContent(@NonNull HttpResponse response) throws GithubProcessException {
+        try {
+            String line;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            StringBuilder builder = new StringBuilder();
+
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append(System.lineSeparator());
+            }
+
+            return builder.toString();
+        } catch (IOException e) {
+            throw new GithubProcessException("Failed to obtain github api response content", e);
+        }
+    }
+
+    protected <T> T readValue(@NonNull String json, Class<T> clazz) throws GithubProcessException {
+        try {
+            return MAPPER.readValue(json, clazz);
+        } catch (IOException e) {
+            throw new GithubProcessException("Failed to retrieve object from Json", e);
         }
     }
 
