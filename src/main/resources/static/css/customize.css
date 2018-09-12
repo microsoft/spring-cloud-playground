@@ -41,7 +41,7 @@
 }
 
 .large-bottom-padding {
-    padding-bottom: 4rem;
+    padding-bottom: 6rem;
 }
 
 .module-checkbox {
@@ -121,6 +121,7 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     top: 0;
     right: 0;
     border: 0;
+    z-index: 1000;
 }
 
 .start-video {
@@ -186,4 +187,24 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 
 .playground-footer .content ul {
     margin-top: 0;
+}
+
+.loading-status {
+    padding-top: 0.5rem;
+}
+
+.status-icon {
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

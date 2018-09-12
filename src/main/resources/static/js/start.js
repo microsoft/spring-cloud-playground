@@ -77,6 +77,21 @@ $(function () {
     var serviceNameHelp = $("#service-name-help");
     var servicePortHelp = $("#port-help");
 
+    var inProgressLabel = $("#in-progress");
+    var generateSucceedLabel = $("#generate-succeed");
+    var generateFailedLabel = $("#generate-failed");
+
+    var githubModal = $("#github-login-modal");
+    var githubModalClose = $("#github-login-modal .delete");
+
+    var githubConfigModal = $("#github-config-modal");
+    var githubConfigModalClose = $("#github-config-modal .delete");
+    var cancelGithubModal = $("#cancel-github-push");
+
+    azureCheckbox.on("change", addServiceBtnChecker);
+    azureServiceNameInput.on("input", addServiceBtnChecker);
+    azureServicePortInput.on("input", addServiceBtnChecker);
+
     configPort.on("click", function () {
         if (infraPort.hasClass("hidden")) {
             infraPort.addClass("is-active");
@@ -153,24 +168,14 @@ $(function () {
         }
     });
 
-    $("#form").submit(function(event) {
-        var csrfToken = $("input[name='_csrf']").val();
-        var csrfTokenHeader = $("input[name='_csrf_header']").val();
-        var groupId = $("#groupId").val();
-        var artifactId = $("#artifactId").val();
-        var projectName = $("#project-name").val();
-        var description = $("#description").val();
+    $("#generate-project").on("click", function(event) {
+       event.preventDefault();
+    });
 
-        var data = {
-            name: projectName,
-            groupId: groupId,
-            artifactId: artifactId,
-            baseDir: artifactId,
-            description: description,
-            packageName: groupId + "." + artifactId,
-            microServices: allServiceList.serviceList
-        };
 
+    $("#download-project").on("click", function(event) {
+        generateInProgress();
+        var data = getProjectData();
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             var a;
@@ -188,12 +193,16 @@ $(function () {
                     a.click();
                     a.remove();
                 }
+
+                generateSucceed();
+            } else if (xhttp.readyState === 4 && xhttp.status !== 200) {
+                generateFailed();
             }
         };
 
         xhttp.open("POST", '/project.zip');
         xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+        setCsrfHeader(xhttp);
         // Set responseType as blob for binary responses
         xhttp.responseType = 'blob';
         xhttp.send(JSON.stringify(data));
@@ -201,9 +210,69 @@ $(function () {
         event.preventDefault();
     });
 
-    azureCheckbox.on("change", addServiceBtnChecker);
-    azureServiceNameInput.on("input", addServiceBtnChecker);
-    azureServicePortInput.on("input", addServiceBtnChecker);
+    $("#push-to-github-btn").on("click", function(event) {
+        event.preventDefault();
+
+        var data = getProjectData();
+        var repoName = $("#github-config-modal input").val();
+        if (!repoName || repoName.trim().length === 0 || /\s/.test(repoName.trim())) {
+            return;
+        }
+        data['repoName'] = repoName.trim();
+
+        generateInProgress();
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState === 4 && xhttp.status === 201) {
+                var repoUrl = xhttp.getResponseHeader("Location");
+                generateSucceed();
+                generateGithubUrl(repoUrl);
+            } else if (xhttp.readyState === 4) {
+                generateFailed();
+            }
+            closeModal(githubConfigModal);
+        };
+
+        xhttp.open("POST", '/push-to-github');
+        xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+
+        setCsrfHeader(xhttp);
+        xhttp.send(JSON.stringify(data));
+    });
+
+    $("#push-to-github").on("click", function() {
+        if (!hasLoggedIn()) {
+            showModal(githubModal);
+            event.preventDefault();
+            return;
+        }
+
+        showModal(githubConfigModal);
+    });
+
+    function setCsrfHeader(xhttp) {
+        var csrfToken = $("input[name='_csrf']").val();
+        var csrfTokenHeader = $("input[name='_csrf_header']").val();
+
+        xhttp.setRequestHeader(csrfTokenHeader, csrfToken);
+    };
+
+    function getProjectData() {
+        var groupId = $("#groupId").val();
+        var artifactId = $("#artifactId").val();
+        var projectName = $("#project-name").val();
+        var description = $("#description").val();
+
+        return {
+            name: projectName,
+            groupId: groupId,
+            artifactId: artifactId,
+            baseDir: artifactId,
+            description: description,
+            packageName: groupId + "." + artifactId,
+            microServices: allServiceList.serviceList
+        };
+    }
 
     function isValidServiceName(serviceName) {
         return serviceName && /^([a-zA-Z0-9\-]*)$/.test(serviceName);
@@ -220,8 +289,7 @@ $(function () {
     }
 
     function showMetaDataConfig() {
-        showElements([metaDataConfig]);
-        hideElements([infraModulesSelector, azureModulesSelector]);
+        toggleElements([metaDataConfig], [infraModulesSelector, azureModulesSelector]);
 
         activateStep(metaDataStep);
         disActivateStep(infraStep);
@@ -231,8 +299,7 @@ $(function () {
     }
 
     function showInfraModulesConfig() {
-        hideElements([metaDataConfig, azureModulesSelector]);
-        showElements([infraModulesSelector]);
+        toggleElements([infraModulesSelector], [metaDataConfig, azureModulesSelector]);
 
         completeStep(metaDataStep);
         activateStep(infraStep);
@@ -242,8 +309,7 @@ $(function () {
     }
 
     function showAzureModulesConfig() {
-        hideElements([metaDataConfig, infraModulesSelector]);
-        showElements([azureModulesSelector]);
+        toggleElements([azureModulesSelector], [metaDataConfig, infraModulesSelector]);
 
         completeStep(metaDataStep);
         completeStep(infraStep);
@@ -254,18 +320,6 @@ $(function () {
 
     function showCompleteForm() {
         $("#form div")[0].scrollIntoView(false);
-    }
-
-    function showElements(elements) {
-        elements.forEach(function(element) {
-            element.removeClass("hidden");
-        })
-    }
-
-    function hideElements(elements) {
-        elements.forEach(function(element) {
-            element.addClass("hidden");
-        })
     }
 
     function activateStep(stepElement) {
@@ -372,8 +426,56 @@ $(function () {
         }
     }
 
+    function generateInProgress() {
+        toggleElements([inProgressLabel], [generateSucceedLabel, generateFailedLabel]);
+    }
+
+    function generateSucceed() {
+        removeGithubUrl();
+        toggleElements([generateSucceedLabel], [inProgressLabel, generateFailedLabel]);
+    }
+
+    function generateFailed() {
+        toggleElements([generateFailedLabel], [inProgressLabel, generateSucceedLabel]);
+    }
+
+    function showModal(modalElement) {
+        modalElement.addClass("is-active");
+    }
+
+    function closeModal(modalElement) {
+        modalElement.removeClass("is-active");
+    }
+
+    githubModalClose.on("click", function(event) {
+       event.preventDefault();
+       closeModal(githubModal);
+    });
+
     // Initialize already selected infra services
     infraCheckbox.each(function(){
         updateInfraService($(this), false);
     });
+
+    githubConfigModalClose.on("click", function(event) {
+        event.preventDefault();
+        closeModal(githubConfigModal);
+    });
+
+    cancelGithubModal.on("click", function(event) {
+        event.preventDefault();
+        closeModal(githubConfigModal);
+    });
+
+    function generateGithubUrl(url) {
+        if (!url || url.trim().length === 0) {
+            return;
+        }
+        removeGithubUrl();
+        generateSucceedLabel.append("<p> Available at <a href=\"" + url + "\" target=\"_blank\">Github repository</a> </p>")
+    }
+
+    function removeGithubUrl() {
+        generateSucceedLabel.find("p").remove();
+    }
 });

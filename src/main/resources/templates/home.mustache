@@ -30,6 +30,24 @@
                     Spring Cloud Azure Playground
                 </h1>
             </div>
+            <div class="navbar-end azure-navbar-link">
+                <a href="https://github.com/Microsoft/spring-cloud-playground/issues" target="_blank">Report Issue</a>
+            </div>
+            <div class="navbar-end azure-navbar-link {{#loggedInUser}}hidden{{/loggedInUser}}" id="login_link">
+                <a href="/oauth2/authorization/github">Login</a>
+            </div>
+            <div class="navbar-end azure-navbar-link {{^loggedInUser}}hidden{{/loggedInUser}}" id="user_dropdown">
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="truncate" id="logged_user">
+                        {{#loggedInUser}}{{loggedInUser}}{{/loggedInUser}}
+                    </a>
+                    <div class="navbar-dropdown" id="logout_link">
+                        <a class="navbar-item">
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -84,6 +102,8 @@
 <script src="{{#linkTo}}/js/mousetrap.min.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/adal.min.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/all.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/utils.js{{/linkTo}}"></script>
+<script src="{{#linkTo}}/js/auth.js{{/linkTo}}"></script>
 <script src="{{#linkTo}}/js/start.js{{/linkTo}}"></script>
 </body>
 </html>
