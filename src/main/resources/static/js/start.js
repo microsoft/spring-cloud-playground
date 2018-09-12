@@ -77,6 +77,17 @@ $(function () {
     var serviceNameHelp = $("#service-name-help");
     var servicePortHelp = $("#port-help");
 
+    var inProgressLabel = $("#in-progress");
+    var generateSucceedLabel = $("#generate-succeed");
+    var generateFailedLabel = $("#generate-failed");
+
+    var githubModal = $("#github-login-modal");
+    var githubModalClose = $("#github-login-modal .delete");
+
+    var githubConfigModal = $("#github-config-modal");
+    var githubConfigModalClose = $("#github-config-modal .delete");
+    var cancelGithubModal = $("#cancel-github-push");
+
     azureCheckbox.on("change", addServiceBtnChecker);
     azureServiceNameInput.on("input", addServiceBtnChecker);
     azureServicePortInput.on("input", addServiceBtnChecker);
@@ -204,7 +215,7 @@ $(function () {
 
         var data = getProjectData();
         var repoName = $("#github-config-modal input").val();
-        if (!repoName || repoName.trim().length === 0) {
+        if (!repoName || repoName.trim().length === 0 || /\s/.test(repoName.trim())) {
             return;
         }
         data['repoName'] = repoName.trim();
@@ -213,7 +224,9 @@ $(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState === 4 && xhttp.status === 201) {
+                var repoUrl = xhttp.getResponseHeader("Location");
                 generateSucceed();
+                generateGithubUrl(repoUrl);
             } else if (xhttp.readyState === 4) {
                 generateFailed();
             }
@@ -413,24 +426,18 @@ $(function () {
         }
     }
 
-    var inProgressLabel = $("#in-progress");
-    var generateSucceedLabel = $("#generate-succeed");
-    var generateFailedLabel = $("#generate-failed");
-
     function generateInProgress() {
         toggleElements([inProgressLabel], [generateSucceedLabel, generateFailedLabel]);
     }
 
     function generateSucceed() {
+        removeGithubUrl();
         toggleElements([generateSucceedLabel], [inProgressLabel, generateFailedLabel]);
     }
 
     function generateFailed() {
         toggleElements([generateFailedLabel], [inProgressLabel, generateSucceedLabel]);
     }
-
-    var githubModal = $("#github-login-modal");
-    var githubModalClose = $("#github-login-modal .delete");
 
     function showModal(modalElement) {
         modalElement.addClass("is-active");
@@ -450,10 +457,6 @@ $(function () {
         updateInfraService($(this), false);
     });
 
-    var githubConfigModal = $("#github-config-modal");
-    var githubConfigModalClose = $("#github-config-modal .delete");
-    var cancelGithubModal = $("#cancel-github-push");
-
     githubConfigModalClose.on("click", function(event) {
         event.preventDefault();
         closeModal(githubConfigModal);
@@ -463,4 +466,16 @@ $(function () {
         event.preventDefault();
         closeModal(githubConfigModal);
     });
+
+    function generateGithubUrl(url) {
+        if (!url || url.trim().length === 0) {
+            return;
+        }
+        removeGithubUrl();
+        generateSucceedLabel.append("<p> Available at <a href=\"" + url + "\" target=\"_blank\">Github repository</a> </p>")
+    }
+
+    function removeGithubUrl() {
+        generateSucceedLabel.find("p").remove();
+    }
 });

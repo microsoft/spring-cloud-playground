@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -149,10 +150,10 @@ public class MainController extends AbstractPlaygroundController {
             triggerGenerateEvent(request.getMicroServices());
 
             try {
-                operator.createRepository(dir, request.getRepoName());
+                String repositoryUrl = operator.createRepository(dir, request.getRepoName());
                 triggerGithubPushEventSuccess(username);
 
-                return new ResponseEntity(HttpStatus.CREATED);
+                return ResponseEntity.created(URI.create(repositoryUrl)).build();
             } catch (GithubProcessException e) {
                 triggerGithubPushEventFailure(username, e.getMessage());
 

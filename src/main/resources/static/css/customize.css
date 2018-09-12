@@ -192,3 +192,19 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .loading-status {
     padding-top: 0.5rem;
 }
+
+.status-icon {
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
