@@ -47,13 +47,16 @@
                 Previous
             </button>
 
-            <div class="dropdown is-hoverable">
+            <div class="dropdown" id="generate-project">
                 <div class="dropdown-trigger">
-                    <button id="generate-project" class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                        <span>Generate Project</span>
-                        <span class="icon is-small">
-                            <i class="fas fa-angle-down" aria-hidden="true"></i>
-                        </span>
+                    <button class="button is-link" aria-haspopup="true" aria-controls="dropdown-menu">
+                        <span class="icon push-to-github">
+                              <i class="fab fa-github"></i>
+                            </span>
+                        <span class="push-to-github">Push to Github</span>
+                    <span class="icon is-small" id="open-download">
+                        <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
                     </button>
                 </div>
                 <div class="dropdown-menu" id="dropdown-menu" role="menu">
@@ -64,12 +67,6 @@
                                 <i class="fa fa-download"></i>
                             </span>
                             <span>Download</span>
-                        </a>
-                        <a class="dropdown-item" id="push-to-github">
-                            <span class="icon">
-                              <i class="fab fa-github"></i>
-                            </span>
-                            <span>Push to Github</span>
                         </a>
                     </div>
                 </div>
@@ -113,13 +110,13 @@
     <div class="modal-background"></div>
     <div class="modal-card">
         <header class="modal-card-head">
-            <p class="modal-card-title">Configure Github Repository Name</p>
+            <p class="modal-card-title">New Github Repository</p>
             <button class="delete" aria-label="close"></button>
         </header>
         <section class="modal-card-body">
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label mandatory-label">Repository name</label>
+                    <label class="label mandatory-label">Name</label>
                 </div>
                 <div class="field-body">
                     <div class="field">
@@ -131,7 +128,7 @@
             </div>
         </section>
         <footer class="modal-card-foot">
-            <button class="button is-success" id="push-to-github-btn">Push to Github</button>
+            <button class="button is-link" id="push-to-github-btn">Push to Github</button>
             <button class="button" id="cancel-github-push">Cancel</button>
         </footer>
     </div>

@@ -1,38 +1,4 @@
 $(function () {
-    function microservices(serviceList) {
-        this.serviceList = serviceList;
-    }
-
-    microservices.prototype.addService = function(microservice) {
-        this.serviceList.push(microservice);
-    }
-
-    microservices.prototype.deleteServiceByName = function(serviceName) {
-        this.serviceList = this.serviceList.filter(function(service) {
-            return service.name != serviceName;
-        });
-
-        return this.serviceList;
-    }
-
-    function microservice(serviceName, moduleList, port) {
-        this.name = serviceName;
-        this.modules = moduleList;
-        this.port = port;
-    }
-
-    microservice.prototype.getName = function() {
-        return this.name;
-    }
-
-    microservice.prototype.getModuleList = function() {
-        return this.modules;
-    }
-
-    microservice.prototype.getPort = function() {
-        return this.port;
-    }
-
     var allServiceList = new microservices([]);
 
     if (navigator.appVersion.indexOf("Mac") != -1) {
@@ -157,7 +123,7 @@ $(function () {
             }
         })
 
-        var azureMicroService = new microservice(serviceName, moduleList, servicePort);
+        var azureMicroService = new microservice(serviceName, moduleList, servicePort, true);
         if(addServiceOnPage(azureMicroService, true)) {
             // Clear input values
             azureServiceNameInput.val("");
@@ -167,11 +133,6 @@ $(function () {
             });
         }
     });
-
-    $("#generate-project").on("click", function(event) {
-       event.preventDefault();
-    });
-
 
     $("#download-project").on("click", function(event) {
         generateInProgress();
@@ -240,7 +201,7 @@ $(function () {
         xhttp.send(JSON.stringify(data));
     });
 
-    $("#push-to-github").on("click", function() {
+    $(".push-to-github").on("click", function() {
         if (!hasLoggedIn()) {
             showModal(githubModal);
             event.preventDefault();
@@ -248,6 +209,16 @@ $(function () {
         }
 
         showModal(githubConfigModal);
+    });
+
+    $("#generate-project").on("click", function() {
+       event.preventDefault();
+    });
+
+    $("#open-download").on("click", function () {
+        $("#generate-project").toggleClass('is-active');
+        event.preventDefault();
+        event.stopPropagation();
     });
 
     function setCsrfHeader(xhttp) {
@@ -334,7 +305,7 @@ $(function () {
         stepElement.className = "step-item is-completed is-success";
     }
 
-    function addServiceOnPage(service, deletable) {
+    function addServiceOnPage(service) {
         if(!isValidServiceName(service.getName()) || !isValidPort(service.getPort())
             || typeof service.getModuleList() === 'undefined' || service.getModuleList().length === 0) {
             console.warn("Some service property is empty or format illegal, " + JSON.stringify(service));
@@ -343,10 +314,10 @@ $(function () {
 
         allServiceList.addService(service);
         // Append selected services into the list on the page
-        selectedModules.append(serviceItemDom(service, deletable));
+        selectedModules.append(serviceItemDom(service));
         createAzureServiceBtn.prop('disabled', true);
 
-        if (deletable) {
+        if (service.isDeletable()) {
             $("#" + service.getName() + " span").on("click", function () {
                 deleteServiceOnPage(service.getName());
                 $("input[value='" + service.getName() + "']").prop('checked', false);
@@ -360,9 +331,9 @@ $(function () {
         $("#selected-modules-list #" + serviceName).remove();
     }
 
-    function serviceItemDom(service, deletable) {
+    function serviceItemDom(service) {
         var serviceElement = '<li id=\"' + service.getName() + '\">';
-        if (deletable) {
+        if (service.isDeletable()) {
             serviceElement += '<span class="icon"><i class="fas fa-times"></i></span>';
         } else {
             serviceElement += '<span class="icon" title="Cannot delete"><i class="fas fa-info-circle"></i></span>'
@@ -418,9 +389,9 @@ $(function () {
         var moduleList = [serviceName];
         var port = infraCheckbox.next("input").val();
 
-        var service = new microservice(serviceName, moduleList, port);
+        var service = new microservice(serviceName, moduleList, port, serviceDeletable);
         if(infraCheckbox[0].checked) {
-            addServiceOnPage(service, serviceDeletable);
+            addServiceOnPage(service);
         } else {
             deleteServiceOnPage(serviceName);
         }
@@ -452,11 +423,6 @@ $(function () {
        closeModal(githubModal);
     });
 
-    // Initialize already selected infra services
-    infraCheckbox.each(function(){
-        updateInfraService($(this), false);
-    });
-
     githubConfigModalClose.on("click", function(event) {
         event.preventDefault();
         closeModal(githubConfigModal);
@@ -478,4 +444,90 @@ $(function () {
     function removeGithubUrl() {
         generateSucceedLabel.find("p").remove();
     }
+
+    function getCurrentStep() {
+        if($("#azure-step").hasClass("is-active")) {
+            return 3;
+        } else if($("#infra-step").hasClass("is-active")) {
+            return 2;
+        }
+        return 1;
+    }
+
+    function setActiveStep(stepNumber) {
+        if(stepNumber === "1") {
+            showMetaDataConfig();
+        } else if(stepNumber === "2") {
+            showInfraModulesConfig();
+        } else {
+            showAzureModulesConfig();
+        }
+
+    }
+
+    function setInputValue(inputElement, value) {
+        if(value && !/\s/.test(value)) {
+            inputElement.val(value);
+        }
+    }
+
+    function getSelectedInfraModules() {
+        var selectedModules = [];
+        infraCheckbox.each(function() {
+            if($(this)[0].checked) {
+                selectedModules.push($(this).val())
+            }
+        });
+
+        return selectedModules;
+    }
+
+    function checkInfraModules(infraModules) {
+        if (!Array.isArray(infraModules) || !infraModules.length) {
+            return;
+        }
+
+        $.each(infraModules, function(index, moduleName) {
+            infraCheckbox.filter(function() {
+                return this.value === moduleName;
+            }).prop('checked', true);
+        });
+    }
+
+    $(document).on("click", function (event) {
+        $(".dropdown").each(function () {
+            $(this).removeClass('is-active');
+        });
+        event.stopPropagation();
+    });
+
+    $(window).on('beforeunload', function(){
+        var pageStatus = getProjectData();
+        pageStatus['step'] = getCurrentStep();
+        pageStatus['selectedInfraModules'] = getSelectedInfraModules();
+
+        pageStorage.setPageStatus(pageStatus);
+    });
+
+    $(window).on('load', function(){
+        setActiveStep(pageStorage.getStep());
+        setInputValue($("#project-name"), pageStorage.getProjectName());
+        setInputValue($("#groupId"), pageStorage.getGroupId());
+        setInputValue($("#artifactId"), pageStorage.getArtifactId());
+        setInputValue($("#description"), pageStorage.getDescription());
+        checkInfraModules(pageStorage.getSelectedInfraModules());
+
+        var storedServices = pageStorage.getMicroServices();
+        if (Array.isArray(storedServices) && storedServices.length) {
+            // Load stored microservices from localstorage
+            $.each(storedServices, function(index, service) {
+                addServiceOnPage(new microservice(service['name'], service['modules'], service['port'], service['deletable']));
+            });
+        } else {
+            // Initialize already selected infra services
+            infraCheckbox.each(function(){
+                updateInfraService($(this), false);
+            });
+        }
+    });
 });
