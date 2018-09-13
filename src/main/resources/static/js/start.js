@@ -157,7 +157,7 @@ $(function () {
 
                 generateSucceed();
             } else if (xhttp.readyState === 4 && xhttp.status !== 200) {
-                generateFailed();
+                generateFailed(xhttp.response);
             }
         };
 
@@ -189,7 +189,7 @@ $(function () {
                 generateSucceed();
                 generateGithubUrl(repoUrl);
             } else if (xhttp.readyState === 4) {
-                generateFailed();
+                generateFailed(xhttp.response);
             }
             closeModal(githubConfigModal);
         };
@@ -406,8 +406,9 @@ $(function () {
         toggleElements([generateSucceedLabel], [inProgressLabel, generateFailedLabel]);
     }
 
-    function generateFailed() {
+    function generateFailed(failureMessage) {
         toggleElements([generateFailedLabel], [inProgressLabel, generateSucceedLabel]);
+        generateFailedLabel.find("span").append(failureMessage);
     }
 
     function showModal(modalElement) {
