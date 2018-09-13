@@ -1,8 +1,24 @@
 .header-nav {
     min-height: 4.25rem !important;
     background-color: black !important;
-    padding: 0.25rem 0;
+    padding: 0.25rem 5rem;
     box-shadow: none;
+}
+
+.azure-nav-end {
+    padding: 0 5rem;
+}
+
+.azure-nav-end, .azure-nav-end div {
+    z-index: 2000;
+}
+
+.navbar-user {
+    color: #fff;
+}
+
+.navbar-user::after {
+    border-color: #fff;
 }
 
 .hidden {
@@ -69,11 +85,6 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     font-family: 'Segoe UI',SegoeUI,'Segoe WP',Tahoma,Arial,sans-serif;
 }
 
-.azure-navbar-link {
-    align-items: center;
-    margin-left: 2rem;
-}
-
 .navbar>.small-container {
     max-width: 1152px;
     width: 1152px;
@@ -91,10 +102,6 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .azure-green-color {
     background-color: transparent;
     color: #89c402;
-}
-
-.azure-navbar-link, .azure-navbar-link a  {
-    font-weight: 600;
 }
 
 #generate-project {
