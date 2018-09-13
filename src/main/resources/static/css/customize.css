@@ -123,12 +123,8 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
     position: relative;
 }
 
-.github-fork img {
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: 0;
-    z-index: 1000;
+.github-fork:before {
+    background-color: #090;
 }
 
 .start-video {
