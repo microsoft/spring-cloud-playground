@@ -17,7 +17,7 @@ public class GithubRepository {
     public static GithubRepositoryBuilder builder(@NonNull String name) {
         return hiddenBuilder()
                 .name(name)
-                .homepage("https://github.com")
+                .homepage("")
                 .auto_init(true);
     }
 
