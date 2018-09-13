@@ -159,7 +159,7 @@ public class MainController extends AbstractPlaygroundController {
             } catch (GithubProcessException e) {
                 triggerGithubPushEventFailure(username, e.getMessage());
 
-                return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
+                return new ResponseEntity(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
             }
         }
 
