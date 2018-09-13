@@ -19,7 +19,11 @@ public class GithubOperator extends GithubApiWrapper {
 
     private static final String DEFAULT_EMAIL = "noreply@github.com";
 
+    private static final int MAX_THREAD_COUNT = 56; // Refer to the max thread from Xeon 8180M
+
     private final List<GithubEmails> userEmails;
+
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
 
     public GithubOperator(@NonNull String username, @NonNull String token) {
         super(username, token);
@@ -202,14 +206,13 @@ public class GithubOperator extends GithubApiWrapper {
         List<String> files = getAllFiles(dir);
         GitDataTree tree = getGitDataTree(repository, parentCommit);
         GitDataRequestTree requestTree = getGitDataRequestTree(tree);
-        ExecutorService executor = Executors.newCachedThreadPool();
         List<Callable<GitDataFileBlob>> tasks = files.parallelStream().map(
                 f -> GitDataFileBlobCreator
                         .builder().filename(f).username(getUsername()).token(getToken()).repository(repository).build())
                 .collect(Collectors.toList());
 
         try {
-            List<Future<GitDataFileBlob>> results = executor.invokeAll(tasks);
+            List<Future<GitDataFileBlob>> results = EXECUTOR.invokeAll(tasks);
 
             for (Future<GitDataFileBlob> blobFuture : results) {
                 GitDataFileBlob blob = blobFuture.get();
