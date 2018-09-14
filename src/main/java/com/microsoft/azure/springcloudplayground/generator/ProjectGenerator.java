@@ -161,6 +161,9 @@ public class ProjectGenerator {
 
         writeMavenWrapper(dir);
         write(new File(dir, ".gitignore"), "gitignore.tmpl", model);
+
+        String readme = "README.md";
+        writeText(new File(dir, readme), templateRenderer.process(readme, null));
     }
 
     private File generateRootProject(@NonNull ProjectRequest request, @NonNull Map<String, Object> model) {
