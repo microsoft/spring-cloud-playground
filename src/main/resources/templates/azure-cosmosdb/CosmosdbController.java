@@ -10,11 +10,14 @@ import java.util.List;
 @RequestMapping("/cosmosdb")
 public class CosmosdbController {
 
+    private static final User USER = new User("id", "first-name", "last-name", "address");
+
     @Autowired
     private UserRepository repository;
 
     @GetMapping(value = "/users")
     public List<User> getUsers() {
+        this.repository.save(USER);
         return Lists.newArrayList(this.repository.findAll());
     }
 
