@@ -12,12 +12,16 @@ public class CosmosdbController {
 
     private static final User USER = new User("id", "first-name", "last-name", "address");
 
+    private final UserRepository repository;
+
     @Autowired
-    private UserRepository repository;
+    public CosmosdbController(UserRepository repository) {
+        this.repository = repository;
+        this.repository.save(USER);
+    }
 
     @GetMapping(value = "/users")
     public List<User> getUsers() {
-        this.repository.save(USER);
         return Lists.newArrayList(this.repository.findAll());
     }
 
