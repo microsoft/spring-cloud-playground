@@ -510,7 +510,8 @@ $(function () {
         pageStorage.setPageStatus(pageStatus);
     });
 
-    $(window).on('load', function(){
+    (function() {
+        // Initialize page when page ready, load data from localStorage
         setActiveStep(pageStorage.getStep());
         setInputValue($("#project-name"), pageStorage.getProjectName());
         setInputValue($("#groupId"), pageStorage.getGroupId());
@@ -525,20 +526,20 @@ $(function () {
 
         var storedServices = pageStorage.getMicroServices();
         if (Array.isArray(storedServices) && storedServices.length) {
-            // Load stored microservices from localstorage
+            // Load stored microservices from localStorage
             $.each(storedServices, function(index, service) {
-                var microservice = new microservice(service['name'], service['modules'], service['port'], service['deletable']);
+                var _microservice = new microservice(service['name'], service['modules'], service['port'], service['deletable']);
 
                 var matchedServices = allServiceList.serviceList.filter(function(service) {
-                    return service.getName() === microservice.getName();
+                    return service.getName() === _microservice.getName();
                 });
 
                 if (matchedServices) {
-                    deleteServiceOnPage(microservice.getName())
+                    deleteServiceOnPage(_microservice.getName())
                 }
 
-                addServiceOnPage(microservice);
+                addServiceOnPage(_microservice);
             });
         }
-    });
+    })();
 });
