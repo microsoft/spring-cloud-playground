@@ -518,16 +518,26 @@ $(function () {
         setInputValue($("#description"), pageStorage.getDescription());
         checkInfraModules(pageStorage.getSelectedInfraModules());
 
+        // Initialize already selected infra services
+        infraCheckbox.each(function(){
+            updateInfraService($(this), false);
+        });
+
         var storedServices = pageStorage.getMicroServices();
         if (Array.isArray(storedServices) && storedServices.length) {
             // Load stored microservices from localstorage
             $.each(storedServices, function(index, service) {
-                addServiceOnPage(new microservice(service['name'], service['modules'], service['port'], service['deletable']));
-            });
-        } else {
-            // Initialize already selected infra services
-            infraCheckbox.each(function(){
-                updateInfraService($(this), false);
+                var microservice = new microservice(service['name'], service['modules'], service['port'], service['deletable']);
+
+                var matchedServices = allServiceList.serviceList.filter(function(service) {
+                    return service.getName() === microservice.getName();
+                });
+
+                if (matchedServices) {
+                    deleteServiceOnPage(microservice.getName())
+                }
+
+                addServiceOnPage(microservice);
             });
         }
     });
