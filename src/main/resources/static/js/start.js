@@ -510,7 +510,8 @@ $(function () {
         pageStorage.setPageStatus(pageStatus);
     });
 
-    $(window).on('load', function(){
+    (function() {
+        // Initialize page when page ready, load data from localStorage
         setActiveStep(pageStorage.getStep());
         setInputValue($("#project-name"), pageStorage.getProjectName());
         setInputValue($("#groupId"), pageStorage.getGroupId());
@@ -518,17 +519,27 @@ $(function () {
         setInputValue($("#description"), pageStorage.getDescription());
         checkInfraModules(pageStorage.getSelectedInfraModules());
 
+        // Initialize already selected infra services
+        infraCheckbox.each(function(){
+            updateInfraService($(this), false);
+        });
+
         var storedServices = pageStorage.getMicroServices();
         if (Array.isArray(storedServices) && storedServices.length) {
-            // Load stored microservices from localstorage
+            // Load stored microservices from localStorage
             $.each(storedServices, function(index, service) {
-                addServiceOnPage(new microservice(service['name'], service['modules'], service['port'], service['deletable']));
-            });
-        } else {
-            // Initialize already selected infra services
-            infraCheckbox.each(function(){
-                updateInfraService($(this), false);
+                var _microservice = new microservice(service['name'], service['modules'], service['port'], service['deletable']);
+
+                var matchedServices = allServiceList.serviceList.filter(function(service) {
+                    return service.getName() === _microservice.getName();
+                });
+
+                if (matchedServices) {
+                    deleteServiceOnPage(_microservice.getName())
+                }
+
+                addServiceOnPage(_microservice);
             });
         }
-    });
+    })();
 });
