@@ -11,8 +11,8 @@ import org.junit.Ignore;
 @Ignore
 public class {{applicationName}}Tests {
 
-	@Test
-	public void contextLoads() {
-	}
+    @Test
+    public void contextLoads() {
+    }
 
 }

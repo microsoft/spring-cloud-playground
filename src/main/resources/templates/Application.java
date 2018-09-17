@@ -10,7 +10,7 @@ import {{this}};
 {{/applicationAnnotations}}
 public class {{applicationName}} {
 
-	public static void main(String[] args) {
-		SpringApplication.run({{applicationName}}.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run({{applicationName}}.class, args);
+    }
 }
