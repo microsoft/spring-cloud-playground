@@ -13,8 +13,10 @@ $(function () {
     });
 
     // Switch between get started video tabs
+    var pushToGithubTab = $("#push-to-github-tab");
     var generateTab = $("#generate-tab");
     var buildRunTab = $("#build-run-tab");
+    var pushToGithubVideo = $("#push-to-github-animation");
     var generateVideo = $("#generate-animation");
     var buildRunVideo = $("#build-run-animation");
 
@@ -74,19 +76,33 @@ $(function () {
         updateInfraPort($(this));
     });
 
-    generateTab.on("click", function() {
-        generateTab.addClass("is-active");
+    pushToGithubTab.on("click", function() {
+        pushToGithubTab.addClass("is-active");
+        generateTab.removeClass("is-active");
         buildRunTab.removeClass("is-active");
 
-        generateVideo.removeClass("hidden");
         buildRunVideo.addClass("hidden");
+        generateVideo.addClass("hidden");
+        pushToGithubVideo.removeClass("hidden");
+    });
+
+    generateTab.on("click", function() {
+        generateTab.addClass("is-active");
+        pushToGithubTab.removeClass("is-active");
+        buildRunTab.removeClass("is-active");
+
+        buildRunVideo.addClass("hidden");
+        pushToGithubVideo.addClass("hidden");
+        generateVideo.removeClass("hidden");
 
     });
 
     buildRunTab.on("click", function() {
         buildRunTab.addClass("is-active");
         generateTab.removeClass("is-active");
+        pushToGithubTab.removeClass("is-active");
 
+        pushToGithubVideo.addClass("hidden");
         generateVideo.addClass("hidden");
         buildRunVideo.removeClass("hidden");
     });
@@ -332,15 +348,15 @@ $(function () {
     }
 
     function serviceItemDom(service) {
-        var serviceElement = '<li id=\"' + service.getName() + '\">';
+        var serviceElement = '<li id=\"' + service.getName() + '\"><div class=\"columns service-columns\"><div class=\"column is-one-fifth\">';
         if (service.isDeletable()) {
             serviceElement += '<span class="icon"><i class="fas fa-times"></i></span>';
         } else {
             serviceElement += '<span class="icon" title="Cannot delete"><i class="fas fa-info-circle"></i></span>'
         }
 
-        return serviceElement + '<strong>' + service.getName() + '</strong>, module(s): '
-            + service.getModuleList().toString() + ', port: ' + service.getPort() + '</li>';
+        return serviceElement + service.getName() + '</div><div class=\"column\">module(s): '
+            + service.getModuleList().toString() + ', port: ' + service.getPort() + '</div></div></li>';
     }
 
     function addServiceBtnChecker() {
