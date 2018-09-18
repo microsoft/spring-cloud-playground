@@ -13,8 +13,10 @@ $(function () {
     });
 
     // Switch between get started video tabs
+    var pushToGithubTab = $("#push-to-github-tab");
     var generateTab = $("#generate-tab");
     var buildRunTab = $("#build-run-tab");
+    var pushToGithubVideo = $("#push-to-github-animation");
     var generateVideo = $("#generate-animation");
     var buildRunVideo = $("#build-run-animation");
 
@@ -74,19 +76,33 @@ $(function () {
         updateInfraPort($(this));
     });
 
-    generateTab.on("click", function() {
-        generateTab.addClass("is-active");
+    pushToGithubTab.on("click", function() {
+        pushToGithubTab.addClass("is-active");
+        generateTab.removeClass("is-active");
         buildRunTab.removeClass("is-active");
 
-        generateVideo.removeClass("hidden");
         buildRunVideo.addClass("hidden");
+        generateVideo.addClass("hidden");
+        pushToGithubVideo.removeClass("hidden");
+    });
+
+    generateTab.on("click", function() {
+        generateTab.addClass("is-active");
+        pushToGithubTab.removeClass("is-active");
+        buildRunTab.removeClass("is-active");
+
+        buildRunVideo.addClass("hidden");
+        pushToGithubVideo.addClass("hidden");
+        generateVideo.removeClass("hidden");
 
     });
 
     buildRunTab.on("click", function() {
         buildRunTab.addClass("is-active");
         generateTab.removeClass("is-active");
+        pushToGithubTab.removeClass("is-active");
 
+        pushToGithubVideo.addClass("hidden");
         generateVideo.addClass("hidden");
         buildRunVideo.removeClass("hidden");
     });
