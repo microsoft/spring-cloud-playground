@@ -419,6 +419,8 @@ $(function () {
 
     function generateSucceed() {
         removeGithubUrl();
+        pageStorage.clearPageStatus();
+        pageStorage.setUserOperation(USER_OPERATION.COMPLETE);
         toggleElements([generateSucceedLabel], [inProgressLabel, generateFailedLabel]);
     }
 
@@ -472,7 +474,7 @@ $(function () {
     }
 
     function setActiveStep(stepNumber) {
-        if(stepNumber === "1") {
+        if(!stepNumber || stepNumber === "1") {
             showMetaDataConfig();
         } else if(stepNumber === "2") {
             showInfraModulesConfig();
@@ -523,7 +525,9 @@ $(function () {
         pageStatus['step'] = getCurrentStep();
         pageStatus['selectedInfraModules'] = getSelectedInfraModules();
 
-        pageStorage.setPageStatus(pageStatus);
+        if (pageStorage.getUserOperation() === USER_OPERATION.IN_PROGRESS) {
+            pageStorage.setPageStatus(pageStatus);
+        }
     });
 
     (function() {
@@ -557,5 +561,7 @@ $(function () {
                 addServiceOnPage(_microservice);
             });
         }
+
+        pageStorage.setUserOperation(USER_OPERATION.IN_PROGRESS);
     })();
 });
