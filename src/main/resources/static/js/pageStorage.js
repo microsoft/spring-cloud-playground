@@ -89,8 +89,8 @@ var pageStorage = (function() {
 
     var clearPageStatus = function () {
         var playgroundKeys = [];
-        for(var index = 0; index < localStorage.length; index++) {
-            if (localStorage.key(index).startsWith('playground.')) {
+        for (var index = 0; index < localStorage.length; index++) {
+            if (localStorage.key(index) && localStorage.key(index).startsWith('playground.')) {
                 playgroundKeys.push(localStorage.key(index));
             }
         }
