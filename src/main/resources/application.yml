@@ -266,14 +266,14 @@ playground:
         - name: Azure Redis Cache
           id: azure-redis-cache
           groupId: com.microsoft.azure
-          artifactId: spring-cloud-azure-starter-cache
+          artifactId: spring-azure-starter-cache
           description: Azure Redis Cache Integration
           links:
             - rel: sample
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-cache-sample
-              description: Spring Cloud Azure redis cache sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-samples/spring-cloud-azure-cache-sample
+              description: Spring Azure redis cache sample
             - rel: reference
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-cache
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-starters/spring-azure-starter-cache
               description: Reference doc
         - name: Azure Sql Server Database
           id: azure-sql-server
@@ -282,22 +282,22 @@ playground:
           description: Azure Sql Server Database Integration
           links:
             - rel: sample
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-sql-sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-samples/spring-cloud-azure-sql-sample
               description: Spring Cloud Azure redis cache sample
             - rel: reference
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-sql-sqlserver
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-starters/spring-cloud-azure-starter-sql-sqlserver
               description: Reference doc
         - name: Azure Storage
           id: azure-storage
           groupId: com.microsoft.azure
-          artifactId: spring-cloud-azure-starter-storage
+          artifactId: spring-azure-starter-storage
           description: Azure Storage Integration
           links:
             - rel: sample
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-storage-sample
-              description: Spring Cloud Azure storage sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-samples/spring-cloud-azure-storage-sample
+              description: Spring Azure storage sample
             - rel: reference
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-storage
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-starters/spring-azure-starter-storage
               description: Reference doc
         - name: Azure Event Hub Stream Binder
           id: azure-eventhub-binder
@@ -306,10 +306,10 @@ playground:
           description: Spring Cloud Stream Event Hub Binder
           links:
             - rel: sample
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
               description: Spring Cloud Stream with Event Hub Binder sample
             - rel: reference
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-eventhub-stream-binder
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-eventhub-stream-binder
               description: Reference doc
         - name: Azure Event Hub
           id: azure-eventhub-starter
@@ -318,10 +318,10 @@ playground:
           description: Azure Event Hub Integration
           links:
             - rel: sample
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-samples/spring-cloud-azure-eventhub-binder-sample
               description: Spring Cloud Stream with Event Hub Binder sample
             - rel: reference
-              href: https://github.com/Microsoft/spring-cloud-azure/tree/1.0.0.M1/spring-cloud-azure-starters/spring-cloud-azure-starter-eventhub
+              href: https://github.com/Microsoft/spring-cloud-azure/tree/master/spring-cloud-azure-starters/spring-cloud-azure-starter-eventhub
               description: Reference doc
     - name: Azure Spring Boot
       bom: azure-spring-boot
