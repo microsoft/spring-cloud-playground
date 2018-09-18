@@ -332,15 +332,15 @@ $(function () {
     }
 
     function serviceItemDom(service) {
-        var serviceElement = '<li id=\"' + service.getName() + '\">';
+        var serviceElement = '<li id=\"' + service.getName() + '\"><div class=\"columns service-columns\"><div class=\"column is-one-fifth\">';
         if (service.isDeletable()) {
             serviceElement += '<span class="icon"><i class="fas fa-times"></i></span>';
         } else {
             serviceElement += '<span class="icon" title="Cannot delete"><i class="fas fa-info-circle"></i></span>'
         }
 
-        return serviceElement + '<strong>' + service.getName() + '</strong>, module(s): '
-            + service.getModuleList().toString() + ', port: ' + service.getPort() + '</li>';
+        return serviceElement + service.getName() + '</div><div class=\"column\">module(s): '
+            + service.getModuleList().toString() + ', port: ' + service.getPort() + '</div></div></li>';
     }
 
     function addServiceBtnChecker() {
