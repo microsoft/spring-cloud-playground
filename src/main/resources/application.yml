@@ -275,7 +275,7 @@ playground:
             - rel: reference
               href: https://github.com/Microsoft/spring-cloud-azure/tree/release/1.0.0.M2/spring-cloud-azure-starters/spring-azure-starter-cache
               description: Reference doc
-        - name: Azure Storage
+        - name: Azure Blob Storage
           id: azure-storage
           groupId: com.microsoft.azure
           artifactId: spring-azure-starter-storage
@@ -360,7 +360,7 @@ playground:
           description: Spring Caching with Azure Redis Cache
         - name: Azure Storage
           id: azure-storage
-          description: Spring Cloud Resource with Azure Storage
+          description: Spring Resource with Azure Blob Storage
         - name: Azure Active Directory
           id: azure-active-directory
           description: Spring Security with Azure Active Directory
