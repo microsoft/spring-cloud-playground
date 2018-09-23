@@ -213,9 +213,10 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 
 .preview:after {
     position: relative;
-    content: "Preview";
+    content: "PREVIEW";
     top: -0.3rem;
+    left: 0.3rem;
     font-size: 0.75rem;
     color: #090;
-    font-weight: 600;
+    font-weight: 700;
 }
