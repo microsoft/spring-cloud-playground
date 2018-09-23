@@ -210,3 +210,12 @@ body, button, input, p, select, textarea, label, h1, h2, h3, h4 {
 .service-columns {
     width: 100%;
 }
+
+.preview:after {
+    position: relative;
+    content: "Preview";
+    top: -0.3rem;
+    font-size: 0.75rem;
+    color: #090;
+    font-weight: 600;
+}
