@@ -88,7 +88,8 @@ public class MainController extends AbstractPlaygroundController {
     private void triggerGenerateEvent(@NonNull List<MicroService> services) {
         final Map<String, String> properties = new HashMap<>();
 
-        services.forEach(s -> properties.put(s.getName(), "selected"));
+        services.stream().map(MicroService::getModules).flatMap(List::stream)
+                .forEach(m -> properties.putIfAbsent(m, "selected"));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
