@@ -6,6 +6,7 @@ import com.microsoft.azure.springcloudplayground.generator.ProjectGenerator;
 import com.microsoft.azure.springcloudplayground.generator.ProjectRequest;
 import com.microsoft.azure.springcloudplayground.github.GithubOperator;
 import com.microsoft.azure.springcloudplayground.metadata.GeneratorMetadataProvider;
+import com.microsoft.azure.springcloudplayground.module.ModuleNames;
 import com.microsoft.azure.springcloudplayground.util.PropertyLoader;
 import com.microsoft.azure.springcloudplayground.util.TelemetryProxy;
 import com.samskivert.mustache.Mustache;
@@ -39,6 +40,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha256Hex;
 
@@ -88,7 +90,11 @@ public class MainController extends AbstractPlaygroundController {
     private void triggerGenerateEvent(@NonNull List<MicroService> services) {
         final Map<String, String> properties = new HashMap<>();
 
-        services.forEach(s -> properties.put(s.getName(), "selected"));
+        final List<String> allModules = ModuleNames.getModuleNames();
+        final List<String> selectModules =
+                services.stream().map(MicroService::getModules).flatMap(List::stream).collect(Collectors.toList());
+
+        allModules.forEach(m -> properties.putIfAbsent(m, String.valueOf(selectModules.contains(m))));
 
         this.telemetryProxy.trackEvent(TELEMETRY_EVENT_GENERATE, properties);
     }
