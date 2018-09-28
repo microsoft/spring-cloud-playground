@@ -5,9 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ModuleNames {
@@ -36,6 +34,10 @@ public class ModuleNames {
 
     public static final String AZURE_KEY_VAULT = "azure-keyvault-secrets";
 
+    private static final List<String> MODULE_NAMES = Arrays.asList(CLOUD_GATEWAY, CLOUD_CONFIG_SERVER,
+            CLOUD_EUREKA_SERVER, CLOUD_HYSTRIX_DASHBOARD, AZURE_CACHE, AZURE_COSMOSDB,
+            AZURE_STORAGE, AZURE_EVENTHUB_BINDER, AZURE_ACTIVE_DIRECTORY, AZURE_KEY_VAULT);
+
     private static final Map<String, Module> NAME_TO_MODULE;
 
     static {
@@ -54,6 +56,10 @@ public class ModuleNames {
         map.put(AZURE_KEY_VAULT, new KeyVaultModule());
 
         NAME_TO_MODULE = Collections.unmodifiableMap(map);
+    }
+
+    public static List<String> getModuleNames() {
+        return MODULE_NAMES;
     }
 
     public static Module toModule(@NonNull String moduleName) {
